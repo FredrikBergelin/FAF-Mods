@@ -60,9 +60,9 @@ KeyMapper.SetUserKeyAction('Shift_Engies', {action = 'UI_Lua import("/lua/keymap
 KeyMapper.SetUserKeyAction('Arty', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Arty")', category = 'Target priorities', order = 91})
 KeyMapper.SetUserKeyAction('Shift_Arty', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Arty")', category = 'Target priorities', order = 92})
 
---Fighters
-KeyMapper.SetUserKeyAction('Fighters', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Fighters")', category = 'Target priorities', order = 93})
-KeyMapper.SetUserKeyAction('Shift_Fighters', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Fighters")', category = 'Target priorities', order = 94})
+--AA
+KeyMapper.SetUserKeyAction('AA', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("AA")', category = 'Target priorities', order = 93})
+KeyMapper.SetUserKeyAction('Shift_AA', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("AA")', category = 'Target priorities', order = 94})
 
 --SMD
 KeyMapper.SetUserKeyAction('SMD', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("SMD")', category = 'Target priorities', order = 95})

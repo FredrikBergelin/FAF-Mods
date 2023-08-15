@@ -21,7 +21,7 @@ local PrioritySettings = {
         EXP = "{categories.EXPERIMENTAL}",
         Engies = "{categories.ENGINEER * categories.RECLAIMABLE}",
         Arty = "{categories.ARTILLERY}",
-        Fighters = "{categories.AIR * categories.ANTIAIR - categories.EXPERIMENTAL}",
+        AA = "{categories.AIR * categories.ANTIAIR - categories.EXPERIMENTAL}",
         SMD = "{categories.TECH3 * categories.STRUCTURE * categories.ANTIMISSILE}",
         Gunship = "{categories.AIR * categories.GROUNDATTACK}",
         Mex = "{categories.MASSEXTRACTION}",
@@ -37,10 +37,10 @@ local PrioritySettings = {
         Factory = "{categories.TECH3 * categories.STRUCTURE * categories.FACTORY, categories.TECH2 * categories.STRUCTURE * categories.FACTORY, categories.TECH1 * categories.STRUCTURE * categories.FACTORY}",
     },
     exclusive = {ACU = false, Power = false, PD = false, Units = false, Shields = false, EXP = false, Engies = false,
-                 Arty = false, Fighters = false, SMD = false, Gunship = false, Mex = false, Snipe = false},
+                 Arty = false, AA = false, SMD = false, Gunship = false, Mex = false, Snipe = false},
     buttonLayout = {
         {"ACU", "Units", "PD", "Engies", "Shields", "EXP"}, --first column. bottom --> top
-        {"Mex", "Power", "SMD", "Arty", "Gunship", "Fighters"}, --second column. bottom --> top
+        {"Mex", "Power", "SMD", "Arty", "Gunship", "AA"}, --second column. bottom --> top
         {"Factory", "SACU", "Cruiser", "Destros", "Bships", "Naval"}, --third column. bottom --> top
         },
 }
@@ -85,7 +85,7 @@ local prioStateTextures = {
     EXP = textures..'EXP.dds',
     Engies = textures..'engies.dds',
     Arty = textures..'arty.dds',
-    Fighters = textures..'fighters.dds',
+    AA = textures..'AA.dds',
     SMD = textures..'SMD.dds',
     Gunship = textures..'gunship.dds',
     Mex = textures..'mex.dds',
