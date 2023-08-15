@@ -1,0 +1,10 @@
+name = "FF Advanced target priorities"
+version = 1
+copyright = "Nope"
+description = "Forked from ATP v1.1"
+author = "FreadyFish"
+url = ""
+uid = "Advanced-target-priorities-ff-v1"
+exclusive = false
+ui_only = true
+conflicts = {}

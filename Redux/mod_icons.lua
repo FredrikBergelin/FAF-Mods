@@ -1,0 +1,116 @@
+
+-- we do not have any manual assignments
+UnitIconAssignments = {
+	{BlueprintId = "UEL0001", IconSet = "icon_commander_uef"},
+	{BlueprintId = "URL0001", IconSet = "icon_commander_cybran"},
+	{BlueprintId = "XSL0001", IconSet = "icon_commander_seraphim"},
+	{BlueprintId = "UAL0001", IconSet = "icon_commander_aeon"},	
+
+	{BlueprintId = "XEA3204", IconSet = "icon_drone_engineer"},
+	{BlueprintId = "XEL0209", IconSet = "icon_land2_sparky"},
+
+	{BlueprintId = "UEB1102", IconSet = "icon_structure1_hydro"},
+	{BlueprintId = "URB1102", IconSet = "icon_structure1_hydro"},
+	{BlueprintId = "UAB1102", IconSet = "icon_structure1_hydro"},
+	{BlueprintId = "XSB1102", IconSet = "icon_structure1_hydro"},
+	{BlueprintId = "XNB1102", IconSet = "icon_structure1_hydro"},
+
+	{BlueprintId = "XNB3102", IconSet = "icon_structure1_sonar"},
+	{BlueprintId = "URB3102", IconSet = "icon_structure1_sonar"},
+	{BlueprintId = "UEB3102", IconSet = "icon_structure1_sonar"},
+	{BlueprintId = "UAB3102", IconSet = "icon_structure1_sonar"},
+	{BlueprintId = "XSB3102", IconSet = "icon_structure1_sonar"},
+
+	{BlueprintId = "UEB3202", IconSet = "icon_structure2_sonar"},
+	{BlueprintId = "URB3202", IconSet = "icon_structure2_sonar"},
+	{BlueprintId = "UAB3202", IconSet = "icon_structure2_sonar"},
+	{BlueprintId = "XSB3202", IconSet = "icon_structure2_sonar"},
+	{BlueprintId = "XNB3202", IconSet = "icon_structure2_sonar"},
+
+	{BlueprintId = "UES0305", IconSet = "icon_structure3_sonar"},
+	{BlueprintId = "URS0305", IconSet = "icon_structure3_sonar"},
+	{BlueprintId = "UAS0305", IconSet = "icon_structure3_sonar"},
+	{BlueprintId = "XNB3302", IconSet = "icon_structure3_sonar"},
+
+	{BlueprintId = "XRB3301", IconSet = "icon_structure3_optics"},
+	{BlueprintId = "XAB3301", IconSet = "icon_structure3_optics"},
+
+	{BlueprintId = "UEB1104", IconSet = "icon_structure2_fab"},
+	{BlueprintId = "URB1104", IconSet = "icon_structure2_fab"},
+	{BlueprintId = "XSB1104", IconSet = "icon_structure2_fab"},
+	{BlueprintId = "UAB1104", IconSet = "icon_structure2_fab"},
+	{BlueprintId = "XNB1104", IconSet = "icon_structure2_fab"},
+	{BlueprintId = "UEB1303", IconSet = "icon_structure3_fab"},
+	{BlueprintId = "URB1303", IconSet = "icon_structure3_fab"},
+	{BlueprintId = "UAB1303", IconSet = "icon_structure3_fab"},
+	{BlueprintId = "XSB1303", IconSet = "icon_structure3_fab"},
+	{BlueprintId = "XNB1303", IconSet = "icon_structure3_fab"},
+
+	{BlueprintId = "UES0401", IconSet = "icon_experimental_atlantis"},
+	{BlueprintId = "XSA0402", IconSet = "icon_experimental_awasher"},
+	{BlueprintId = "UAA0310", IconSet = "icon_experimental_czar"},
+	{BlueprintId = "UEL0401", IconSet = "icon_experimental_fatty"},	
+	{BlueprintId = "UEB2401", IconSet = "icon_experimental_mavor"},
+	{BlueprintId = "XRL0403", IconSet = "icon_experimental_mega"},
+	{BlueprintId = "XAB1401", IconSet = "icon_experimental_paragon"},
+	{BlueprintId = "XAB2307", IconSet = "icon_experimental_salvation"},
+	{BlueprintId = "XEB2402", IconSet = "icon_experimental_satelit"},
+	{BlueprintId = "URL0401", IconSet = "icon_experimental_scathis"},
+	{BlueprintId = "URA0401", IconSet = "icon_experimental_soulripper"},
+	{BlueprintId = "URL0402", IconSet = "icon_experimental_spider"},
+	{BlueprintId = "UAS0401", IconSet = "icon_experimental_tempest"},
+	{BlueprintId = "XSB2401", IconSet = "icon_experimental_yolona"},
+	{BlueprintId = "XSL0401", IconSet = "icon_experimental_yota_gc"},
+	{BlueprintId = "UAL0401", IconSet = "icon_experimental_yota_gc"},
+
+	}
+
+--- Entry point for scripted assignments. This function has a limited scope and any changes to the 
+-- units and / or the projectiles do not affect the game as they are deep-copied of the originals. 
+-- Functionality that is available:
+--  - moho-log interaction: LOG, WARN, _ALERT, SPEW, error, assert
+--  - debugging: repr
+--  - iterators: pairs, ipairs, next 
+--  - typical statements: table, math (excluding math.random), string, tonumber, type, unpack, tostring
+-- @param units All available unit blueprints.
+-- @param projectiles All available projectile blueprints.
+-- @param icons All the file names of the icons part of this mod.
+function ScriptedIconAssignments (units, projectiles, icons)
+
+    -- for performance
+    local StringSub = string.sub
+    local StringFind = string.find
+
+    -- this is where we store the results
+    local IconAssignments = {}
+
+    -- loop over all the units
+    for id, bp in units do
+
+        -- retrieve the original strategic icon name
+        local strategicIconName = bp.StrategicIconName
+
+        -- this can be nil
+        if strategicIconName then
+
+            -- compute this once for all icons
+            local target = "/" .. strategicIconName .. "_rest.dds"
+
+            -- check if we have the same identifier in our icon folder
+            local partOfIconsMod = false
+            for k, icon in icons do
+                if StringSub(icon, -9) == '_rest.dds' and StringFind(icon, target) then
+                    partOfIconsMod = true
+                    break
+                end
+            end
+
+            -- if we do, use that instead
+            if partOfIconsMod then
+                IconAssignments[id] = { BlueprintId = id, IconSet = bp.StrategicIconName }
+            end
+        end
+    end
+
+    return IconAssignments
+end

@@ -1,0 +1,10 @@
+name = "Zoom Acceleration"
+uid = "944d2030-da68-494b-9be0-474e9b027ce1"
+version = 1
+description = "Allows you to set the acceleration factors for zooming, in the gameplay options tab."
+author = "odomobo"
+url = "https://bitbucket.org/odomobo/zoom-acceleration-mod"
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
