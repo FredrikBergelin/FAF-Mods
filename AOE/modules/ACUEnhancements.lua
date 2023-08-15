@@ -81,10 +81,15 @@ local nano1UpgradeMap =
 
 local nano2UpgradeMap =
 {
-    ["url0001"] = "CloakingGenerator",
+    ["url0001"] = "FAF_SelfRepairSystem",
     ["uel0001"] = "ShieldGeneratorField",
     ["xsl0001"] = "DamageStabilizationAdvanced",
     ["ual0001"] = "ShieldHeavy",
+}
+
+local nano3UpgradeMap =
+{
+    ["url0001"] = "CloakingGenerator",
 }
 
 ---@param unit UserUnit
@@ -95,12 +100,16 @@ function UpgradeNano(unit)
     local upgrade = nano1UpgradeMap[unit:GetBlueprint().BlueprintId:lower()]
     if not upgrade then return end
 
-
-
     if Enhancements.HasPrerequisite(unit, upgrade) then
         upgrade = nano2UpgradeMap[unit:GetBlueprint().BlueprintId:lower()]
         if not upgrade then return end
     end
+
+    if Enhancements.HasPrerequisite(unit, upgrade) then
+        upgrade = nano3UpgradeMap[unit:GetBlueprint().BlueprintId:lower()]
+        if not upgrade then return end
+    end
+
     Enhancements.OrderUnitEnhancement(unit, upgrade)
 end
 
