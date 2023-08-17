@@ -6,7 +6,6 @@ local Prefs = import("/lua/user/prefs.lua")
 local AddBeatFunction = import("/lua/ui/game/gamemain.lua").AddBeatFunction
 local LazyVar = import("/lua/lazyvar.lua")
 
-
 local GetUnits = UMT.Units.GetFast
 local Options = import("options.lua")
 local LayoutFor = UMT.Layouter.ReusedLayoutFor
@@ -37,15 +36,15 @@ local EngineerOverlay = Class(Overlay)
 {
     __init = function(self, parent, unit)
         Overlay.__init(self, parent, unit)
-        self.offsetX = 1
-        self.offsetY = 1
+        self.offsetX = 2
+        self.offsetY = -1
         self.isIdle = false
         if unit:IsInCategory("TECH1") then
-            self:SetTexture("/mods/IEL/textures/t1_idle_bold.dds", 0)
+            self:SetTexture("/mods/IEL/textures/t1_idle.dds", 0)
         elseif unit:IsInCategory("TECH2") then
-            self:SetTexture("/mods/IEL/textures/t2_idle_bold.dds", 0)
+            self:SetTexture("/mods/IEL/textures/t2_idle.dds", 0)
         elseif unit:IsInCategory("TECH3") then
-            self:SetTexture("/mods/IEL/textures/t3_idle_bold.dds", 0)
+            self:SetTexture("/mods/IEL/textures/t3_idle.dds", 0)
         end
     end,
 
