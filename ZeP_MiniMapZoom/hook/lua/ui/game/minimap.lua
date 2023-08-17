@@ -3,7 +3,7 @@
 --* Author: Chris Blackwell
 --* Summary: UI for the multifunction display
 --*
---* Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
+--* Copyright ï¿½ 2005 Gas Powered Games, Inc.  All rights reserved.
 --*****************************************************************************
 
 local UIUtil = import('/lua/ui/uiutil.lua')
@@ -178,11 +178,11 @@ function CreateMinimap(parent)
 end
 
 function ToggleMinimap()
-    # disable when in Screen Capture mode
+    -- disable when in Screen Capture mode
     if import('/lua/ui/game/gamemain.lua').gameUIHidden then
         return
     end
-    
+
     --PlaySound(Sound({Bank = 'Interface', Cue = 'UI_Economy_Rollover'}))
 
     minimap = not minimap
@@ -197,7 +197,7 @@ function ToggleMinimap()
 end
 
 function resizeMiniMap(zoomRatio,mapSizeMax,posX,posY)
-	
+
 	local defPosition = {Left =posX, Top = posY, Bottom = (posY+mapSizeMax) *zoomRatio, Right = (mapSizeMax+posX) *zoomRatio}
 
 	for index, val in defPosition do

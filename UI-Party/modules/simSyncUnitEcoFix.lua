@@ -3,7 +3,7 @@ function Invoke()
 	local a, b = pcall(function()
 --		local x = GetUnitById(1)
 --		local f = x:GetFocusUnit()
-		--if f then 
+		--if f then
 --			LOG(EntityCategoryContains(categories.SILO, x))
 		--end
 	--LOG(x:GetConsumptionPerSecondMass())
@@ -86,35 +86,34 @@ function Invoke()
 
 		Sync.FixedEcoData = {}
 
-		if GetFocusArmy() != -1 then
+		if GetFocusArmy() ~= -1 then
 			local brain = ArmyBrains[GetFocusArmy()]
-			local units = brain:GetListOfUnits( categories.ALLUNITS, false)
+			local units = brain:GetListOfUnits(categories.ALLUNITS, false)
 			for k,unit in units do
---				LOG(unit:GetEconData())
-				if not unit:IsDead() then									
-				
+				if not unit:IsDead() then
+
 					local econData = {
 						massConsumed = 0,
 						energyConsumed = 0,
-						--d=unit:GetBlueprint().Description
 					}
 
 					local f = unit:GetFocusUnit()
-					if f and EntityCategoryContains(categories.SILO, f) and not unit:IsUnitState("Building") then 
-						continue;
+					if f and EntityCategoryContains(categories.SILO, f) and not unit:IsUnitState("Building") then
+						goto continue
 					else
 						econData.massConsumed = unit:GetConsumptionPerSecondMass() * unit:GetResourceConsumed()
 						econData.energyConsumed = unit:GetConsumptionPerSecondEnergy() * unit:GetResourceConsumed()
 					end
-					
+
 					Sync.FixedEcoData[unit:GetEntityId()] = econData
+					::continue::
 				end
 			end
 		end
 	end)
-	
-	if not a then 
-		LOG("UI PARTY RESULT: ", a, b)   
+
+	if not a then
+		LOG("UI PARTY RESULT: ", a, b)
 	end
 end
 

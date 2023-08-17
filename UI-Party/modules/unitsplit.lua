@@ -6,7 +6,7 @@ local lastSelectedGroup
 local groups
 
 function GetAveragePoint(units)
-	
+
 	local x = units.avg(function(k,v) return v:GetPosition()[1] end)
 	local y = units.avg(function(k,v) return v:GetPosition()[2] end)
 	local z = units.avg(function(k,v) return v:GetPosition()[3] end)
@@ -81,26 +81,26 @@ function SplitGroups(desiredGroups)
 
 	local avg = GetAveragePoint(ungroupedUnits)
 	groups = from({})
-		
+	
 	-- START A GROUP
 	local priorityUnits = from({})
 	while groups.count() < desiredGroups do
 		if not priorityUnits.any() then priorityUnits = GetPriorityUnits(ungroupedUnits) end
-		if not priorityUnits.any() then 
+		if not priorityUnits.any() then
 			UipLog("Not enough units to make another group'")
 			break
 		end
-	
+
 		local avoidancePoints = from({ avg })
-		if groups.any() then 
+		if groups.any() then
 			avoidancePoints = groups.select(function(k,v) return v.Center end)
 		end
-	
+
 		local unit = FindUnitFurtherestFromAllPoints(priorityUnits, avoidancePoints)
 
 		ungroupedUnits.removeByValue(unit)
 		priorityUnits.removeByValue(unit)
-		
+	
 		local group = {}
 		group.Name = groups.count()+1
 		group.Center = unit:GetPosition()
@@ -108,27 +108,27 @@ function SplitGroups(desiredGroups)
 		groups.addValue(group);
 	end
 
-	
+
 	-- SHUNK UNITS INTO GROUPS
 	while ungroupedUnits.any() do
-	
+
 		local nextGroups = groups.copy()
-	
+
 		while ungroupedUnits.any() and nextGroups.any() do
 
 			if not priorityUnits.any() then priorityUnits = GetPriorityUnits(ungroupedUnits) end
 			local t = FindNearestToGroup(priorityUnits, nextGroups)
-	
+
 			nextGroups.removeByValue(t.Group)
-	
+
 			ungroupedUnits.removeByValue(t.Unit)
 			priorityUnits.removeByValue(t.Unit)
-	
+
 			t.Group.Units.addValue(t.Unit)
 			t.Group.Center = GetAveragePoint(t.Group.Units);
 		end
 	end
-	
+
 	-- REORDER GROUPS TO BE NEAR MOUSE (annoying bug here where very different position if you slightly move mouse before/after end-drag)
 	local sortedGroups = from({})
 	local mpos = GetMouseWorldPos()
@@ -143,7 +143,7 @@ function SplitGroups(desiredGroups)
 		gv.Name = gnum
 		gnum = gnum + 1
 	end)
-	
+
 	SelectGroup(groups.first().Name)
 
 end
@@ -152,17 +152,17 @@ end
 function DontClearCycle(a)
 	selectionsClearGroupCycle = false
 	a()
-	selectionsClearGroupCycle = true	
+	selectionsClearGroupCycle = true
 end
 
-function SelectGroup(name, appendToExistingSelection)	
-	if name > groups.count() then 
+function SelectGroup(name, appendToExistingSelection)
+	if name > groups.count() then
 		UIP.PlayErrorSound()
-		name = 1 
+		name = 1
 	end
-	if name < 1 then 
+	if name < 1 then
 		UIP.PlayErrorSound()
-		name = groups.count() 
+		name = groups.count()
 	end
 
 	local group = groups.get(name)
@@ -170,24 +170,24 @@ function SelectGroup(name, appendToExistingSelection)
 	if group == nil then return end
 
 	DontClearCycle(function()
-		local newSelection = group.Units 
+		local newSelection = group.Units
 
 		if appendToExistingSelection then
 			newSelection = newSelection
 				.concat(from(GetSelectedUnits()))
 		end
-			
+
 		SetSelectedUnits(newSelection.toArray())
 	end)
 end
 
 function SetSelectedUnits(units)
-	UnitLock.IgnoreLocksWhile(function() 
+	UnitLock.IgnoreLocksWhile(function()
 		SelectUnits(units)
-	end)	
+	end)
 end
 
-function SelectNextGroup()	
+function SelectNextGroup()
 	if lastSelectedGroup ~= nil then
 		local appendToExistingSelection = IsKeyDown("Shift")
 		SelectGroup(lastSelectedGroup.Name + 1, appendToExistingSelection)
@@ -198,7 +198,7 @@ end
 
 function ReselectSplitUnits()
 	local units = from({})
-	groups.foreach(function(k,v) 
+	groups.foreach(function(k,v)
 		units = units.concat(v.Units)
 	end)
 	SetSelectedUnits(units.toArray())
@@ -206,7 +206,7 @@ end
 
 function ReselectOrderedSplitUnits()
 	local units = from({})
-	groups.foreach(function(k,v) 
+	groups.foreach(function(k,v)
 		if v.Name <= lastSelectedGroup.Name then
 			units = units.concat(v.Units)
 		end
@@ -219,16 +219,16 @@ function SelectPrevGroup()
 		SelectGroup(lastSelectedGroup.Name - 1)
 	else
 		SplitGroups(100)
-	end	
+	end
 end
 
 function SelectionChanged()
-	if selectionsClearGroupCycle then 
+	if selectionsClearGroupCycle then
 		lastSelectedGroup = nil
 	end
 end
 
-function SelectNextLandUnitsGroupByRole()	
+function SelectNextLandUnitsGroupByRole()
 	if lastSelectedGroup ~= nil then
 		local appendToExistingSelection = IsKeyDown("Shift")
 		SelectGroup(lastSelectedGroup.Name + 1, appendToExistingSelection)
@@ -245,23 +245,23 @@ function SplitLandUnitsByRole()
 
 
 	local groupDefns = {
-		{ 
+		{
 		  Name = 1,
-		  testFn= function(u) 
+		  testFn= function(u)
 			return u:IsInCategory("DIRECTFIRE") and not u:IsInCategory("ENGINEER") and not u:IsInCategory("SCOUT") and not u:IsInCategory("del0204") and not u:IsInCategory("drl0204") and not u:IsInCategory("xrl0302") -- mongoose and hoplite and firebeetle
 		  end,
 		  Units = from({})
 		},
-		{ 
+		{
 		  Name = 2,
-		  testFn= function(u) 
+		  testFn= function(u)
 			return u:IsInCategory("INDIRECTFIRE") or u:IsInCategory("del0204") or u:IsInCategory("drl0204") -- mongoose and hoplite
 		  end,
 		  Units = from({})
 		},
-		{ 
+		{
 		  Name = 3,
-		  testFn= function(u) 
+		  testFn= function(u)
 			return not u:IsInCategory("ENGINEER") and (not u:IsInCategory("DIRECTFIRE") or u:IsInCategory("SCOUT") or u:IsInCategory("xrl0302")) -- fire beetle
 		  end,
 		  Units = from({})
@@ -269,10 +269,10 @@ function SplitLandUnitsByRole()
 	};
 
 	-- give lock a chance to run
-	ForkThread(function() 
+	ForkThread(function()
 		units = GetSelectedUnits()
-		
-		from(units).foreach(function(uk,uv) 
+	
+		from(units).foreach(function(uk,uv)
 			local found = false
 			for gk, gv in groupDefns do
 				if (not found and gv.testFn(uv)) then
@@ -296,5 +296,5 @@ function SplitLandUnitsByRole()
 			SelectUnits({})
 		end
 
-	end)	
+	end)
 end

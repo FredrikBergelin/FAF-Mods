@@ -28,7 +28,7 @@ end
 
 
 function UpdateAllUnits()
-	if GetFocusArmy() != lastFocusedArmy then
+	if GetFocusArmy() ~= lastFocusedArmy then
 		Reset()
 		lastFocusedArmy = GetFocusArmy()
 	end

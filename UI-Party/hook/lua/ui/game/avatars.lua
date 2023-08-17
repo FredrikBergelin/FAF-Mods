@@ -5,13 +5,13 @@ local oldCreateIdleTab = CreateIdleTab
 function CreateIdleTab(unitData, id, expandFunc)
     local bg = oldCreateIdleTab(unitData, id, expandFunc)
 
-	if (UIP.GetSetting("alertIdleFac")) then 
+	if (UIP.GetSetting("alertIdleFac")) then
 
 		if (id == "factory") then
 			bg.overlay = Bitmap(bg)
 			LayoutHelpers.AtLeftTopIn(bg.overlay, bg, 7, 8)
 			bg.overlay:SetSolidColor('aaFF0000')
-			bg.overlay.Width:Set(90)
+			bg.overlay.Width:Set(50)
 			bg.overlay.Height:Set(34)
 			bg.overlay:DisableHitTest()
 			bg.overlay.dir = -1
@@ -46,7 +46,7 @@ end
 
 --function CreateBigRedScreen()
 
---	if (UIP.GetSetting("immersionAcuDamage")) then 
+--	if (UIP.GetSetting("immersionAcuDamage")) then
 
 --		bigRed = Bitmap(GetFrame(0))
 --		LayoutHelpers.AtLeftTopIn(bigRed, GetFrame(0), 7, 8)
@@ -66,7 +66,7 @@ end
 
 --function ShowBigRedScreen()
 
---	if (UIP.GetSetting("immersionAcuDamage")) then 
+--	if (UIP.GetSetting("immersionAcuDamage")) then
 
 --		bigRed:SetAlpha(1)
 --		bigRed:SetNeedsFrameUpdate(true)

@@ -29,7 +29,7 @@ function setSelection(expression)
 
   ConExecute("Ui_SelectByCategory " .. others)
 
-	ForkThread(function() 
+	ForkThread(function()
 
 		local units = GetSelectedUnits()
 		for k,v in expression.negatives do
@@ -39,8 +39,8 @@ function setSelection(expression)
 		end
 
 		SelectUnits(units)
-	end)	
-  
+	end)
+ 
 end
 
 

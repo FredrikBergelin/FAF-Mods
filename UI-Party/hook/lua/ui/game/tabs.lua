@@ -4,7 +4,7 @@ local oldOnGameOver = OnGameOver
 function OnGameOver()
 	oldOnGameOver()
 
-	if UIP.GetSetting("hideMenusOnStart") then 
+	if UIP.GetSetting("hideMenusOnStart") then
 		Expand()
 	end
 

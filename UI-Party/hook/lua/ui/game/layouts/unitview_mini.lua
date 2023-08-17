@@ -6,7 +6,7 @@ local oldPositionWindow = PositionWindow
 function PositionWindow()
 	oldPositionWindow()
 
-	if UIP.Enabled() and UIP.GetSetting("rearrangeBottomPanes") then 
+	if UIP.GetSetting("rearrangeBottomPanes") then
 
 		local controls = import('/lua/ui/game/unitview.lua').controls
 		LayoutHelpers.AtBottomIn(controls.bg, controls.parent)

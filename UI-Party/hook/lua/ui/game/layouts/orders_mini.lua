@@ -6,7 +6,7 @@ local oldSetLayout = SetLayout
 function SetLayout()
 	oldSetLayout()
 
-	if UIP.Enabled() and UIP.GetSetting("rearrangeBottomPanes") then 
+	if UIP.GetSetting("rearrangeBottomPanes") then
 
 		local controls = import('/lua/ui/game/orders.lua').controls
 		LayoutHelpers.AtLeftIn(controls.bg, controls.controlClusterGroup, 350)

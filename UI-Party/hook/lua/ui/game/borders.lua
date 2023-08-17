@@ -4,12 +4,8 @@ local oldSplitMapGroup = SplitMapGroup
 function SplitMapGroup(splitState, forceSplit)
 	oldSplitMapGroup(splitState, forceSplit)
 
-	if not UIP.Enabled() then 
-		return
-	end
-
 	-- move avatars
-	if UIP.GetSetting("moveAvatarsToLeftSplitScreen")then 
+	if UIP.GetSetting("moveAvatarsToLeftSplitScreen")then
 
 		local avatars = import('/lua/ui/game/avatars.lua')
 		if splitState then
@@ -23,7 +19,7 @@ function SplitMapGroup(splitState, forceSplit)
 	end
 
 	-- move bottom panes
-	if UIP.GetSetting("smallerContructionTabWhenSplitScreen")then 
+	if UIP.GetSetting("smallerContructionTabWhenSplitScreen")then
 
 		MoveBuilders(splitState)
 
@@ -35,11 +31,11 @@ function MoveBuilders(halfMode)
 
 	local controlClusterGroup = import('/lua/ui/game/construction.lua').controlClusterGroup
 	local controls = import('/lua/ui/game/construction.lua').controls
-	controls.constructionGroup.Right:Set(function() 
+	controls.constructionGroup.Right:Set(function()
 		local w = GetFrame(0).Width()
-		if halfMode then 
+		if halfMode then
 			w = w / 2
-		end 
+		end
 		return w - 20
 	end)
 

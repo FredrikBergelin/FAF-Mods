@@ -3,8 +3,8 @@ local UIP = import('/mods/UI-Party/modules/UI-Party.lua')
 local oldSetLayout = SetLayout
 function SetLayout()
 	oldSetLayout()
-	
-	if UIP.Enabled() and UIP.GetSetting("rearrangeBottomPanes") then 
+
+	if UIP.GetSetting("rearrangeBottomPanes") then
 		local control = import('/lua/ui/game/unitviewDetail.lua').View
 		LayoutHelpers.AtBottomIn(control, control:GetParent(), 0)
 		LayoutHelpers.AtLeftIn(control, control:GetParent(), 0)

@@ -30,13 +30,13 @@ buttons = {
 function init()
 	-- settings
 	savedPrefs = settings.getPreferences()
-	
+
 	mainPanel = Bitmap(GetFrame(0))
 	mainPanel.Depth:Set(99)
 	LayoutHelpers.AtLeftTopIn(mainPanel, GetFrame(0), savedPrefs.global.xOffset, savedPrefs.global.yOffset)
 	mainPanel.Height:Set(panelConst.buttonSize)
 	mainPanel.Width:Set(panelConst.buttonSize)
-	
+
 	addMainpanelButtons()
 end
 
@@ -52,10 +52,10 @@ end
 function addMainpanelButtons()
 	buttons.dragButton = Button(mainPanel, modpath..'/textures/drag_up.dds', modpath..'/textures/drag_down.dds', modpath..'/textures/drag_over.dds', modpath..'/textures/drag_up.dds')
 	LayoutHelpers.AtLeftTopIn(buttons.dragButton, mainPanel, panelConst.buttonXOffset, 0)
-	
+
 	buttons.configButton = Button(mainPanel, modpath..'/textures/options_up.dds', modpath..'/textures/options_down.dds', modpath..'/textures/options_over.dds', modpath..'/textures/options_up.dds')
 	LayoutHelpers.AtLeftTopIn(buttons.configButton, mainPanel, panelConst.buttonXOffset + (panelConst.buttonSize+40)*1, 0)
-	
+
 	buttons.dragButton.HandleEvent = function(self, event)
 		if event.Type == 'ButtonPress' then
 			local drag = Dragger()
@@ -78,18 +78,18 @@ function addMainpanelButtons()
 	buttons.configButton:EnableHitTest(true)
 	buttons.configButton.OnClick = function(self, event)
 		import(modpath..'/modules/settingsUi.lua').createPrefsUi()
-	end	
-	
+	end
+
 end
 
 function moveMainpanelButtons(s)
 	helpDistance = panelConst.buttonSize + panelConst.buttonDistance
 	helpOffsetX = 0
-	
+
 	if s == "right" then
 		helpOffsetX = panelConst.width - 3*helpDistance + panelConst.buttonDistance
 	end
-	
+
 	LayoutHelpers.AtLeftTopIn(buttons.dragButton, mainPanel, helpOffsetX + helpDistance*0, 0)
 	LayoutHelpers.AtLeftTopIn(buttons.configButton, mainPanel, helpOffsetX + helpDistance*1, 0)
 end

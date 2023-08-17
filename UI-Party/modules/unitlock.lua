@@ -14,10 +14,10 @@ function SelectAllLockedUnits()
 end
 
 function ToggleSelectedUnitsLock()
-	
+
 	local units = GetSelectedUnits()
 	if units == nil then return end
-	
+
 	local anyLocked = from(units).any(function(k,v) return v.locked end)
 	local newLockState = not anyLocked
 	from(units).foreach(function(k,v)
@@ -31,13 +31,13 @@ local dblClickId = false
 local dblClickUnit = nil
 local dblClickEnd = false
 function isDoubleclick(newSelection)
-	-- a double click is if 
+	-- a double click is if
 	--   the first click is just one unit
 	--   and the second click contains the same unit
-	if dblClickStart then 
+	if dblClickStart then
 		dblClickEnd = newSelection[dblClickId] ~= nil
 		UipLog("end?: " .. tostring(dblClickEnd))
-		if dblClickEnd then 
+		if dblClickEnd then
 			UipLog("***** double click")
 			return true
 		end
@@ -72,24 +72,24 @@ function OnSelectionChanged(oldSelection, newSelection, added, removed)
 	end
 
 	-- prevent inifite recursion
-	if suppress then 
+	if suppress then
 		return false
 	end
 
 	local tobeSelected = {}
 	local changesMade = false
 
-	if not ignoreLocks and UIP.GetSetting("doubleClickSelectsSimilarAssisters") then 
+	if not ignoreLocks and UIP.GetSetting("doubleClickSelectsSimilarAssisters") then
 
 		-- if its a double click on an assister, select all fellow assisters
 		if isDoubleclick(newSelection) then
 			UipLog("-- double click detected")
 
-			local dblClickGuardedUnit = dblClickUnit:GetGuardedEntity() 
+			local dblClickGuardedUnit = dblClickUnit:GetGuardedEntity()
 			local dblClickLocked = dblClickUnit.locked
 
 			for entityid, unit in ipairs(newSelection) do
-		
+	
 				local isSame = unit:GetGuardedEntity() == dblClickGuardedUnit and unit.locked == dblClickUnit.locked
 				if isSame then
 					UipLog("found a brother")
@@ -99,42 +99,42 @@ function OnSelectionChanged(oldSelection, newSelection, added, removed)
 					UipLog("didnt find brother")
 				end
 			end
-			
+
 		end
 	end
 
-	if not ignoreLocks and UIP.GetSetting("enableUnitLock") then 
+	if not ignoreLocks and UIP.GetSetting("enableUnitLock") then
 
 		-- if double click didnt happen then select everything except assisters
 		if not changesMade then
 			if newSelection then
-	
+
 				local newSelectionCount = table.getn(newSelection)
 				local reduceSelection = newSelectionCount > 1
-	
+
 				if reduceSelection then
-		
+	
 					for entityid, unit in ipairs(newSelection) do
-		
+	
 						if unit.locked then
 							changesMade = true
 						else
 							table.insert(tobeSelected,unit)
 						end
-	
+
 					end
-				end	
+				end
 			end
 		end
 	end
 
-	if changesMade then 
-		ForkThread(function() 
+	if changesMade then
+		ForkThread(function()
 			suppress = true
 			UipLog("--changing")
 			SelectUnits(tobeSelected)
 			suppress = false
-		end)	
+		end)
 	end
 
 	return changesMade

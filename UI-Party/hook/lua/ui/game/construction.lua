@@ -1,10 +1,7 @@
-local UnitLock = import('/mods/ui-party/modules/unitlock.lua')
-
-
 function StopAllExceptCurrentProduction()
 
 	local units = GetSelectedUnits()
-	
+
 	for k,v in units do
 		local queue = SetCurrentFactoryForQueueDisplay(v)
 		clearQueue(v, queue)
@@ -27,7 +24,7 @@ end
 
 function UndoLastQueueOrder()
 
-	local units = GetSelectedUnits()	
+	local units = GetSelectedUnits()
 	if (units ~= nil) then
 		local u = units[1]
 		local queue = SetCurrentFactoryForQueueDisplay(u);

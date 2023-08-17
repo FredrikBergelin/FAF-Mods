@@ -14,10 +14,10 @@ function GetUnitName(u)
         if techLevel then
             description = LOCF("Tech %d %s", techLevel, bp.Description)
         end
-      
+     
         if bp.General.UnitName then
             description =(LOCF('%s: %s', bp.General.UnitName, description))
-        else        
+        else       
 		    description =(LOCF('%s', description))
         end
 		return description

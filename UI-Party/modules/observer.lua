@@ -1,7 +1,7 @@
 function QuickSwitch()
 
     local info = GetRolloverInfo()
-    
+   
     if info == nil then
         SetFocusArmy(-1)
     else

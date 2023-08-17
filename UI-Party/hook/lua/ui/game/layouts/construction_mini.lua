@@ -2,10 +2,10 @@ local UIP = import('/mods/UI-Party/modules/UI-Party.lua')
 
 local oldSetLayout = SetLayout
 function SetLayout()
-   
+
 	oldSetLayout()
 
-	if UIP.Enabled() and UIP.GetSetting("rearrangeBottomPanes") then 
+	if UIP.GetSetting("rearrangeBottomPanes") then
 
 		-- if its a replay there is no orders panel and we need to place it differently
 		local controls = import('/lua/ui/game/construction.lua').controls
@@ -16,5 +16,5 @@ function SetLayout()
 		end
 
     end
-    
+
 end
