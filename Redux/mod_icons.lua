@@ -4,7 +4,18 @@ UnitIconAssignments = {
 	{BlueprintId = "UEL0001", IconSet = "icon_commander_uef"},
 	{BlueprintId = "URL0001", IconSet = "icon_commander_cybran"},
 	{BlueprintId = "XSL0001", IconSet = "icon_commander_seraphim"},
-	{BlueprintId = "UAL0001", IconSet = "icon_commander_aeon"},	
+	{BlueprintId = "UAL0001", IconSet = "icon_commander_aeon"},
+
+	{BlueprintId = "URL0301_RAS", IconSet = "SACU_RAS"},
+    {BlueprintId = "UEL0301_RAS", IconSet = "SACU_RAS"},
+    {BlueprintId = "UAL0301_RAS", IconSet = "SACU_RAS"},
+    {BlueprintId = "UEL0301_ENGINEER", IconSet = "SACU_ENG"},
+    {BlueprintId = "UAL0301_ENGINEER", IconSet = "SACU_ENG"},
+    {BlueprintId = "URL0301_ENGINEER", IconSet = "SACU_ENG"},
+    {BlueprintId = "XSL0301_ENGINEER", IconSet = "SACU_ENG"},
+    {BlueprintId = "XSL0301_RAMBO", IconSet = "SACU_SHIELD"},
+    {BlueprintId = "UEL0301_RAMBO", IconSet = "SACU_SHIELD"},
+    {BlueprintId = "UAL0301_SHIELDCombat", IconSet = "SACU_SHIELD"},
 
 	{BlueprintId = "XEA3204", IconSet = "icon_drone_engineer"},
 	{BlueprintId = "XEL0209", IconSet = "icon_land2_sparky"},
@@ -63,7 +74,7 @@ UnitIconAssignments = {
 	{BlueprintId = "XSL0401", IconSet = "icon_experimental_yota_gc"},
 	{BlueprintId = "UAL0401", IconSet = "icon_experimental_yota_gc"},
 
-	}
+}
 
 --- Entry point for scripted assignments. This function has a limited scope and any changes to the 
 -- units and / or the projectiles do not affect the game as they are deep-copied of the originals. 
