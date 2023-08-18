@@ -1,7 +1,7 @@
 name = "Starting Options (from UIP)"
 version = 1
 copyright = ""
-description = "Starting options from UI-Party only, to reduce problems with other code."
+description = "Starting options from UI-Party, to reduce problems with other code."
 author = ""
 url = ""
 uid = "starting-options-freadyfish-v01"

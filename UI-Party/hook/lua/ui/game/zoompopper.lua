@@ -18,7 +18,6 @@ local cam, wv
 local lastCam
 
 function Init()
-	UipLog("zoom pop - init cam")
 	cam = GetCamera('WorldCamera')
 	lastCam = cam
 	wv = import('/lua/ui/game/worldview.lua').GetWorldViews()["WorldCamera"];

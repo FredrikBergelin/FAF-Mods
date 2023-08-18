@@ -17,6 +17,12 @@ function init()
 
 	settingDescriptions = {
 
+		{ name = "Start Sequence", settings = {
+			{ key="useAlternativeStartSequence", type="bool", default=true, name="Use Alternative Start Sequence", description="Different zoom in.\r\nAcu is selected earlier.\r\nFirst fac placement started." },
+			{ indent = 1, key="startSplitScreen", type="bool", default=true, name="Start Split Screen", description="The game starts in split screen mode.\r\nLeft screen zooms in.\r\nRight screen zooms out.\r\nUser can control acu earlier.\r\nAcu is automatically set in place-land-factory mode.\r\nRequires alternative start sequence." },
+			{ key="playerColors", type="bool", default=false, name="Start with Player Colors on", description="Start in alternate player colour mode (allies = green, enemy = red, you = blue)." },
+		}},
+
 		{ name = "Zoom Pop", settings = {
 			{ key="zoomPopOverride", type="bool", default=true, name="Fix Zoom Pop Accuracy", description="Reimplements zoom pop to be more accurate. To see the problem with old zoom pop, zoom out, hover a fac near a mex then pop in ... you will be at some random place nearby. In the new implementation the hovering fac is pretty much in the same place as before you popped." },
 			{ key="zoomPopSpeed", type="number", default=0.08, name="Zoom Pop Speed", description="Speed up/slow down the pop animation. (Zero = disabled).", min=0, max=10, valMult=0.01  },
@@ -39,26 +45,10 @@ function init()
 			{ indent = 1, key="alertIdleFac", type="bool", default=true, name="Highglight idle factory in avatars", description="Beeps and show big red marker on the avatars pane, whenever there is an idle fac" },
 		}},
 
-		{ name = "Selection", settings = {
-			{ key="enableUnitLock", type="bool", default=true, name="Enable Unit Lock (slow?)", description="Pressing the Toggle Unit Lock key locks the unit so it will be filtered out of any selection that mixes locked and unlocked units. (Shift overrides this back to normal)" },
-			{ key="doubleClickSelectsSimilarAssisters", type="bool", default=true, name="Double click assister selects similar assisters (slow?)", description="If the unit is assisting something, double clicking it will select everything else that assists the same target" },
-		}},
-
-		{ name = "Start Sequence", settings = {
-			{ key="useAlternativeStartSequence", type="bool", default=true, name="Use Alternative Start Sequence", description="Different zoom in.\r\nAcu is selected earlier.\r\nFirst fac placement started." },
-			{ indent = 1, key="startSplitScreen", type="bool", default=true, name="Start Split Screen", description="The game starts in split screen mode.\r\nLeft screen zooms in.\r\nRight screen zooms out.\r\nUser can control acu earlier.\r\nAcu is automatically set in place-land-factory mode.\r\nRequires alternative start sequence." },
-			{ key="playerColors", type="bool", default=false, name="Start with Player Colors on", description="Start in alternate player colour mode (allies = green, enemy = red, you = blue)." },
-		}},
-
 		{ name = "Split Screen", settings = {
 			{ key="smallerContructionTabWhenSplitScreen", type="bool", default=true, name="Construction to left", description="Construction menu just spans left screen (not both)" },
 			{ key="moveAvatarsToLeftSplitScreen", type="bool", default=true, name="Avatars to left", description="Move the avatars (idle engies pane) to the left screen." },
 			{ key="moveMainMenuToRight", type="bool", default=true, name="Main menu to right", description="Move the tabs (main menu) to the right screen." },
-		}},
-
-		{ name = "Mod", settings = {
-			{ key="modEnabled", type="bool", default=true, name="Mod Enabled (disable mod if lag/bug)", description="Turns off the entire mod. This does not put windows in their original place, etc. It just stops doing anything at all." },
-			{ key="logEnabled", type="bool", default=false, name="Mod Log Enabled", description="For diagnostic purposes", min=0, max=10, valMult=0.01  },
 		}},
 
 		{ name = "Hidden", settings = {
@@ -80,7 +70,6 @@ function init()
 			-- make defaults
 			keys.addValue(sv.key)
 			if savedPrefs.global[sv.key] == nil then
-				UipLog("setting default " .. sv.key)
 				savedPrefs.global[sv.key] = sv.default
 			end
 
@@ -97,7 +86,6 @@ function init()
 	local g = from(savedPrefs.global)
 	g.foreach(function(gk, gv)
 		if not keys.contains(gk) then
-			UipLog("removing old key " .. gk)
 			g.removeKey(gk)
 		end
 	end)

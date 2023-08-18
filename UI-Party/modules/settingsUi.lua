@@ -129,7 +129,6 @@ function createOptions()
 			from(kv.settings).foreach(function(sk, sv)
 
 				local indent = 5 + (sv.indent or 0) * 15
-	
 
 				if sv.type == "bool" then
 					createSettingCheckbox(curX+indent, curY, 13, {"global", sv.key}, sv.name, sv.key)
@@ -139,8 +138,6 @@ function createOptions()
 					LayoutHelpers.AtLeftTopIn(sv.control(sv), uiPanel.main, curX+indent, curY)
 					LayoutHelpers.AtLeftTopIn(UIUtil.CreateText(uiPanel.main, sv.name, uiPanelSettings.textSize.option, UIUtil.bodyFont), uiPanel.main, curX+100+indent, curY+7)
 					curY = curY + 30
-				else
-					UipLog("Unknown settings type: " .. sv.type)
 				end
 			end)
 		end

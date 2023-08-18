@@ -2,33 +2,14 @@ local a, b = pcall(function()
 	local CommonUnits = import('/mods/common/units.lua')
 end)
 if a == false then
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
-	LOG("Crashed. ui party requires another ui mod to work: Common Mod Tools v1")
+	LOG("Crashed. Requires another ui mod to work: Common Mod Tools v1")
+
 	local UIUtil = import('/lua/ui/uiutil.lua')
-	UIUtil.CreateText(GetFrame(0), "Crashed. Ui party requires another ui mod to work: Common Mod Tools v1", 20, UIUtil.bodyFont)
+	UIUtil.CreateText(GetFrame(0), "Crashed. Requires another ui mod to work: Common Mod Tools v1", 20, UIUtil.bodyFont)
 	return 0
 end
 
 local UIP = import('/mods/UI-Party/modules/UI-Party.lua')
-local UnitSplit = import('/mods/UI-Party/modules/UnitSplit.lua')
-local UnitLock = import('/mods/ui-party/modules/unitlock.lua')
 
 UIP.Init()
 
@@ -191,21 +172,7 @@ function AlternateStartSequence()
 
 end
 
-
-local oldOnSelectionChanged = OnSelectionChanged
-function OnSelectionChanged(oldSelection, newSelection, added, removed)
-	--if not SelectHelper.IsAutoSelection() then
-		UnitSplit.SelectionChanged()
-
-		local selectionChanged = UnitLock.OnSelectionChanged(oldSelection, newSelection, added, removed)
-		if not selectionChanged then
-			oldOnSelectionChanged(oldSelection, newSelection, added, removed)
-		end
-	--end
-end
-
-
-local oldOnQueueChanged = OnQueueChanged
-function OnQueueChanged(newQueue)
-    oldOnQueueChanged(newQueue)
-end
+-- local oldOnQueueChanged = OnQueueChanged
+-- function OnQueueChanged(newQueue)
+--     oldOnQueueChanged(newQueue)
+-- end

@@ -1,5 +1,4 @@
 function SelectSimilarOnscreenUnits()
-	UipLog("here")
 	local units = GetSelectedUnits()
 	if (units ~= nil) then
 		local blueprints = from(units).select(function(k, u) return u:GetBlueprint(); end).distinct()

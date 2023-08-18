@@ -55,21 +55,6 @@ function OnUnitBoxClick(self, event, unitBox)
 				SelectWorkers(unitBox)
 			end
 		end
-	
-		--if unitBox.workerType == workerTypes.WORKING then
-
---			if event.Modifiers.Right then
---				DisableWorkers(unitBox)
---			else
---				SelectWorkers(unitBox)
---			end
---		elseif unitBox.workerType == workerTypes.PAUSED then
---			if event.Modifiers.Right then
---				EnablePaused(unitBox)
---			else
---				SelectPaused(unitBox)
---			end
---		end
 	end
 
 end
@@ -193,7 +178,6 @@ function EnableUnitsAbility(units)
 end
 
 function GetIsUnitAbilityEnabled(units)
-
 	for i = 0,8 do
         if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
 			return true
@@ -201,7 +185,6 @@ function GetIsUnitAbilityEnabled(units)
     end
 	return false
 end
-
 
 local hoverUnitType = nil
 local selectedUnitType = nil
@@ -217,17 +200,14 @@ function OnClick(self, event, unitType)
 		hoverUnitType = unitType
 	end
 	if event.Type == 'ButtonPress' then
-
 		if selectedUnitType ~= nil then
 			selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
 		end
 		selectedUnitType = unitType
 		UpdateSelectedUnitType(selectedUnitType)
 
-
 		local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
 		SelectUnits(allUnits)
-
 	end
 
 	if hoverUnitType ~= nil then
@@ -244,7 +224,6 @@ function UpdateSelectedUnitType(selectedUnitType)
 	UIP.econtrol.ui.textLabel:SetText(selectedUnitType.name)
 	--UIP.econtrol.ui.selectedTypeView.textLabel:SetText(selectedUnitType.name)
 end
-
 
 function GetEconData(unit)
 	local mi = unit:GetMissileInfo()
@@ -266,7 +245,6 @@ function DoUpdate()
 	if UIP.GetSetting("showEcontrolResources") then
 		UpdateResourcesUi();
 	end
-	UpdateMexesUi();
 end
 
 function UpdateResourcesUi()
@@ -325,7 +303,7 @@ function UpdateResourcesUi()
 				unitHasUsage = true
 			end
 
-		end )
+		end)
 
 		if unitHasUsage then
 			if (isMaint) then
@@ -384,19 +362,9 @@ function UpdateResourcesUi()
 
 				unitType.typeUi.prodUnitsBox.SetOn(bv > 0)
 				unitType.typeUi.maintUnitsBox.SetOn(bmv > 0)
-
-				-- unitTypeUsage.text:SetText(string.format("%4.0f", unitTypeUsage.usage))
-
-				-- local str = unitTypeUsage.usage
-				-- if (str == 0) then str = "" else str = string.format("%10.3f", str) end
-				-- unitTypeUsage.text:SetText(str)
-
-				-- local str = unitTypeUsage.maintUsage
-				-- if (str == 0) then str = "" else str = string.format("%10.3f", str) end
-				-- unitTypeUsage.maintText:SetText(str)
 			end
-		end )
-	end )
+		end)
+	end)
 
 	if relayoutRequired then
 		local y = 0
@@ -471,57 +439,6 @@ function UnitBox(typeUi, unitType, spendType, workerType)
 	end
 
 	return unitBox
-
-end
-
-
-local mexCategories = {}
-
-function UpdateMexesUi()
-
-	from(mexCategories).foreach(function(k, category)
-
-		category.units = {};
-
-	end)
-
-
-	local units = from(CommonUnits.Get())
-
-	units.foreach(function(k, unit)
-
-		if EntityCategoryContains(categories.MASSEXTRACTION, unit) then
-			for k,category in mexCategories do
-				if IsMexCategoryMatch(category, unit) then
-					table.insert(category.units, unit)
-					break;
-				end
-			end
-		end
-
-	end)
-
-	from(mexCategories).foreach(function(k, category)
-
-		local count = table.getn(category.units)
-		local str = ""
-		local alpha = 0.3
-		if count > 0 then
-			str = count
-			alpha = 1
-		end
-		category.ui.countLabel:SetText(str)
-		category.ui.stratIcon:SetAlpha(alpha)
-		if category.ui.upgrIcon then category.ui.upgrIcon:SetAlpha(alpha) end
-		if category.ui.pauseIcon then category.ui.pauseIcon:SetAlpha(alpha) end
-
-		local sorted = GetUpgradingUnits(category)
-		for i=1,10 do
-			local u = sorted[i]
-			SetMexCategoryProgress(category, i, u)
-		end
-
-	end)
 
 end
 
@@ -630,103 +547,6 @@ function OnMexCategoryUiClick(self, event, category)
 	end
 
 	return true
-
-end
-
-function CreateMexesUi(uiRoot)
-
-	mexCategories = {
-		{ name = "T1 idle", categories = categories.TECH1, isUpgrading = false, isPaused = nil, icon = "icon_structure1_mass" },
-		{ name = "T1 upgrading paused", categories = categories.TECH1, isUpgrading = true, isPaused = true, icon = "icon_structure1_mass" },
-		{ name = "T1 upgrading", categories = categories.TECH1, isUpgrading = true, isPaused = false, icon = "icon_structure1_mass" },
-		{ name = "T2 idle", categories = categories.TECH2, isUpgrading = false, isPaused = nil, icon = "icon_structure2_mass"},
-		{ name = "T2 upgrading paused", categories = categories.TECH2, isUpgrading = true, isPaused = true, icon = "icon_structure2_mass" },
-		{ name = "T2 upgrading", categories = categories.TECH2, isUpgrading = true, isPaused = false, icon = "icon_structure2_mass" },
-		{ name = "T3", categories = categories.TECH3, isUpgrading = false, isPaused = nil, icon = "icon_structure3_mass" },
-	}
-
-	local mexRoot = Bitmap(uiRoot)
-	mexRoot.Width:Set(table.getn(categories)*24-2)
-	mexRoot.Height:Set(22)
-	--mexRoot:InternalSetSolidColor('aa00ff00')
-	LayoutHelpers.AtLeftIn(mexRoot, uiRoot, 0)
-	LayoutHelpers.AtTopIn(mexRoot, uiRoot, -72)
-
-	from(mexCategories).foreach(function(k, category)
-		local categoryUi = Bitmap(mexRoot)
-		categoryUi.HandleEvent = function(self, event) return OnMexCategoryUiClick(self, event, category) end
-		categoryUi.Width:Set(22)
-		categoryUi.Height:Set(50)
-		categoryUi:InternalSetSolidColor('aa000000')
-		--categoryUi:InternalSetSolidColor('aa00ffff')
-		LayoutHelpers.AtLeftIn(categoryUi, mexRoot, (k-1) * 24)
-		LayoutHelpers.AtTopIn(categoryUi, mexRoot, 0)
-
-		categoryUi.stratIcon = Bitmap(categoryUi)
-		iconName = '/textures/ui/common/game/strategicicons/' .. category.icon .. '_rest.dds'
-		categoryUi.stratIcon:SetTexture(iconName)
-		categoryUi.stratIcon.Height:Set(categoryUi.stratIcon.BitmapHeight)
-		categoryUi.stratIcon.Width:Set(categoryUi.stratIcon.BitmapWidth)
-		categoryUi.stratIcon:SetAlpha(0.3)
-		LayoutHelpers.AtLeftIn(categoryUi.stratIcon, categoryUi, (22-categoryUi.stratIcon.Width())/2)
-		LayoutHelpers.AtTopIn(categoryUi.stratIcon, categoryUi,(16 + 24-categoryUi.stratIcon.Height())/2)
-
-		if (category.isPaused) then
-			categoryUi.pauseIcon = Bitmap(categoryUi)
-			iconName = '/textures/ui/common/game/strategicicons/pause_rest.dds'
-			categoryUi.pauseIcon:SetTexture(iconName)
-			categoryUi.pauseIcon.Height:Set(24)
-			categoryUi.pauseIcon.Width:Set(24)
-			categoryUi.pauseIcon:SetAlpha(0.3)
-			LayoutHelpers.AtLeftIn(categoryUi.pauseIcon, categoryUi, (22-categoryUi.pauseIcon.Width())/2)
-			LayoutHelpers.AtTopIn(categoryUi.pauseIcon, categoryUi, 8 + 0)
-		end
-
-		if (category.isUpgrading) then
-			categoryUi.upgrIcon = Bitmap(categoryUi)
-			iconName = '/mods/ui-party/textures/upgrade.dds'
-			categoryUi.upgrIcon:SetTexture(iconName)
-			categoryUi.upgrIcon.Height:Set(8)
-			categoryUi.upgrIcon.Width:Set(8)
-			categoryUi.upgrIcon:SetAlpha(0.3)
-			LayoutHelpers.AtLeftIn(categoryUi.upgrIcon, categoryUi, (22-categoryUi.upgrIcon.Width())/2+6)
-			LayoutHelpers.AtTopIn(categoryUi.upgrIcon, categoryUi, 12 + 8)
-		end
-
-		categoryUi.countLabel = UIUtil.CreateText(categoryUi, "0", 9, UIUtil.bodyFont)
-		categoryUi.countLabel.Width:Set(5)
-		categoryUi.countLabel.Height:Set(5)
-		categoryUi.countLabel:SetNewColor('ffaaaaaa')
-		categoryUi.countLabel:DisableHitTest()
-		LayoutHelpers.AtLeftIn(categoryUi.countLabel, categoryUi, 9)
-		LayoutHelpers.AtTopIn(categoryUi.countLabel, categoryUi, 1)
-
-		categoryUi.bar1s = {}
-		categoryUi.bar2s = {}
-		for i=1,10 do
-
-			local bar1 = Bitmap(categoryUi)
-			bar1.Width:Set(22)
-			bar1.Height:Set(2)
-			bar1:InternalSetSolidColor('1100ff00')
-			LayoutHelpers.AtLeftIn(bar1, categoryUi, 0)
-			LayoutHelpers.AtTopIn(bar1, categoryUi, 50 - i * 2)
-
-			local bar2 = Bitmap(categoryUi)
-			bar2.Width:Set(2)
-			bar2.Height:Set(2)
-			bar2:InternalSetSolidColor('3300ff00')
-			LayoutHelpers.AtLeftIn(bar2, categoryUi, 0)
-			LayoutHelpers.AtTopIn(bar2, categoryUi, 50 - i * 2)
-
-			table.insert(categoryUi.bar1s, bar1)
-			table.insert(categoryUi.bar2s, bar2)
-
-		end
-
-		category.ui = categoryUi
-	end);
-
 
 end
 
@@ -954,7 +774,6 @@ function buildUi()
 --		LayoutHelpers.AtTopIn(selectedTypeView, uiRoot, 0)
 		--selectedTypeView:SetSolidColor("aa000000")
 
-
 --		selectedTypeView.textLabel = UIUtil.CreateText(selectedTypeView, 'Unit Type', 15, UIUtil.bodyFont)
 --		selectedTypeView.textLabel.Width:Set(10)
 --		selectedTypeView.textLabel.Height:Set(9)
@@ -963,9 +782,7 @@ function buildUi()
 --		LayoutHelpers.AtLeftIn(selectedTypeView.textLabel, selectedTypeView, 5)
 --		LayoutHelpers.AtTopIn(selectedTypeView.textLabel, selectedTypeView, -31)
 
-
 --		for i = 0,8 do
-
 --			local typeUi = { }
 
 --			typeUi.uiRoot = Bitmap(selectedTypeView)
@@ -1015,10 +832,7 @@ function buildUi()
 --			typeUi.energyMaintBar:DisableHitTest()
 --			LayoutHelpers.AtLeftIn(typeUi.energyMaintBar, typeUi.uiRoot, col9)
 --			LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, 10)
-
 --		end
-
-		CreateMexesUi(uiRoot)
 
 		UIP.econtrol.beat = DoUpdate
 		GameMain.AddBeatFunction(UIP.econtrol.beat)
