@@ -1,9 +1,12 @@
+local Util = import('/lua/utilities.lua')
 local CM = import("/lua/ui/game/commandmode.lua")
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
-local currentIndex
-local selection
+local currentUnitIndex
+local selection = {}
+local selectionWithOrder = {}
+local selectionWithoutOrder = {}
 local commandMode
 local commandModeData
 local currentUnit
@@ -19,7 +22,7 @@ local function IsActive()
 end
 
 local function Reset(deselect)
-    currentIndex = nil
+    currentUnitIndex = nil
     commandMode = nil
     commandModeData = nil
     currentUnit = nil
@@ -28,6 +31,7 @@ local function Reset(deselect)
     end
 end
 
+-- TODO Remove, will be unnecessary
 function ReduceIndex(index)
     if index > 1 then
         return (index - 1)
@@ -38,54 +42,55 @@ function ReduceIndex(index)
 end
 
 -- Select next unit in the saved selection
-function SelectNext(dontSelect)
-    local unit
-    local i = currentIndex
+function SelectClosest()
 
-    repeat
-        if selection == nil or table.getn(selection) == 0 then
-            Reset()
-            return
-        end
+    if table.getn(selectionWithoutOrder) == 0 then
+        PlaySound(completeCycleSound)
+        SelectUnits(nil)
+        currentUnitIndex = nil
+        selectionWithoutOrder = selectionWithOrder
+        selectionWithOrder = {}
+        return
+    end
 
-        i, unit = next(selection, i)
+    local mousePos = GetMouseWorldPos()
+    local shortestDistance = 99999999
+    local closestUnit = nil
+    local closestUnitIndex = nil
 
-        if i == nil then
-            -- We reached the end
-            PlaySound(completeCycleSound)
-            SelectUnits(nil)
-            currentIndex = nil
-            return
-        end
-
-        -- if unit == nil then
-        --     Reset()
-        --     return
-        -- else
+    for key,unit in pairs(selectionWithoutOrder) do
 
         if unit:IsDead() then
-            table.remove(selection, i)
-
+            table.remove(selection, key)
+            table.remove(selectionWithoutOrder, key)
         else
-            currentIndex = i
-            currentUnit = unit
 
-            if not dontSelect then
-                SelectUnits { unit }
-                CM.StartCommandMode(commandMode, commandModeData)
+            local distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+
+            if distanceToCursor < shortestDistance then
+                shortestDistance = distanceToCursor
+                closestUnit = unit
+                closestUnitIndex = key
             end
-
-            return
         end
-    until false
+    end
+
+    if selectionWithoutOrder == nil or table.getn(selectionWithoutOrder) == 0 then
+        Reset()
+        return
+    end
+
+    currentUnit = closestUnit
+    currentUnitIndex = closestUnitIndex
+
+    SelectUnits { closestUnit }
+    CM.StartCommandMode(commandMode, commandModeData)
+
 end
 
 function SelectionIsCurrent(units)
-    if currentUnit == nil then
+    if currentUnit == nil or currentUnit:IsDead() then
         return false
-    end
-    if currentUnit:IsDead() then
-        SelectNext(true)
     end
 
     if units ~= nil then
@@ -102,8 +107,10 @@ function CreateSelection(units)
 
     Reset()
     selection = selectedUnits
+    selectionWithoutOrder = selectedUnits
+    selectionWithOrder = {}
 
-    SelectNext()
+    SelectClosest()
 end
 
 function SelectionChanged(oldSelection, newSelection, added, removed)
@@ -130,7 +137,10 @@ function OnCommandIssued(cmdMode, cmdModeData, command)
     if command.CommandType == 'Guard' and not command.Target.EntityId then return end
     if command.CommandType == 'None' then return end
 
-    ForkThread(SelectNext, false)
+    table.insert(selectionWithOrder, selectionWithoutOrder[currentUnitIndex])
+    table.remove(selectionWithoutOrder, currentUnitIndex)
+
+    ForkThread(SelectClosest, false)
 end
 
 ---comment
@@ -155,14 +165,13 @@ function CreateOrContinueSelection()
         end
 
         if SelectionIsCurrent(selectedUnits) then
-            SelectNext()
+            -- TODO Move selected unit to WithOrder
+            SelectClosest()
             return
         end
     end
 
-    currentIndex = ReduceIndex(currentIndex)
-    SelectNext()
-
+    SelectClosest()
 end
 
 function Main(isReplay)
