@@ -17,7 +17,7 @@ function AddFilterSelection(group)
 	for _,unit in SelectedUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint()
-		--LOG(repr(bp))
+
 		if not isInTable(Filters[group],bp.BlueprintId) then
 			Filters[group][id] = bp.BlueprintId
 			Names[id] = TechCategoryList[bp.TechCategory]..LOC(bp.Description)
@@ -32,21 +32,23 @@ function AddFilterSelection(group)
 	--PrintText(message,28,"ff9161ff",1, 'centerbottom')
 end
 
+local lastClickTick = nil
 function FilterSelect(group)
+    local currentTick = GameTick()
 	if Filters[group] == nil then return AddFilterSelection(group) end
 	local allUnits = GetAllUnits()
 	local SelectedUnits = {}
+	local isDoubleClick = lastClickTick ~= nil and currentTick < lastClickTick + 50
 	for _,unit in allUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint().BlueprintId
-		--LOG(repr(bp))
-		if worldView:GetScreenPos(unit) and isInTable(Filters[group],bp) then
+
+		if isInTable(Filters[group],bp) and (isDoubleClick or worldView:GetScreenPos(unit)) then
 			table.insert(SelectedUnits,unit)
-			--SelectedUnits[id] = unit
-			--SelectedUnits[id] = id
 		end
 	end
 	SelectUnits(SelectedUnits)
+	lastClickTick = currentTick
 end
 
 function isInTable(tabl,item)
