@@ -2,7 +2,6 @@ local GetAllUnits = import('/mods/FilterSelection/modules/allunits.lua').GetAllU
 local worldView = import('/lua/ui/game/worldview.lua').viewLeft
 local Filters = {}
 
-
 local TechCategoryList = {
 	TECH1 = 'T1 ',
 	TECH2 = 'T2 ',
@@ -14,7 +13,7 @@ function AddFilterSelection(group)
 	local SelectedUnits = GetSelectedUnits()
 	local Names = {}
 	Filters[group] = {}
-	
+
 	for _,unit in SelectedUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint()
@@ -32,9 +31,6 @@ function AddFilterSelection(group)
 	print(message)
 	--PrintText(message,28,"ff9161ff",1, 'centerbottom')
 end
-
-
-
 
 function FilterSelect(group)
 	if Filters[group] == nil then return AddFilterSelection(group) end
