@@ -31,7 +31,7 @@ function MexPanel:new()
     self.__index = self
 
     o.x = 0
-	o.y = 420
+	o.y = 220
     o.controls = {}
 
     return o

@@ -21,7 +21,7 @@ function CreateUI(_isReplay)
 
 	MexPanelInstance = import('/mods/' .. modFolder .. '/modules/ui/MexPanel.lua').getInstance()
 
-	MexPanelInstance:onCreate(isReplay, 0, 380)
+	MexPanelInstance:onCreate(isReplay, 0, 220)
 
 	AddBeatFunction(ModMainUpdate)
 end
