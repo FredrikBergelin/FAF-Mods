@@ -18,7 +18,7 @@ local panelConst = {
 	distance = 4,
 	buttonSize = 15,
 	buttonDistance = 3,
-	buttonXOffset = 0
+	buttonXOffset = 220
 }
 
 buttons = {

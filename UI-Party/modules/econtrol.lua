@@ -37,7 +37,6 @@ function GetUnitType(unit)
 	return unitType
 end
 
-
 function OnUnitBoxClick(self, event, unitBox)
 
 	if event.Type == 'ButtonPress' then
@@ -158,7 +157,7 @@ end
 --    Stealth = 5,
 --    Generic = 6,
 --    Special = 7,
---Cloak = 8,}
+--	  Cloak = 8,}
 
 function GetOnValueForScriptBit(i)
 	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
@@ -166,6 +165,17 @@ function GetOnValueForScriptBit(i)
 end
 
 function DisableUnitsAbility(units)
+	local totalMaintMass = 0
+	for k,v in pairs(units) do
+		local econData = GetEconData(v)
+		totalMaintMass = totalMaintMass + econData["massConsumed"]
+	end
+
+	-- Special case for silos and commander while upgrading, its not an ability so it needs to pause even tho its in the maintenance category
+	if totalMaintMass > 0 then
+		SetPaused(units, true)
+	end
+
     for i = 0,8 do
         ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
     end
@@ -200,6 +210,27 @@ function OnClick(self, event, unitType)
 		hoverUnitType = unitType
 	end
 	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl then
+			if event.Modifiers.Right then
+				if unitType.typeUi.prodUnitsBox ~= nil then EnablePaused(unitType.typeUi.prodUnitsBox) end
+				if unitType.typeUi.maintUnitsBox ~= nil then EnablePaused(unitType.typeUi.maintUnitsBox) end
+			else
+				local pausedUnits = {}
+				if unitType.typeUi.prodUnitsBox ~= nil then
+					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.prodUnitsBox))).toArray()
+				end
+
+				if unitType.typeUi.maintUnitsBox ~= nil then
+					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.maintUnitsBox))).toArray()
+				end
+
+				SelectUnits(pausedUnits)
+			end
+		else
+			if event.Modifiers.Right then
+				if unitType.typeUi.prodUnitsBox ~= nil then DisableWorkers(unitType.typeUi.prodUnitsBox) end
+				if unitType.typeUi.maintUnitsBox ~= nil then DisableWorkers(unitType.typeUi.maintUnitsBox) end
+			else
 		if selectedUnitType ~= nil then
 			selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
 		end
@@ -208,6 +239,8 @@ function OnClick(self, event, unitType)
 
 		local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
 		SelectUnits(allUnits)
+	end
+		end
 	end
 
 	if hoverUnitType ~= nil then
@@ -222,7 +255,6 @@ end
 
 function UpdateSelectedUnitType(selectedUnitType)
 	UIP.econtrol.ui.textLabel:SetText(selectedUnitType.name)
-	--UIP.econtrol.ui.selectedTypeView.textLabel:SetText(selectedUnitType.name)
 end
 
 function GetEconData(unit)
@@ -312,6 +344,19 @@ function UpdateResourcesUi()
 				table.insert(unitType.prodUnits, unit)
 			end
 		end
+
+		-- if unitHasUsage then
+		-- 	if (isMaint) then
+		-- 		if unit:IsInCategory 'COMMAND' then
+		-- 			table.insert(unitType.prodUnits, unit)
+		-- 		else
+		-- 			table.insert(unitType.maintUnits, unit)
+		-- 		end
+		-- 	else
+		-- 		table.insert(unitType.prodUnits, unit)
+		-- 	end
+		-- end
+
 	end)
 
 	-- update ui
@@ -396,7 +441,7 @@ function UnitBox(typeUi, unitType, spendType, workerType)
 	local check2 = Bitmap(group	)
 	check2.Width:Set(12)
 	check2.Height:Set(12)
-	check2:InternalSetSolidColor('55ff0000')
+	check2:InternalSetSolidColor('bbff0000')
 	LayoutHelpers.AtLeftIn(check2, group, 4)
 	LayoutHelpers.AtVerticalCenterIn(check2, group, 0)
 
@@ -604,7 +649,6 @@ function buildUi()
 		local col9 = col8 + 20
 		local col10 = col9 + 105
 
-
 		local dragger = import('/mods/UI-Party/modules/ui.lua').buttons.dragButton
 		local uiRoot = Bitmap(dragger)
 		UIP.econtrol.ui = uiRoot
@@ -614,7 +658,7 @@ function buildUi()
 		uiRoot.Depth:Set(99)
 		uiRoot:DisableHitTest()
 		LayoutHelpers.AtLeftIn(uiRoot, dragger, 0)
-		LayoutHelpers.AtTopIn(uiRoot, dragger,120)
+		LayoutHelpers.AtTopIn(uiRoot, dragger,60)
 	
 		uiRoot.textLabel = UIUtil.CreateText(uiRoot, 'ECOntrol', 15, UIUtil.bodyFont)
 		uiRoot.textLabel.Width:Set(10)
@@ -622,7 +666,7 @@ function buildUi()
 		uiRoot.textLabel:SetNewColor('white')
 		uiRoot.textLabel:DisableHitTest()
 		LayoutHelpers.AtLeftIn(uiRoot.textLabel, uiRoot, 0)
-		LayoutHelpers.AtTopIn(uiRoot.textLabel, uiRoot, -95)
+		LayoutHelpers.AtTopIn(uiRoot.textLabel, uiRoot, -35)
 
 		function CreateText(text, x)
 
@@ -635,204 +679,97 @@ function buildUi()
 			LayoutHelpers.AtTopIn(t, uiRoot, -12)
 		end
 
-		if UIP.GetSetting("showEcontrolResources") then
-			CreateText("B", col0+5)
-			CreateText("U", col1+5)
-	--		CreateText("C", col2+5)
-			CreateText("Resources", col3)
+		CreateText("B", col0+5)
+		CreateText("U", col1+5)
+		CreateText("Resources", col3)
 
-			unitTypes.foreach( function(k, unitType)
+		unitTypes.foreach( function(k, unitType)
 
-				local typeUi = { }
-				unitType.typeUi = typeUi
+			local typeUi = { }
+			unitType.typeUi = typeUi
 
-				typeUi.uiRoot = Bitmap(uiRoot)
-				typeUi.uiRoot.HandleEvent = function(self, event) return OnClick(self, event, unitType) end
-				typeUi.uiRoot.Width:Set(col4)
-				typeUi.uiRoot.Height:Set(22)
-				typeUi.uiRoot:InternalSetSolidColor('aa000000')
-				typeUi.uiRoot:Hide()
-				LayoutHelpers.AtLeftIn(typeUi.uiRoot, uiRoot, 0)
-				LayoutHelpers.AtTopIn(typeUi.uiRoot, uiRoot, 0)
+			typeUi.uiRoot = Bitmap(uiRoot)
+			typeUi.uiRoot.HandleEvent = function(self, event) return OnClick(self, event, unitType) end
+			typeUi.uiRoot.Width:Set(col4)
+			typeUi.uiRoot.Height:Set(22)
+			typeUi.uiRoot:InternalSetSolidColor('aa000000')
+			typeUi.uiRoot:Hide()
+			LayoutHelpers.AtLeftIn(typeUi.uiRoot, uiRoot, 0)
+			LayoutHelpers.AtTopIn(typeUi.uiRoot, uiRoot, 0)
 
-				typeUi.stratIcon = Bitmap(typeUi.uiRoot)
-				iconName = '/textures/ui/common/game/strategicicons/' .. unitType.icon .. '_rest.dds'
-				typeUi.stratIcon:SetTexture(iconName)
-				typeUi.stratIcon.Height:Set(typeUi.stratIcon.BitmapHeight)
-				typeUi.stratIcon.Width:Set(typeUi.stratIcon.BitmapWidth)
-				LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, col2 + (20-typeUi.stratIcon.Width())/2)
-				LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
+			typeUi.stratIcon = Bitmap(typeUi.uiRoot)
+			iconName = '/textures/ui/common/game/strategicicons/' .. unitType.icon .. '_rest.dds'
+			typeUi.stratIcon:SetTexture(iconName)
+			typeUi.stratIcon.Height:Set(typeUi.stratIcon.BitmapHeight)
+			typeUi.stratIcon.Width:Set(typeUi.stratIcon.BitmapWidth)
+			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, col2 + (20-typeUi.stratIcon.Width())/2)
+			LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
 
-				typeUi.prodUnitsBox = UnitBox(typeUi, unitType, spendTypes.PROD, workerTypes.WORKING)
-				LayoutHelpers.AtLeftIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, col0)
-				LayoutHelpers.AtVerticalCenterIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, 0)
+			typeUi.prodUnitsBox = UnitBox(typeUi, unitType, spendTypes.PROD, workerTypes.WORKING)
+			LayoutHelpers.AtLeftIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, col0)
+			LayoutHelpers.AtVerticalCenterIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, 0)
 
-				typeUi.maintUnitsBox = UnitBox(typeUi, unitType, spendTypes.MAINT, workerTypes.WORKING)
-				LayoutHelpers.AtLeftIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, col1)
-				LayoutHelpers.AtVerticalCenterIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, 0)
+			typeUi.maintUnitsBox = UnitBox(typeUi, unitType, spendTypes.MAINT, workerTypes.WORKING)
+			LayoutHelpers.AtLeftIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, col1)
+			LayoutHelpers.AtVerticalCenterIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, 0)
 
-				typeUi.Clear = function()
+			typeUi.Clear = function()
+				typeUi.prodUnitsBox.check:Hide()
+				typeUi.maintUnitsBox.check:Hide()
+			end
 
-					typeUi.prodUnitsBox.check:Hide()
-					typeUi.maintUnitsBox.check:Hide()
+			typeUi.massBar = Bitmap(typeUi.uiRoot)
+			typeUi.massBar.Width:Set(10)
+			typeUi.massBar.Height:Set(1)
+			typeUi.massBar:InternalSetSolidColor('lime')
+			typeUi.massBar:DisableHitTest()
+			LayoutHelpers.AtLeftIn(typeUi.massBar, typeUi.uiRoot, col3)
+			LayoutHelpers.AtTopIn(typeUi.massBar, typeUi.uiRoot, 8)
 
-				end
+			typeUi.massMaintBar = Bitmap(typeUi.uiRoot)
+			typeUi.massMaintBar.Width:Set(10)
+			typeUi.massMaintBar.Height:Set(1)
+			typeUi.massMaintBar:InternalSetSolidColor('cyan')
+			typeUi.massMaintBar:DisableHitTest()
+			LayoutHelpers.AtLeftIn(typeUi.massMaintBar, typeUi.uiRoot, col3)
+			LayoutHelpers.AtTopIn(typeUi.massMaintBar, typeUi.uiRoot, 8)
 
-				typeUi.massBar = Bitmap(typeUi.uiRoot)
-				typeUi.massBar.Width:Set(10)
-				typeUi.massBar.Height:Set(1)
-				typeUi.massBar:InternalSetSolidColor('lime')
-				typeUi.massBar:DisableHitTest()
-				LayoutHelpers.AtLeftIn(typeUi.massBar, typeUi.uiRoot, col3)
-				LayoutHelpers.AtTopIn(typeUi.massBar, typeUi.uiRoot, 8)
+			typeUi.energyBar = Bitmap(typeUi.uiRoot)
+			typeUi.energyBar.Width:Set(10)
+			typeUi.energyBar.Height:Set(1)
+			typeUi.energyBar:InternalSetSolidColor('yellow')
+			typeUi.energyBar:DisableHitTest()
+			LayoutHelpers.AtLeftIn(typeUi.energyBar, typeUi.uiRoot, col3)
+			LayoutHelpers.AtTopIn(typeUi.energyBar, typeUi.uiRoot, 11)
 
-				typeUi.massMaintBar = Bitmap(typeUi.uiRoot)
-				typeUi.massMaintBar.Width:Set(10)
-				typeUi.massMaintBar.Height:Set(1)
-				typeUi.massMaintBar:InternalSetSolidColor('cyan')
-				typeUi.massMaintBar:DisableHitTest()
-				LayoutHelpers.AtLeftIn(typeUi.massMaintBar, typeUi.uiRoot, col3)
-				LayoutHelpers.AtTopIn(typeUi.massMaintBar, typeUi.uiRoot, 8)
+			typeUi.energyMaintBar = Bitmap(typeUi.uiRoot)
+			typeUi.energyMaintBar.Width:Set(10)
+			typeUi.energyMaintBar.Height:Set(1)
+			typeUi.energyMaintBar:InternalSetSolidColor('orange')
+			typeUi.energyMaintBar:DisableHitTest()
+			LayoutHelpers.AtLeftIn(typeUi.energyMaintBar, typeUi.uiRoot, col3)
+			LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, 11)
 
-	--			typeUi.massText = UIUtil.CreateText(typeUi.uiRoot, 'M', 9, UIUtil.bodyFont)
-	--			typeUi.massText.Width:Set(10)
-	--			typeUi.massText.Height:Set(9)
-	--			typeUi.massText:SetNewColor('lime')
-	--			typeUi.massText:DisableHitTest()
-	--			LayoutHelpers.AtLeftIn(typeUi.massText, typeUi.uiRoot, col3)
-	--			LayoutHelpers.AtVerticalCenterIn(typeUi.massText, typeUi.uiRoot)
+			unitType.usage["Mass"] = {
+				bar = typeUi.massBar,
+				maintBar = typeUi.massMaintBar,
+				text = typeUi.massText,
+				maintText = typeUi.massMaintText,
+			}
 
+			unitType.usage["Energy"] = {
+				bar = typeUi.energyBar,
+				maintBar = typeUi.energyMaintBar,
+				text = typeUi.energyText,
+				maintText = typeUi.energyMaintText,
+			}
 
+			typeUi.massBar:Hide()
+			typeUi.massMaintBar:Hide()
+			typeUi.energyBar:Hide()
+			typeUi.energyMaintBar:Hide()
 
-	--			typeUi.massMaintText = UIUtil.CreateText(typeUi.uiRoot, 'M', 9, UIUtil.bodyFont)
-	--			typeUi.massMaintText.Width:Set(10)
-	--			typeUi.massMaintText.Height:Set(9)
-	--			typeUi.massMaintText:SetNewColor('cyan')
-	--			typeUi.massMaintText:DisableHitTest()
-	--			LayoutHelpers.AtLeftIn(typeUi.massMaintText, typeUi.uiRoot, col4)
-	--			LayoutHelpers.AtVerticalCenterIn(typeUi.massMaintText, typeUi.uiRoot)
-	
-				typeUi.energyBar = Bitmap(typeUi.uiRoot)
-				typeUi.energyBar.Width:Set(10)
-				typeUi.energyBar.Height:Set(1)
-				typeUi.energyBar:InternalSetSolidColor('yellow')
-				typeUi.energyBar:DisableHitTest()
-				LayoutHelpers.AtLeftIn(typeUi.energyBar, typeUi.uiRoot, col3)
-				LayoutHelpers.AtTopIn(typeUi.energyBar, typeUi.uiRoot, 11)
-
-				typeUi.energyMaintBar = Bitmap(typeUi.uiRoot)
-				typeUi.energyMaintBar.Width:Set(10)
-				typeUi.energyMaintBar.Height:Set(1)
-				typeUi.energyMaintBar:InternalSetSolidColor('orange')
-				typeUi.energyMaintBar:DisableHitTest()
-				LayoutHelpers.AtLeftIn(typeUi.energyMaintBar, typeUi.uiRoot, col3)
-				LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, 11)
-
-	--			typeUi.energyText = UIUtil.CreateText(typeUi.uiRoot, 'E', 9, UIUtil.bodyFont)
-	--			typeUi.energyText.Width:Set(10)
-	--			typeUi.energyText.Height:Set(9)
-	--			typeUi.energyText:SetNewColor('yellow')
-	--			typeUi.energyText:DisableHitTest()
-	--			LayoutHelpers.AtLeftIn(typeUi.energyText, typeUi.uiRoot, col5)
-	--			LayoutHelpers.AtVerticalCenterIn(typeUi.energyText, typeUi.uiRoot)
-
-	--			typeUi.energyMaintText = UIUtil.CreateText(typeUi.uiRoot, 'E', 9, UIUtil.bodyFont)
-	--			typeUi.energyMaintText.Width:Set(10)
-	--			typeUi.energyMaintText.Height:Set(9)
-	--			typeUi.energyMaintText:SetNewColor('orange')
-	--			typeUi.energyMaintText:DisableHitTest()
-	--			LayoutHelpers.AtLeftIn(typeUi.energyMaintText, typeUi.uiRoot, col6)
-	--			LayoutHelpers.AtVerticalCenterIn(typeUi.energyMaintText, typeUi.uiRoot)
-
-				unitType.usage["Mass"] = {
-					bar = typeUi.massBar,
-					maintBar = typeUi.massMaintBar,
-					text = typeUi.massText,
-					maintText = typeUi.massMaintText,
-				}
-
-				unitType.usage["Energy"] = {
-					bar = typeUi.energyBar,
-					maintBar = typeUi.energyMaintBar,
-					text = typeUi.energyText,
-					maintText = typeUi.energyMaintText,
-				}
-
-				typeUi.massBar:Hide()
-				typeUi.massMaintBar:Hide()
-				typeUi.energyBar:Hide()
-				typeUi.energyMaintBar:Hide()
-
-			end )
-		end
-
---		local selectedTypeView = Bitmap(uiRoot)
---		uiRoot.selectedTypeView = selectedTypeView
---		selectedTypeView.Width:Set(col10)
---		selectedTypeView.Height:Set(250)
---		LayoutHelpers.AtLeftIn(selectedTypeView, uiRoot, col7)
---		LayoutHelpers.AtTopIn(selectedTypeView, uiRoot, 0)
-		--selectedTypeView:SetSolidColor("aa000000")
-
---		selectedTypeView.textLabel = UIUtil.CreateText(selectedTypeView, 'Unit Type', 15, UIUtil.bodyFont)
---		selectedTypeView.textLabel.Width:Set(10)
---		selectedTypeView.textLabel.Height:Set(9)
---		selectedTypeView.textLabel:SetNewColor('white')
---		selectedTypeView.textLabel:DisableHitTest()
---		LayoutHelpers.AtLeftIn(selectedTypeView.textLabel, selectedTypeView, 5)
---		LayoutHelpers.AtTopIn(selectedTypeView.textLabel, selectedTypeView, -31)
-
---		for i = 0,8 do
---			local typeUi = { }
-
---			typeUi.uiRoot = Bitmap(selectedTypeView)
---			--typeUi.uiRoot.HandleEvent = function(self, event) return OnClick(self, event, unitType) end
---			typeUi.uiRoot.Width:Set(col10)
---			typeUi.uiRoot.Height:Set(22)
---			typeUi.uiRoot:InternalSetSolidColor('ff000000')
---			LayoutHelpers.AtLeftIn(typeUi.uiRoot, selectedTypeView, 0)
---			LayoutHelpers.AtTopIn(typeUi.uiRoot, selectedTypeView,i*22)
-
---			typeUi.stratIcon = Bitmap(typeUi.uiRoot)
---			iconName = '/textures/ui/common/game/strategicicons/icon_land1_generic_rest.dds'
---			typeUi.stratIcon:SetTexture(iconName)
---			typeUi.stratIcon.Height:Set(typeUi.stratIcon.BitmapHeight)
---			typeUi.stratIcon.Width:Set(typeUi.stratIcon.BitmapWidth)
---			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, col8 + (20-typeUi.stratIcon.Width())/2)
---			LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
-
---			typeUi.massBar = Bitmap(typeUi.uiRoot)
---			typeUi.massBar.Width:Set(10)
---			typeUi.massBar.Height:Set(1)
---			typeUi.massBar:InternalSetSolidColor('lime')
---			typeUi.massBar:DisableHitTest()
---			LayoutHelpers.AtLeftIn(typeUi.massBar, typeUi.uiRoot, col9)
---			LayoutHelpers.AtTopIn(typeUi.massBar, typeUi.uiRoot, 6)
-
---			typeUi.massMaintBar = Bitmap(typeUi.uiRoot)
---			typeUi.massMaintBar.Width:Set(10)
---			typeUi.massMaintBar.Height:Set(1)
---			typeUi.massMaintBar:InternalSetSolidColor('cyan')
---			typeUi.massMaintBar:DisableHitTest()
---			LayoutHelpers.AtLeftIn(typeUi.massMaintBar, typeUi.uiRoot, col9)
---			LayoutHelpers.AtTopIn(typeUi.massMaintBar, typeUi.uiRoot, 6)
-
---			typeUi.energyBar = Bitmap(typeUi.uiRoot)
---			typeUi.energyBar.Width:Set(10)
---			typeUi.energyBar.Height:Set(1)
---			typeUi.energyBar:InternalSetSolidColor('yellow')
---			typeUi.energyBar:DisableHitTest()
---			LayoutHelpers.AtLeftIn(typeUi.energyBar, typeUi.uiRoot, col9)
---			LayoutHelpers.AtTopIn(typeUi.energyBar, typeUi.uiRoot, 10)
-
---			typeUi.energyMaintBar = Bitmap(typeUi.uiRoot)
---			typeUi.energyMaintBar.Width:Set(10)
---			typeUi.energyMaintBar.Height:Set(1)
---			typeUi.energyMaintBar:InternalSetSolidColor('orange')
---			typeUi.energyMaintBar:DisableHitTest()
---			LayoutHelpers.AtLeftIn(typeUi.energyMaintBar, typeUi.uiRoot, col9)
---			LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, 10)
---		end
+		end )
 
 		UIP.econtrol.beat = DoUpdate
 		GameMain.AddBeatFunction(UIP.econtrol.beat)
@@ -860,6 +797,3 @@ function setEnabled(value)
 		buildUi()
 	end
 end
-
-
-
