@@ -135,7 +135,7 @@ function EnablePaused(unitBox)
 	if unitBox.spendType == spendTypes.PROD then
 		SetPaused(pauseUnits, false)
 		unitType.pausedProdUnits = {}
-	elseif  unitBox.spendType == spendTypes.MAINT then
+	elseif unitBox.spendType == spendTypes.MAINT then
 		EnableUnitsAbility(pauseUnits)
 		unitType.pausedMaintUnits = {}
 	end
@@ -234,8 +234,6 @@ function OnClick(self, event, unitType)
 		if selectedUnitType ~= nil then
 			selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
 		end
-		selectedUnitType = unitType
-		UpdateSelectedUnitType(selectedUnitType)
 
 		local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
 		SelectUnits(allUnits)
@@ -251,10 +249,6 @@ function OnClick(self, event, unitType)
 	end
 
 	return true
-end
-
-function UpdateSelectedUnitType(selectedUnitType)
-	UIP.econtrol.ui.textLabel:SetText(selectedUnitType.name)
 end
 
 function GetEconData(unit)
@@ -581,8 +575,6 @@ function OnMexCategoryUiClick(self, event, category)
 			else
 
 				SelectUnits(category.units)
-				UIP.econtrol.ui.textLabel:SetText(category.name)
-
 			end
 		end
 	end
@@ -658,15 +650,7 @@ function buildUi()
 		uiRoot.Depth:Set(99)
 		uiRoot:DisableHitTest()
 		LayoutHelpers.AtLeftIn(uiRoot, dragger, 0)
-		LayoutHelpers.AtTopIn(uiRoot, dragger,60)
-	
-		uiRoot.textLabel = UIUtil.CreateText(uiRoot, 'ECOntrol', 15, UIUtil.bodyFont)
-		uiRoot.textLabel.Width:Set(10)
-		uiRoot.textLabel.Height:Set(9)
-		uiRoot.textLabel:SetNewColor('white')
-		uiRoot.textLabel:DisableHitTest()
-		LayoutHelpers.AtLeftIn(uiRoot.textLabel, uiRoot, 0)
-		LayoutHelpers.AtTopIn(uiRoot.textLabel, uiRoot, -35)
+		LayoutHelpers.AtTopIn(uiRoot, dragger, 35)
 
 		function CreateText(text, x)
 
