@@ -10,7 +10,7 @@ local selectionWithoutOrder = {}
 local commandMode
 local commandModeData
 local currentUnit
-local active
+local selectionIsCurrent
 
 KeyMapper.SetUserKeyAction('Activate/return to individual cycling with saved command', {
     action = 'UI_Lua import("/mods/IndividualCommandCycler/modules/Main.lua").CreateOrContinueSelection()',
@@ -96,6 +96,7 @@ function SelectionIsCurrent(units)
             end
         end
     end
+    return false
 end
 
 function CreateSelection(units)
@@ -110,14 +111,10 @@ function CreateSelection(units)
 end
 
 function SelectionChanged(oldSelection, newSelection, added, removed)
-    active = false
-
-    if table.getn(newSelection) == 0 then
-        return
-    end
+    selectionIsCurrent = false
 
     if SelectionIsCurrent(newSelection) then
-        active = true
+        selectionIsCurrent = true
     end
 end
 
@@ -131,8 +128,7 @@ end
 ---@param cmdModeData CommandModeData
 ---@param command any
 function OnCommandIssued(cmdMode, cmdModeData, command)
-
-    if not active then return end
+    if not selectionIsCurrent then return end
     if command.CommandType == 'Guard' and not command.Target.EntityId then return end
     if command.CommandType == 'None' then return end
 
@@ -144,7 +140,7 @@ end
 ---@param cmdModeCommandMode
 ---@param cmdModeData CommandModeData
 function OnCommandStarted(cmdMode, cmdModeData)
-    if active then
+    if selectionIsCurrent then
         local cm = CM.GetCommandMode()
         commandMode, commandModeData = cm[1], cm[2]
     else
