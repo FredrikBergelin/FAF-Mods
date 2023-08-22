@@ -1,0 +1,17 @@
+name = "SubGroups Extended"
+version = 1
+copyright = ""
+description = [[Extending the integrated Selection - SubGroups.]]
+author = "FreadyFish"
+url = ""
+uid = "subgroups-extended-freadyfish-v1"
+icon = "/mods/SubGroups/icon.png"
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
+requires = {}
+requiresNames = {}
+conflicts = { }
+before = {}
+after = {}
