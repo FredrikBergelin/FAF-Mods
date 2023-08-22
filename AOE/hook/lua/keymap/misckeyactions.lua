@@ -1,76 +1,58 @@
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
--- Select nearest / onscreen / globally engineers, by techlevel and idle
-local lastClickMultiSelectEngineers = -9999
-local totalClicksMultiSelectEngineers = 0
-local lastTechlevelMultiSelectEngineers = nil
-local lastIdleStatusMultiSelectEngineers = nil
-function MultiSelectEngineers(tech, onlyIdle)
-    local currentTick = GameTick()
-	local isDoubleClick = currentTick < lastClickMultiSelectEngineers + 5
-    local idleText = " "
-    if onlyIdle then idleText = " +idle " end
-
-    if tech == lastTechlevelMultiSelectEngineers and lastIdleStatusMultiSelectEngineers == onlyIdle and isDoubleClick then
-        if totalClicksMultiSelectEngineers == 1 then
-            ConExecute ("UI_SelectByCategory +inview "..idleText.."ENGINEER TECH"..tech)
-        else
-            ConExecute ("UI_SelectByCategory"..idleText.."ENGINEER TECH"..tech)
-        end
-    else
-        totalClicksMultiSelectEngineers = 0
-        ConExecute ("UI_SelectByCategory +nearest"..idleText.."ENGINEER TECH"..tech)
-    end
-
-    lastTechlevelMultiSelectEngineers = tech
-    lastIdleStatusMultiSelectEngineers = onlyIdle
-    totalClicksMultiSelectEngineers = totalClicksMultiSelectEngineers + 1
-    lastClickMultiSelectEngineers = currentTick
+local displayOrder = 999
+function getDisplayOrder()
+    displayOrder = displayOrder + 1
+    return displayOrder
 end
 
+KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode / Goto ACU", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOCGoto()",
+    category = "selection",
+    order = getDisplayOrder()
+})
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T1 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, false)",
     category = "selection",
-    order = 1
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T2 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, false)",
     category = "selection",
-    order = 2
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T3 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, false)",
     category = "selection",
-    order = 3
+    order = getDisplayOrder()
 })
-
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All SACU", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(false)",
+    category = "selection",
+    order = getDisplayOrder()
+})
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T1 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, true)",
     category = "selection",
-    order = 4
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T2 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, true)",
     category = "selection",
-    order = 5
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T3 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, true)",
     category = "selection",
-    order = 6
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle SACU", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(true)",
+    category = "selection",
+    order = getDisplayOrder()
 })
 
--- Select ACU / OC mode
-function ACUSelectOC()
-    local selection = GetSelectedUnits()
-    if not table.empty(selection) and table.getn(selection) == 1 and selection[1]:IsInCategory "COMMAND" then
-        import("/lua/ui/game/orders.lua").EnterOverchargeMode()
-    else
-        ConExecute "UI_SelectByCategory +nearest COMMAND"
-    end
-end
-
--- Select ACU / OC mode/got acu if not on screen
+-- Select ACU / OC mode/ Goto acu if not on screen
 function ACUSelectOCGoto()
     local selection = GetSelectedUnits()
     if not table.empty(selection) and table.getn(selection) == 1 and selection[1]:IsInCategory "COMMAND" then
@@ -84,6 +66,60 @@ function ACUSelectOCGoto()
         end
     end
 end
+
+-- MultiSelect 
+local lastClickMultiSelect = -9999
+local totalClicksMultiSelect = 0
+local lastMultiClickUniqueString = nil
+
+-- Select nearest / onscreen / all engineers
+function MultiSelectEngineers(techlevel, onlyIdle)
+    local idleText = " "
+    if onlyIdle then idleText = " +idle " end
+    local uniqueString = "MultiSelectEngineers"..techlevel..idleText
+    local currentTick = GameTick()
+	local isDoubleClick = currentTick < lastClickMultiSelect + 5
+
+    if uniqueString == lastMultiClickUniqueString and isDoubleClick then
+        if totalClicksMultiSelect == 1 then
+            ConExecute ("UI_SelectByCategory +inview"..idleText.."BUILTBYTIER3FACTORY ENGINEER TECH"..techlevel)
+        else
+            ConExecute ("UI_SelectByCategory"..idleText.."BUILTBYTIER3FACTORY ENGINEER TECH"..techlevel)
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute ("UI_SelectByCategory +nearest"..idleText.."BUILTBYTIER3FACTORY ENGINEER TECH"..techlevel)
+    end
+
+    lastMultiClickUniqueString = uniqueString
+    totalClicksMultiSelect = totalClicksMultiSelect + 1
+    lastClickMultiSelect = currentTick
+end
+
+-- Select nearest / onscreen / all SACU
+function MultiSelectSACU(onlyIdle)
+    local idleText = " "
+    if onlyIdle then idleText = " +idle " end
+    local uniqueString = "MultiSelectSACU"..idleText
+    local currentTick = GameTick()
+	local isDoubleClick = currentTick < lastClickMultiSelect + 5
+
+    if uniqueString == lastMultiClickUniqueString and isDoubleClick then
+        if totalClicksMultiSelect == 1 then
+            ConExecute ("UI_SelectByCategory +inview"..idleText.."SUBCOMMANDER")
+        else
+            ConExecute ("UI_SelectByCategory"..idleText.."SUBCOMMANDER")
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute ("UI_SelectByCategory +nearest"..idleText.."SUBCOMMANDER")
+    end
+
+    lastMultiClickUniqueString = uniqueString
+    totalClicksMultiSelect = totalClicksMultiSelect + 1
+    lastClickMultiSelect = currentTick
+end
+
 
 -- Select nearest idle engineer / Reclaim mode
 function ReclaimSelectIDLENearestT1()
@@ -131,52 +167,7 @@ function SelectNearestIdleTransportOrTransport()
     end
 end
 
-local currentMex = nil
-function LoopOverMexes(onScreen, upgrade)
-    if upgrade then
-        local selectedUnits = GetSelectedUnits()
-        if selectedUnits and table.getn(selectedUnits) == 1 and selectedUnits[1]:IsInCategory("MASSEXTRACTION") then
-            local bp = selectedUnits[1]:GetBlueprint()
-            IssueBlueprintCommand("UNITCOMMAND_Upgrade", bp.General.UpgradesTo, 1, false)
-        end
-    end
-    local isFound = false
-    for _, tech in { "TECH1", "TECH2" } do
-        UISelectionByCategory("MASSEXTRACTION STRUCTURE " .. tech, false, onScreen, false, true)
-        local selectedMexes = GetSelectedUnits()
-        if selectedMexes and not table.empty(selectedMexes) then
-            table.sort(selectedMexes, function(a, b)
-                return a:GetEntityId() < b:GetEntityId()
-            end)
-            for _, mex in selectedMexes do
-                if currentMex == nil or currentMex:IsDead() then
-                    currentMex = mex
-                    isFound = true
-                    break
-                elseif currentMex:GetEntityId() < mex:GetEntityId() then
-                    currentMex = mex
-                    isFound = true
-                    break
-                    -- else
-                    --     currentMex = mex
-                end
-            end
-            if not isFound then
-                currentMex = selectedMexes[1]
-                isFound = true
-                break
-            end
-        end
-        if isFound then
-            break
-        end
-    end
-    if isFound then
-        SelectUnits({ currentMex })
-    end
-end
-
-KeyMapper.SetUserKeyAction("Remove last ququed unit in factory", {
+KeyMapper.SetUserKeyAction("Remove last queued unit in factory", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").RemoveLastItem()",
     category = "orders",
     order = 17
@@ -192,18 +183,6 @@ KeyMapper.SetUserKeyAction("Select All IDLE engineers on screen not ACU", {
     action = "UI_SelectByCategory +inview +idle ENGINEER TECH1,ENGINEER TECH2,ENGINEER TECH3",
     category = "selection",
     order = 19
-})
-
-KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOC()",
-    category = "selection",
-    order = 20
-})
-
-KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode / Goto ACU", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOCGoto()",
-    category = "selection",
-    order = 20
 })
 
 
@@ -250,52 +229,6 @@ KeyMapper.SetUserKeyAction("Shift Select nearest idle transport / transport orde
     category = "selection",
     order = 26
 })
-
-
-
-KeyMapper.SetUserKeyAction("Loop over mexes on screen", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").LoopOverMexes(true, false)",
-    category = "selection",
-    order = 27
-})
-
-KeyMapper.SetUserKeyAction("Loop over mexes on screen and upgrade previous", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").LoopOverMexes(true, true)",
-    category = "selection",
-    order = 28
-})
-
-KeyMapper.SetUserKeyAction("Loop over mexes", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").LoopOverMexes(false, false)",
-    category = "selection",
-    order = 27
-})
-
-KeyMapper.SetUserKeyAction("Loop over mexes and upgrade previous", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").LoopOverMexes(false, true)",
-    category = "selection",
-    order = 28
-})
-
-KeyMapper.SetUserKeyAction("Select all sensor structures", {
-    action = "UI_SelectByCategory INTELLIGENCE SONAR NAVAL, INTELLIGENCE STRUCTURE",
-    category = "selection",
-    order = 29
-})
-
-KeyMapper.SetUserKeyAction("Select all radars", {
-    action = "UI_SelectByCategory INTELLIGENCE STRUCTURE RADAR, INTELLIGENCE STRUCTURE OMNI",
-    category = "selection",
-    order = 29
-})
-
-
-KeyMapper.SetUserKeyAction("Upgrade mex, select next nearest", {
-    action = "UI_Lua import('/lua/keymap/hotbuild.lua').buildAction('Upgrades'); UI_SelectByCategory +inview +idle +nearest MASSEXTRACTION STRUCTURE",
-    category = "selection",
-    order = 29
-})
-
 
 
 local function ExistGlobal(name)
