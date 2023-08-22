@@ -85,11 +85,20 @@ function DisableWorkers(unitBox)
 
 		elseif unitBox.spendType == spendTypes.MAINT then
 
+			local totalMaintMass = 0
+			for k,v in pairs(workers) do
+				local econData = GetEconData(v)
+				if econData["massConsumed"] > 0 then
+					table.insert(unitType.pausedProdUnits, v)
+					SetPaused(workers, true)
+				end
+			end
+
 			for k,v in unitType.maintUnits do
 				table.insert(unitType.pausedMaintUnits, v)
 			end
-			DisableUnitsAbility(workers)
 
+			DisableUnitsAbility(workers)
 		end
 	end
 end
@@ -165,17 +174,6 @@ function GetOnValueForScriptBit(i)
 end
 
 function DisableUnitsAbility(units)
-	local totalMaintMass = 0
-	for k,v in pairs(units) do
-		local econData = GetEconData(v)
-		totalMaintMass = totalMaintMass + econData["massConsumed"]
-	end
-
-	-- Special case for silos and commander while upgrading, its not an ability so it needs to pause even tho its in the maintenance category
-	if totalMaintMass > 0 then
-		SetPaused(units, true)
-	end
-
     for i = 0,8 do
         ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
     end
@@ -650,7 +648,7 @@ function buildUi()
 		uiRoot.Depth:Set(99)
 		uiRoot:DisableHitTest()
 		LayoutHelpers.AtLeftIn(uiRoot, dragger, 0)
-		LayoutHelpers.AtTopIn(uiRoot, dragger, 35)
+		LayoutHelpers.AtTopIn(uiRoot, dragger, 45)
 
 		function CreateText(text, x)
 
