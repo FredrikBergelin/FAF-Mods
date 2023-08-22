@@ -10,16 +10,12 @@ local selectionWithoutOrder = {}
 local commandMode
 local commandModeData
 local currentUnit
-local updateCommandMode
+local active
 
 KeyMapper.SetUserKeyAction('Activate/return to individual cycling with saved command', {
     action = 'UI_Lua import("/mods/IndividualCommandCycler/modules/Main.lua").CreateOrContinueSelection()',
     category = 'Individual Command Cycler'
 })
-
-local function IsActive()
-    return selection ~= nil
-end
 
 local function Reset(deselect)
     currentUnitIndex = nil
@@ -42,7 +38,7 @@ function ReduceIndex(index)
 end
 
 -- Select next unit in the saved selection
-function SelectClosest()
+function SelectNext()
 
     if table.getn(selectionWithoutOrder) == 0 then
         PlaySound(completeCycleSound)
@@ -110,19 +106,24 @@ function CreateSelection(units)
     selectionWithoutOrder = selectedUnits
     selectionWithOrder = {}
 
-    SelectClosest()
+    SelectNext()
 end
 
 function SelectionChanged(oldSelection, newSelection, added, removed)
-    updateCommandMode = false
+    active = false
 
     if table.getn(newSelection) == 0 then
         return
     end
 
     if SelectionIsCurrent(newSelection) then
-        updateCommandMode = true
+        active = true
     end
+end
+
+function MoveCurrentToWithOrder()
+    table.insert(selectionWithOrder, selectionWithoutOrder[currentUnitIndex])
+    table.remove(selectionWithoutOrder, currentUnitIndex)
 end
 
 ---comment
@@ -131,23 +132,19 @@ end
 ---@param command any
 function OnCommandIssued(cmdMode, cmdModeData, command)
 
-    if not IsActive() then return end
-    if not updateCommandMode then return end
-
+    if not active then return end
     if command.CommandType == 'Guard' and not command.Target.EntityId then return end
     if command.CommandType == 'None' then return end
 
-    table.insert(selectionWithOrder, selectionWithoutOrder[currentUnitIndex])
-    table.remove(selectionWithoutOrder, currentUnitIndex)
-
-    ForkThread(SelectClosest, false)
+    MoveCurrentToWithOrder()
+    ForkThread(SelectNext, false)
 end
 
 ---comment
----@param cmdMode CommandMode
+---@param cmdModeCommandMode
 ---@param cmdModeData CommandModeData
 function OnCommandStarted(cmdMode, cmdModeData)
-    if updateCommandMode then
+    if active then
         local cm = CM.GetCommandMode()
         commandMode, commandModeData = cm[1], cm[2]
     else
@@ -165,13 +162,13 @@ function CreateOrContinueSelection()
         end
 
         if SelectionIsCurrent(selectedUnits) then
-            -- TODO Move selected unit to WithOrder
-            SelectClosest()
+            MoveCurrentToWithOrder()
+            SelectNext()
             return
         end
     end
 
-    SelectClosest()
+    SelectNext()
 end
 
 function Main(isReplay)
