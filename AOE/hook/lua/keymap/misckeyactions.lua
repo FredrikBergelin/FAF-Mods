@@ -1,5 +1,64 @@
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
+-- Select nearest / onscreen / globally engineers, by techlevel and idle
+local lastClickMultiSelectEngineers = -9999
+local totalClicksMultiSelectEngineers = 0
+local lastTechlevelMultiSelectEngineers = nil
+local lastIdleStatusMultiSelectEngineers = nil
+function MultiSelectEngineers(tech, onlyIdle)
+    local currentTick = GameTick()
+	local isDoubleClick = currentTick < lastClickMultiSelectEngineers + 5
+    local idleText = " "
+    if onlyIdle then idleText = " +idle " end
+
+    if tech == lastTechlevelMultiSelectEngineers and lastIdleStatusMultiSelectEngineers == onlyIdle and isDoubleClick then
+        if totalClicksMultiSelectEngineers == 1 then
+            ConExecute ("UI_SelectByCategory +inview "..idleText.."ENGINEER TECH"..tech)
+        else
+            ConExecute ("UI_SelectByCategory"..idleText.."ENGINEER TECH"..tech)
+        end
+    else
+        totalClicksMultiSelectEngineers = 0
+        ConExecute ("UI_SelectByCategory +nearest"..idleText.."ENGINEER TECH"..tech)
+    end
+
+    lastTechlevelMultiSelectEngineers = tech
+    lastIdleStatusMultiSelectEngineers = onlyIdle
+    totalClicksMultiSelectEngineers = totalClicksMultiSelectEngineers + 1
+    lastClickMultiSelectEngineers = currentTick
+end
+
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T1 Engineers", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, false)",
+    category = "selection",
+    order = 1
+})
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T2 Engineers", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, false)",
+    category = "selection",
+    order = 2
+})
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T3 Engineers", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, false)",
+    category = "selection",
+    order = 3
+})
+
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T1 Engineers", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, true)",
+    category = "selection",
+    order = 4
+})
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T2 Engineers", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, true)",
+    category = "selection",
+    order = 5
+})
+KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T3 Engineers", {
+    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, true)",
+    category = "selection",
+    order = 6
+})
 
 -- Select ACU / OC mode
 function ACUSelectOC()
@@ -165,8 +224,6 @@ KeyMapper.SetUserKeyAction("Shift Select Nearest IDLE T1 engineer / enter reclai
     category = "selection",
     order = 22
 })
-
-
 
 
 KeyMapper.SetUserKeyAction("Select nearest air scout / build sensors", {

@@ -32,13 +32,13 @@ function AddFilterSelection(group)
 	--PrintText(message,28,"ff9161ff",1, 'centerbottom')
 end
 
-local lastClickTick = nil
+local lastClickTick = -9999
 function FilterSelect(group)
     local currentTick = GameTick()
 	if Filters[group] == nil then return AddFilterSelection(group) end
 	local allUnits = GetAllUnits()
 	local SelectedUnits = {}
-	local isDoubleClick = lastClickTick ~= nil and currentTick < lastClickTick + 50
+	local isDoubleClick = currentTick < lastClickTick + 50
 	for _,unit in allUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint().BlueprintId
