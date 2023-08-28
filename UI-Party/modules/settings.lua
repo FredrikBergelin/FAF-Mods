@@ -20,13 +20,11 @@ function init()
 		{ name = "Start Sequence", settings = {
 			{ key="useAlternativeStartSequence", type="bool", default=true, name="Use Alternative Start Sequence", description="Different zoom in.\r\nAcu is selected earlier.\r\nFirst fac placement started." },
 			{ indent = 1, key="startSplitScreen", type="bool", default=true, name="Start Split Screen", description="The game starts in split screen mode.\r\nLeft screen zooms in.\r\nRight screen zooms out.\r\nUser can control acu earlier.\r\nAcu is automatically set in place-land-factory mode.\r\nRequires alternative start sequence." },
-			{ key="playerColors", type="bool", default=false, name="Start with Player Colors on", description="Start in alternate player colour mode (allies = green, enemy = red, you = blue)." },
 		}},
 
 		{ name = "Zoom Pop", settings = {
 			{ key="zoomPopOverride", type="bool", default=true, name="Fix Zoom Pop Accuracy", description="Reimplements zoom pop to be more accurate. To see the problem with old zoom pop, zoom out, hover a fac near a mex then pop in ... you will be at some random place nearby. In the new implementation the hovering fac is pretty much in the same place as before you popped." },
 			{ key="zoomPopSpeed", type="number", default=0.08, name="Zoom Pop Speed", description="Speed up/slow down the pop animation. (Zero = disabled).", min=0, max=10, valMult=0.01  },
-
 		}},
 
 		{ name = "UI", settings = {

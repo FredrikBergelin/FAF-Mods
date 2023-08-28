@@ -28,10 +28,6 @@ function OnBeat()
 		end
 		wasWatching = isWatching
 
-		if GetSetting("playerColors") then
-			TeamColorMode(true)
-		end
-
 		tick = 0
 	end
 end
