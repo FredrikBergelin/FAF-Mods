@@ -75,3 +75,23 @@ function ConvertToMove()
 		end
 	end
 end
+
+function SelectPatrolUnits()
+	local units = GetSelectedUnits() or {}
+	local unitsToSelect = {}
+
+	for index, unit in units do
+		local commands = {}
+		local comQ = unit:GetCommandQueue()
+
+		local stopCommands = {}
+
+		for _, command in comQ do
+			if (command.type == 'Patrol') then
+				table.insert(unitsToSelect, unit)
+			end
+		end
+	end
+
+	SelectUnits(unitsToSelect)
+end
