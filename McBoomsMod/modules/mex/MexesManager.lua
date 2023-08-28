@@ -2,7 +2,7 @@ local Utilities = import('/lua/utilities.lua')
 
 local modFolder = 'McBoomsMod'
 
-local CreateMex = import('/mods/' .. modFolder .. '/modules/mex/Mex.lua').CreateMex
+CreateMex = import('/mods/' .. modFolder .. '/modules/mex/Mex.lua').CreateMex
 local LinkedTable = import('/mods/' .. modFolder .. '/modules/util/LinkedTable.lua').LinkedTable
 local MexSort = import('/mods/' .. modFolder .. '/modules/mex/MexSort.lua')
 local GetUnitManager = import('/mods/' .. modFolder .. '/modules/UnitManager.lua').GetUnitManager
