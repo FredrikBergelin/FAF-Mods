@@ -1,60 +1,62 @@
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
 local displayOrder = 999
-function getDisplayOrder()
+local function getDisplayOrder()
     displayOrder = displayOrder + 1
     return displayOrder
 end
 
-KeyMapper.SetUserKeyAction("Upgrade selected units", {
-    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").UpgradeSelectedUnits()',
-    category = "selection",
-    order = getDisplayOrder()
-})
+local displayCategory = "MultiHotkeys"
 
 KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode / Goto ACU", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOCGoto()",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T1 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, false)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T2 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, false)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T3 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, false)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All SACU", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(false)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T1 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, true)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T2 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, true)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T3 Engineers", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, true)",
-    category = "selection",
+    category = displayCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle SACU", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(true)",
-    category = "selection",
+    category = displayCategory,
+    order = getDisplayOrder()
+})
+
+KeyMapper.SetUserKeyAction("Upgrade selected structures / Cycle templates for engineers", {
+    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").UpgradeSelectedUnits()',
+    category = displayCategory,
     order = getDisplayOrder()
 })
 
@@ -307,34 +309,34 @@ KeyMapper.SetUserKeyAction("Toggle repeat build of factories / OC mode", {
 
 
 KeyMapper.SetUserKeyAction("Order Tech upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/ACUEnhancements.lua').OrderTechUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderTechUpgrade()",
     category = "Upgrade"
 })
 KeyMapper.SetUserKeyAction("Order Engineering upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/SACUEnhancements.lua').OrderTechUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/SACUEnhancements.lua').OrderTechUpgrade()",
     category = "Upgrade"
 })
 KeyMapper.SetUserKeyAction("Order RAS upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/ACUEnhancements.lua').OrderRASUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderRASUpgrade()",
     category = "Upgrade"
 })
 KeyMapper.SetUserKeyAction("Order Gun upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/ACUEnhancements.lua').OrderGunUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderGunUpgrade()",
     category = "Upgrade"
 })
 
 KeyMapper.SetUserKeyAction("Order Shield / Stealth / Nano upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/ACUEnhancements.lua').OrderNanoUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderNanoUpgrade()",
     category = "Upgrade"
 })
 
 KeyMapper.SetUserKeyAction("Order Laser / Chrono / Gun splash / Billy nuke upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/ACUEnhancements.lua').OrderSpecialUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderSpecialUpgrade()",
     category = "Upgrade"
 })
 
 
 KeyMapper.SetUserKeyAction("Order Tele upgrade", {
-    action = "UI_Lua import('/mods/AOE/modules/ACUEnhancements.lua').OrderTeleUpgrade()",
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderTeleUpgrade()",
     category = "Upgrade"
 })
