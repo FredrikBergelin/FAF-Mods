@@ -12,11 +12,6 @@ function Init()
 	UnitWatcher.Init()
 
 	GameMain.AddBeatFunction(OnBeat)
-
-	if GetSetting("playerColors") then
-		TeamColorMode(true)
-	end
-
 end
 
 local wasWatching = false
@@ -32,6 +27,10 @@ function OnBeat()
 			UnitWatcher.Shutdown();
 		end
 		wasWatching = isWatching
+
+		if GetSetting("playerColors") then
+			TeamColorMode(true)
+		end
 
 		tick = 0
 	end
