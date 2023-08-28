@@ -27,7 +27,6 @@ function OnGuardUpgrade(guardees, unit)
     if EntityCategoryContains(categories.MASSEXTRACTION * categories.TECH1, unit) and
         Prefs.GetFromCurrentProfile('options.assist_to_upgrade') == 'Tech1Extractors'
     then
-        LOG("T1")
         UpgradeUnit(unit)
     end
 

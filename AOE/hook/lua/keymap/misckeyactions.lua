@@ -6,6 +6,12 @@ function getDisplayOrder()
     return displayOrder
 end
 
+KeyMapper.SetUserKeyAction("Upgrade selected units", {
+    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").UpgradeSelectedUnits()',
+    category = "selection",
+    order = getDisplayOrder()
+})
+
 KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode / Goto ACU", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOCGoto()",
     category = "selection",
@@ -51,6 +57,36 @@ KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle SACU", {
     category = "selection",
     order = getDisplayOrder()
 })
+
+function UpgradeSelectedUnits()
+    local units = GetSelectedUnits()
+
+    for i, unit in units do
+        if unit:IsInCategory("ENGINEER") then
+            if units then
+                local tech2 = EntityCategoryFilterDown(categories.TECH2, units)
+                local tech3 = EntityCategoryFilterDown(categories.TECH3, units)
+                local sACUs = EntityCategoryFilterDown(categories.SUBCOMMANDER, units)
+
+                if next(sACUs) then
+                    SimCallback({ Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = sACUs[1]:GetEntityId() } }, true)
+                    SelectUnits(sACUs)
+                elseif next(tech3) then
+                    SimCallback({ Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = tech3[1]:GetEntityId() } }, true)
+                    SelectUnits(tech3)
+                elseif next(tech2) then
+                    SimCallback({ Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = tech2[1]:GetEntityId() } }, true)
+                    SelectUnits(tech2)
+                else end
+            end
+
+            import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
+            return
+        end
+    end
+
+    import("/lua/keymap/hotbuild.lua").buildActionUpgrade()
+end
 
 -- Select ACU / OC mode/ Goto acu if not on screen
 function ACUSelectOCGoto()
