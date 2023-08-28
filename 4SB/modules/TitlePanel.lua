@@ -53,7 +53,8 @@ local TopInfoPanel = Class(Group)
 
 
         LayoutFor(self._speed)
-            :AtCenterIn(self, 0, -30)
+            :AtLeftIn(self, 65)
+            :AtVerticalCenterIn(self)
             :Color(Options.title.color.gameSpeed:Raw())
             :DisableHitTest()
         self._speed:SetFont(Options.title.font.gameSpeed:Raw(), qualityTextSize)
@@ -88,8 +89,13 @@ local TopInfoPanel = Class(Group)
         if gameSpeed then
             self._gameSpeed = gameSpeed
         end
-        
-        self._speed:SetText(("%+d / %+d"):format(self._gameSpeed, GetSimRate()))
+
+        if self._gameSpeed == 0 then
+            self._speed:SetText("")
+        else
+            self._speed:SetText(("%+d"):format(self._gameSpeed, GetSimRate()))
+        end
+
         self._time:SetText(GetGameTime())
 
         if not data then return end
@@ -177,6 +183,9 @@ TitlePanel = Class(Group)
 
     __post_init = function(self)
         self:_Layout()
+        contractAnimation:Apply(self._info, self._top)
+        fadeAnimation:Apply(self._info)
+        self._expanded = false
     end,
 
     _Layout = function(self)

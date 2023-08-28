@@ -78,9 +78,9 @@ end
 
 local function RequestResourceFromPlayer(resourceType, id)
     if GetFocusArmy() == id then
-        SendMessage(string.format("Give me %s", resourceType))
+        SendMessage(string.format("Need %s", resourceType))
     else
-        SendMessage(string.format("%s, give me %s", armiesTable[id].nickname, resourceType))
+        SendMessage(string.format("%s, I need %s", armiesTable[id].nickname, resourceType))
     end
 end
 
@@ -94,9 +94,9 @@ end
 
 function RequestUnitFromPlayer(id)
     if GetFocusArmy() == id then
-        SendMessage("Give me T3 engineer")
+        SendMessage("Give T3 engineer")
     else
-        SendMessage(string.format("%s, give me an engineer", armiesTable[id].nickname))
+        SendMessage(string.format("%s, give engineer", armiesTable[id].nickname))
     end
 end
 

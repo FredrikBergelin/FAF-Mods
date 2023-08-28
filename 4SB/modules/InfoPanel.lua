@@ -52,7 +52,9 @@ InfoPanel = Class(Group)
 
         self._mapName:SetFont(Options.title.font.mapName:Raw(), textSize)
         LayoutFor(self._mapName)
-            :AtCenterIn(self)
+            :AtVerticalCenterIn(self)
+            :AtLeftIn(self, 10)
+            :DisableHitTest()
 
 
         self._mapSize:SetFont(Options.title.font.mapSize:Raw(), textSize)

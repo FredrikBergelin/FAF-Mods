@@ -43,7 +43,7 @@ local armyViewTextPointSize = 12
 local armyViewNameFont = Options.player.font.name:Raw()
 local focusArmyNameFont = Options.player.font.focus:Raw()
 
-minNameWidth = LayoutHelpers.ScaleNumber(75)
+minNameWidth = LayoutHelpers.ScaleNumber(250)
 nameWidth = LazyVar(minNameWidth)
 armyViewWidth = LazyVar()
 armyViewWidth:Set(function() return nameWidth() + LayoutHelpers.ScaleNumber(80) end)
@@ -393,7 +393,7 @@ AllyView = UMT.Class(ArmyView)
         LayoutFor(self._energyBtn)
             :Right(self._energy.Right)
             :AtVerticalCenterIn(self)
-            :Width(35)
+            :Width(100) -- 
             :Height(self.Height)
             :Over(self, 15)
             :EnableHitTest()
@@ -412,7 +412,7 @@ AllyView = UMT.Class(ArmyView)
         LayoutFor(self._massBtn)
             :Right(self._mass.Right)
             :AtVerticalCenterIn(self)
-            :Width(35)
+            :Width(100) -- 
             :Height(self.Height)
             :Over(self, 15)
             :EnableHitTest()
@@ -439,7 +439,7 @@ AllyView = UMT.Class(ArmyView)
 
 
         LayoutFor(self._mass)
-            :AtRightIn(self, 50)
+            :AtRightIn(self, 125)
             :AtVerticalCenterIn(self)
             :Color('ffb7e75f')
             :Over(self, 10)
@@ -471,16 +471,22 @@ AllyView = UMT.Class(ArmyView)
         local resources = data.resources
         if not resources then return end
 
-        if mode == "income" then
-            self._energy:SetText(FormatNumber(resources.energyin.rate * 10))
-            self._mass:SetText(FormatNumber(resources.massin.rate * 10))
-        elseif mode == "storage" then
-            self._energy:SetText(FormatNumber(resources.storage.storedEnergy))
-            self._mass:SetText(FormatNumber(resources.storage.storedMass))
-        elseif mode == "maxstorage" then
-            self._energy:SetText(FormatNumber(resources.storage.maxEnergy))
-            self._mass:SetText(FormatNumber(resources.storage.maxMass))
-        end
+        local energyText = FormatNumber(resources.storage.storedEnergy).." / "..FormatNumber(resources.storage.maxEnergy).." +"..FormatNumber(resources.energyin.rate * 10)
+        local massText = FormatNumber(resources.storage.storedMass).." / "..FormatNumber(resources.storage.maxMass).." +"..FormatNumber(resources.massin.rate * 10)
+
+        self._energy:SetText(energyText)
+        self._mass:SetText(massText)
+
+        -- if mode == "income" then
+        --     self._energy:SetText(FormatNumber(resources.energyin.rate * 10))
+        --     self._mass:SetText(FormatNumber(resources.massin.rate * 10))
+        -- elseif mode == "storage" then
+        --     self._energy:SetText(FormatNumber(resources.storage.storedEnergy))
+        --     self._mass:SetText(FormatNumber(resources.storage.storedMass))
+        -- elseif mode == "maxstorage" then
+        --     self._energy:SetText(FormatNumber(resources.storage.maxEnergy))
+        --     self._mass:SetText(FormatNumber(resources.storage.maxMass))
+        -- end
     end,
 
     MarkOutOfGame = function(self)
@@ -584,7 +590,7 @@ ReplayArmyView = UMT.Class(ArmyView)
         LayoutFor(self)
             :Width(function()
                 return nameWidth() + LayoutHelpers.ScaleNumber(70 + dataTextOffSet)
-                    + self.Right() - first.Right()
+                    + self.Right() - first.Right() --
             end)
 
     end,
