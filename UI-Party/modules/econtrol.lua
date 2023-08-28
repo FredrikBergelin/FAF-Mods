@@ -589,36 +589,40 @@ function buildUi()
 	local a, b = pcall( function()
 		UIP.econtrol = {}
 		unitTypes = from( {
-			{ name = "T1 Land Units", category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land1_generic", spacer = 0 },
-			{ name = "T2 Land Units", category = categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land2_generic", spacer = 0 },
+			{ name = "Land Units", category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER + categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER + categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land_category", spacer = 0 },
+			-- { name = "T1 Land Units", category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land1_generic_rest", spacer = 0 },
+			-- { name = "T2 Land Units", category = categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land2_generic_rest", spacer = 0 },
+			-- { name = "T3 Land Units", category = categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land3_generic_rest", spacer = 0 },
 
-			{ name = "T3 Land Units", category = categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land3_generic", spacer = 20 },
-			{ name = "T1 Air Units", category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter1_generic", spacer = 0 },
-			{ name = "T2 Air Units", category = categories.AIR * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter2_generic", spacer = 0 },
+			{ name = "Air Units", category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER + categories.AIR * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER + categories.AIR * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_air_category", spacer = 0 },
+			-- { name = "T1 Air Units", category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter1_generic_rest", spacer = 0 },
+			-- { name = "T2 Air Units", category = categories.AIR * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter2_generic_rest", spacer = 0 },
+			-- { name = "T3 Air Units", category = categories.AIR * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter3_generic_rest", spacer = 0 },
 
-			{ name = "T3 Air Units", category = categories.AIR * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter3_generic", spacer = 20 },
-			{ name = "T1 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship1_generic", spacer = 0 },
-			{ name = "T2 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship2_generic", spacer = 0 },
-			{ name = "T3 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship3_generic", spacer = 20 },
+			{ name = "Naval Units", category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER + categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER + categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_navy_category", spacer = 0 },
+			-- { name = "T1 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship1_generic_rest", spacer = 0 },
+			-- { name = "T2 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship2_generic_rest", spacer = 0 },
+			-- { name = "T3 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship3_generic_rest", spacer = 0 },
 
-			{ name = "Shields", category = categories.STRUCTURE * categories.SHIELD, icon = "icon_structure_shield", spacer = 0 },
-			{ name = "Radar Stations", category = categories.STRUCTURE * categories.RADAR + categories.STRUCTURE * categories.OMNI, icon = "icon_structure_intel", spacer = 0  },
-			{ name = "Sonar", category = categories.STRUCTURE * categories.SONAR + categories.MOBILESONAR, icon = "icon_structure_intel", spacer = 0  },
-			{ name = "Stealth", category = categories.STRUCTURE * categories.COUNTERINTELLIGENCE, icon = "icon_structure_intel", spacer = 20 },
+			{ name = "Shields", category = categories.STRUCTURE * categories.SHIELD, icon = "icon_shield_category", spacer = 0 },
+			{ name = "Intel", category = categories.STRUCTURE * categories.RADAR + categories.STRUCTURE * categories.OMNI + categories.STRUCTURE * categories.SONAR + categories.MOBILESONAR, icon = "icon_intel_category", spacer = 0  },
+			-- { name = "Sonar", category = categories.STRUCTURE * categories.SONAR + categories.MOBILESONAR, icon = "icon_structure_intel", spacer = 0  },
+			{ name = "Stealth", category = categories.STRUCTURE * categories.COUNTERINTELLIGENCE, icon = "icon_counterintel_category", spacer = 0 },
 
-			{ name = "Energy production", category = categories.STRUCTURE * categories.ENERGYPRODUCTION, icon = "icon_structure1_energy", spacer = 0 },
-			{ name = "Mass extraction", category = categories.MASSEXTRACTION + categories.MASSSTORAGE, icon = "icon_structure1_mass", spacer = 0 },
-			{ name = "Mass fabrication", category = categories.STRUCTURE * categories.MASSFABRICATION, icon = "icon_structure1_mass", spacer = 20 },
+			{ name = "Energy production", category = categories.STRUCTURE * categories.ENERGYPRODUCTION, icon = "icon_energy_category", spacer = 0 },
+			{ name = "Energy storage", category = categories.STRUCTURE * categories.ENERGYSTORAGE, icon = "icon_energy_storage_category", spacer = 0 },
+			{ name = "Mass extraction", category = categories.MASSEXTRACTION + categories.MASSSTORAGE, icon = "icon_mass_category", spacer = 0 },
+			{ name = "Mass fabrication", category = categories.STRUCTURE * categories.MASSFABRICATION, icon = "icon_mass_fab_category", spacer = 0 },
 
-			{ name = "Silos", category = categories.SILO, icon = "icon_structure_missile", spacer = 0 },
-			{ name = "Factories", category = categories.STRUCTURE * categories.FACTORY - categories.GATE, icon = "icon_factory_generic", spacer = 0 },
-			{ name = "Military", category = categories.STRUCTURE * categories.DEFENSE + categories.STRUCTURE * categories.STRATEGIC, icon = "icon_structure_directfire", spacer = 0 },
-			{ name = "Experimentals", category = categories.EXPERIMENTAL, icon = "icon_experimental_generic", spacer = 0 },
-			{ name = "ACU", category = categories.COMMAND, icon = "icon_commander_generic", spacer = 0 },
-			{ name = "SACU", category = categories.SUBCOMMANDER, icon = "icon_commander_generic", spacer = 0 },
-			{ name = "Engineers", category = categories.ENGINEER, icon = "icon_land_engineer", spacer = 20 },
+			{ name = "Silos", category = categories.SILO, icon = "icon_nuke_category", spacer = 0 },
+			{ name = "Factories", category = categories.STRUCTURE * categories.FACTORY - categories.GATE, icon = "icon_factory_category", spacer = 0 },
+			{ name = "Military", category = categories.STRUCTURE * categories.DEFENSE + categories.STRUCTURE * categories.STRATEGIC, icon = "icon_defense_category", spacer = 0 },
+			{ name = "Experimentals", category = categories.EXPERIMENTAL, icon = "icon_experimental_category", spacer = 0 },
+			{ name = "ACU", category = categories.COMMAND, icon = "icon_commander_category", spacer = 0 },
+			{ name = "SACU", category = categories.SUBCOMMANDER, icon = "icon_commander_category", spacer = 0 },
+			{ name = "Engineers", category = categories.ENGINEER, icon = "icon_engineer_category", spacer = 0 },
 
-			{ name = "Everything", category = categories.ALLUNITS, icon = "strat_attack_ping", spacer = 0 },
+			{ name = "Everything", category = categories.ALLUNITS, icon = "strat_attack_ping_rest", spacer = 0 },
 		} )
 
 		unitTypes.foreach( function(k, unitType)
@@ -680,7 +684,7 @@ function buildUi()
 			LayoutHelpers.AtTopIn(typeUi.uiRoot, uiRoot, 0)
 
 			typeUi.stratIcon = Bitmap(typeUi.uiRoot)
-			iconName = '/textures/ui/common/game/strategicicons/' .. unitType.icon .. '_rest.dds'
+			iconName = '/mods/UI-Party/textures/category_icons/' .. unitType.icon .. '.dds'
 			typeUi.stratIcon:SetTexture(iconName)
 			typeUi.stratIcon.Height:Set(typeUi.stratIcon.BitmapHeight)
 			typeUi.stratIcon.Width:Set(typeUi.stratIcon.BitmapWidth)
