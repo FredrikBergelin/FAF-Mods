@@ -432,6 +432,7 @@ end
 local function SelectOldSelection()
     import("/lua/ui/game/commandmode.lua").CacheCommandMode()
     SelectUnits(OldSelection)
+    SetLayerSplit(true)
     import("/lua/ui/game/commandmode.lua").RestoreCommandMode()
 end
 
@@ -456,29 +457,50 @@ local function SetupDynamicSplits(oldSelection, func)
     SelectSplit(DynamicSplit())
 end
 
---- Select the next split, or return to the old selection if there are no next splits. Preserves the command mode
+local function SelectAllMilitary()
+    ConExecute "UI_SelectByCategory +inview BUILTBYTIER3FACTORY DIRECTFIRE, BUILTBYTIER3FACTORY INDIRECTFIRE, BUILTBYTIER3FACTORY ANTIAIR, BUILTBYTIER3FACTORY BOMBER, BUILTBYTIER3FACTORY GUNSHIP, BUILTBYTIER3FACTORY ANTISUB, BUILTBYTIER3FACTORY INTELLIGENCE, BUILTBYTIER3FACTORY COUNTERINTELLIGENCE, BUILTBYTIER3FACTORY SHIELD, EXPERIMENTAL MOBILE DIRECTFIRE, EXPERIMENTAL MOBILE GUNSHIP"
+end
+
+local layerSplit = false
+
+function SetLayerSplit(shouldSplit)
+    layerSplit = shouldSplit
+end
+
+--- Divides a selection into up to three sets of land units, naval units and air units
 function SplitNext()
-    -- LOG("TEST") -- Works
+    ---@type UserUnit[]
+    local units = GetSelectedUnits()
 
-    if SplitType == 'Dynamic' then
-        ---@type UserUnit[]
-        local split = DynamicSplit()
-        if not table.empty(split) then
-            SelectSplit(split)
-        else
-            SplitType = 'None'
-            SelectOldSelection()
-            return
-        end
-    elseif SplitType == 'Static' then
-        StaticSplitCurrent = StaticSplitCurrent + 1
-        if StaticSplitCurrent > table.getn(StaticSplits) then
-            SplitType = 'None'
-            SelectOldSelection()
-            return
-        end
+    if not units or table.empty(units) then
+        SelectAllMilitary()
+        SetLayerSplit(true)
+    elseif layerSplit then
+        SetLayerSplit(false)
+        SplitLayer()
+    else
+        if SplitType == 'Dynamic' then
+            ---@type UserUnit[]
+            local split = DynamicSplit()
+            if not table.empty(split) then
+                SelectSplit(split)
+            else
+                SplitType = 'None'
+                SelectOldSelection()
+                SetLayerSplit(true)
+                return
+            end
+        elseif SplitType == 'Static' then
+            StaticSplitCurrent = StaticSplitCurrent + 1
+            if StaticSplitCurrent > table.getn(StaticSplits) then
+                SplitType = 'None'
+                SelectOldSelection()
+                SetLayerSplit(true)
+                return
+            end
 
-        SelectSplit(StaticSplits[StaticSplitCurrent])
+            SelectSplit(StaticSplits[StaticSplitCurrent])
+        end
     end
 end
 
@@ -729,10 +751,22 @@ function SplitMouseAxis()
     end
 end
 
+function GetSelectedUnitsOrSelectMilitary()
+    local units = GetSelectedUnits()
+
+    if not units or table.empty(units) then
+        SelectAllMilitary()
+        units = GetSelectedUnits()
+        SetLayerSplit(true)
+    end
+
+    return units
+end
+
 --- StaticSplits the current selections into two sets by dividing it with the line orthogonal with the line between the mouse location and the center of the selection
 function SplitMouseOrthogonalAxis()
     ---@type UserUnit[]
-    local units = GetSelectedUnits()
+    local units = GetSelectedUnitsOrSelectMilitary()
 
     if units and not table.empty(units) then
         local cx, cz = GetCenter(units)
@@ -788,7 +822,7 @@ end
 --- Divides a selection into up to five sets of experimentals, SACUs, tech 3, tech 2 and tech 1
 function SplitTech()
     ---@type UserUnit[]
-    local units = GetSelectedUnits()
+    local units = GetSelectedUnitsOrSelectMilitary()
 
     if units and not table.empty(units) then
         local experimental = EntityCategoryFilterDown(categories.EXPERIMENTAL, units)
