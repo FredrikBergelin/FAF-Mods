@@ -7,4 +7,4 @@ url = ""
 uid = "EzReclaim-4z0t-v03"
 exclusive = false
 ui_only = true
-icon = "/mods/EzR/icon.png"
+icon = "/mods/EzReclaim/icon.png"
