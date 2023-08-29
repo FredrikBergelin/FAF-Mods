@@ -11,20 +11,20 @@ local GPGSelection = import('/lua/ui/game/selection.lua')
 local selectionSets = GPGSelection.selectionSets
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 
-KeyMapper.SetUserKeyAction('Show Panel', {
-   action = 'UI_Lua import("/mods/AutoPause/AutoPause.lua").ShowEcon()',
-   category = 'Economy Tools FA'
-})
+-- KeyMapper.SetUserKeyAction('Show Panel', {
+--    action = 'UI_Lua import("/mods/AutoPause/economypanel.lua").ShowEcon()',
+--    category = 'Economy Tools FA'
+-- })
 
 KeyMapper.SetUserKeyAction('Toggle Auto Pause', {
-   action = 'UI_Lua import("/mods/AutoPause/AutoPause.lua").AutoPause()',
+   action = 'UI_Lua import("/mods/AutoPause/economypanel.lua").AutoPause()',
    category = 'Economy Tools FA'
 })
 
-KeyMapper.SetUserKeyAction('Toggle Auto Mass Fabricators', {
-   action = 'UI_Lua import("/mods/AutoPause/AutoPause.lua").ToggleAutoFabs()',
-   category = 'Economy Tools FA'
-})
+-- KeyMapper.SetUserKeyAction('Toggle Auto Mass Fabricators', {
+--    action = 'UI_Lua import("/mods/AutoPause/economypanel.lua").ToggleAutoFabs()',
+--    category = 'Economy Tools FA'
+-- })
 
 local panel = false
 local splitPanel = false
@@ -132,17 +132,17 @@ function UpdateEconValues()
 
 end
 
-function ShowEcon()
-   if panel then
-      if panel:IsHidden() then
-         UpdateFabs()
---         if autoFabsOn then AllFabsOff() end
-         showEffect(panel, splitPanel)
-      else  
-         hideEffect(panel, splitPanel)
-      end   
-   end  
-end
+-- function ShowEcon()
+--    if panel then
+--       if panel:IsHidden() then
+--          UpdateFabs()
+-- --         if autoFabsOn then AllFabsOff() end
+--          showEffect(panel, splitPanel)
+--       else  
+--          hideEffect(panel, splitPanel)
+--       end   
+--    end  
+-- end
 
 
 function AutoPause()
@@ -410,25 +410,25 @@ function DoAutoFabs()
 
 end
 
-function ToggleAutoFabs()
-   if autoFabsOn then
-      autoFabsOn = false
-   else  
-      autoFabsOn = true
-   end   
-end
+-- function ToggleAutoFabs()
+--    if autoFabsOn then
+--       autoFabsOn = false
+--    else  
+--       autoFabsOn = true
+--    end   
+-- end
 
 -------------------------------------------
-function CreatePanel(parent)
-	local panel = Bitmap(parent)
-	panel:SetTexture('/mods/AutoPause/textures/panel.dds')
-	panel.Right:Set(function() return parent.Right() - 100 end)
-	panel.Top:Set(function() return parent.Top() + 100 end)
-	panel.Depth:Set(100)
-	panel.Width:Set(200)
-	panel.Height:Set(130)
-	return panel
-end
+-- function CreatePanel(parent)
+-- 	local panel = Bitmap(parent)
+-- 	panel:SetTexture('/mods/AutoPause/textures/panel.dds')
+-- 	panel.Right:Set(function() return parent.Right() - 100 end)
+-- 	panel.Top:Set(function() return parent.Top() + 100 end)
+-- 	panel.Depth:Set(100)
+-- 	panel.Width:Set(200)
+-- 	panel.Height:Set(130)
+-- 	return panel
+-- end
 
 function CreateSplitControls(parent)
 	local splitgroup = Group(parent)
@@ -458,59 +458,59 @@ function CreateSplitControls(parent)
 	return splitgroup
 end
 
-function hideEffect(control, subcontrol1)
-	control:DisableHitTest(true)
-    control:SetNeedsFrameUpdate(true)
+-- function hideEffect(control, subcontrol1)
+-- 	control:DisableHitTest(true)
+--     control:SetNeedsFrameUpdate(true)
 
-	local timefade = 0.1
-	local time1 = 0.1
-	local time2 = 0.2
-	local minHeight = 16
-    local timeAccum = 0
+-- 	local timefade = 0.1
+-- 	local time1 = 0.1
+-- 	local time2 = 0.2
+-- 	local minHeight = 16
+--     local timeAccum = 0
 
-	EffectHelpers.FadeOut(subcontrol1, timefade)
+-- 	EffectHelpers.FadeOut(subcontrol1, timefade)
 	
-    control.OnFrame = function(self, elapsedTime)
-        timeAccum = timeAccum + elapsedTime
-		if timeAccum >= (time1 + time2) then
-            self:SetNeedsFrameUpdate(false)
-            self:Hide()
-			self.Left:Set(function() return self.Right() - 3 end)
-		elseif timeAccum >= time1 then
-			self.Left:Set(function() return self.Right() - self.BitmapWidth()*((time2+time1 - timeAccum)/(time2)) end)
-			self.Bottom:Set(function() return self.Top() + minHeight end)
-		else
-			self.Bottom:Set(function() return self.Top() + minHeight + (self.BitmapHeight() - minHeight)*((time1 - timeAccum)/(time1)) end )
-		end
-    end
-end
+--     control.OnFrame = function(self, elapsedTime)
+--         timeAccum = timeAccum + elapsedTime
+-- 		if timeAccum >= (time1 + time2) then
+--             self:SetNeedsFrameUpdate(false)
+--             self:Hide()
+-- 			self.Left:Set(function() return self.Right() - 3 end)
+-- 		elseif timeAccum >= time1 then
+-- 			self.Left:Set(function() return self.Right() - self.BitmapWidth()*((time2+time1 - timeAccum)/(time2)) end)
+-- 			self.Bottom:Set(function() return self.Top() + minHeight end)
+-- 		else
+-- 			self.Bottom:Set(function() return self.Top() + minHeight + (self.BitmapHeight() - minHeight)*((time1 - timeAccum)/(time1)) end )
+-- 		end
+--     end
+-- end
 
-function showEffect(control, subcontrol1)
-	control:Show()
-    control:SetNeedsFrameUpdate(true)
+-- function showEffect(control, subcontrol1)
+-- 	control:Show()
+--     control:SetNeedsFrameUpdate(true)
 
-	local timefade = 0.1
-	local time1 = 0.2
-	local time2 = 0.1
-	local minHeight = 16
-    local timeAccum = 0
+-- 	local timefade = 0.1
+-- 	local time1 = 0.2
+-- 	local time2 = 0.1
+-- 	local minHeight = 16
+--     local timeAccum = 0
 
-    control.OnFrame = function(self, elapsedTime)
-        timeAccum = timeAccum + elapsedTime
-		if timeAccum >= (time1 + time2) then
-			self:EnableHitTest(true)
-            self:SetNeedsFrameUpdate(false)
-			LayoutHelpers.ResetLeft(self)
-			LayoutHelpers.ResetBottom(self)
-			EffectHelpers.FadeIn(subcontrol1, timefade)
-		elseif timeAccum >= time1 then
-			self.Bottom:Set(function() return self.Top() + minHeight + (self.BitmapHeight() - minHeight)*((timeAccum - time1)/(time2)) end )
-			self.Left:Set(function() return self.Right() - self.BitmapWidth() end)
-        else
-			self.Left:Set(function() return self.Right() - self.BitmapWidth()*((timeAccum)/(time1)) end)
-        end
-     end
-end
+--     control.OnFrame = function(self, elapsedTime)
+--         timeAccum = timeAccum + elapsedTime
+-- 		if timeAccum >= (time1 + time2) then
+-- 			self:EnableHitTest(true)
+--             self:SetNeedsFrameUpdate(false)
+-- 			LayoutHelpers.ResetLeft(self)
+-- 			LayoutHelpers.ResetBottom(self)
+-- 			EffectHelpers.FadeIn(subcontrol1, timefade)
+-- 		elseif timeAccum >= time1 then
+-- 			self.Bottom:Set(function() return self.Top() + minHeight + (self.BitmapHeight() - minHeight)*((timeAccum - time1)/(time2)) end )
+-- 			self.Left:Set(function() return self.Right() - self.BitmapWidth() end)
+--         else
+-- 			self.Left:Set(function() return self.Right() - self.BitmapWidth()*((timeAccum)/(time1)) end)
+--         end
+--      end
+-- end
 
 function Init()
 	panel = CreatePanel(borders)
@@ -526,7 +526,7 @@ function Init()
                                       end   
                                    end)
 
-    hideEffect(panel, splitPanel) -- start hidden
+   --  hideEffect(panel, splitPanel) -- start hidden
 
     --AddConsoleOutputReciever(function(output) LOG(output) end) -- For con_listcommands
 
@@ -535,9 +535,9 @@ function Init()
 	-- IN_AddKeyMapTable(newSelectionsMap)
 
    --  local replacementMap = {
-   --  ['Semicolon']          = {action =	 'UI_Lua import("/mods/AutoPause/AutoPause.lua").ShowEcon()'}, 
-   --  ['Shift-Semicolon']    = {action =	 'UI_Lua import("/mods/AutoPause/AutoPause.lua").AutoPause()'}, 
-   --  ['Shift-Ctrl-Semicolon']    = {action =	 'UI_Lua import("/mods/AutoPause/AutoPause.lua").ToggleAutoFabs()'}, 
+   --  ['Semicolon']          = {action =	 'UI_Lua import("/mods/AutoPause/economypanel.lua").ShowEcon()'}, 
+   --  ['Shift-Semicolon']    = {action =	 'UI_Lua import("/mods/AutoPause/economypanel.lua").AutoPause()'}, 
+   --  ['Shift-Ctrl-Semicolon']    = {action =	 'UI_Lua import("/mods/AutoPause/economypanel.lua").ToggleAutoFabs()'}, 
    --  }
 
    --  IN_AddKeyMapTable(replacementMap)
