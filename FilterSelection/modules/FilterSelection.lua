@@ -38,7 +38,7 @@ function FilterSelect(group)
 	if Filters[group] == nil then return AddFilterSelection(group) end
 	local allUnits = GetAllUnits()
 	local SelectedUnits = {}
-	local isDoubleClick = currentTick < lastClickTick + 50
+	local isDoubleClick = currentTick < lastClickTick + 5
 	for _,unit in allUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint().BlueprintId

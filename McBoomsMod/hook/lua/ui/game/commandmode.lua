@@ -37,7 +37,7 @@ function OnGuardUpgrade(guardees, unit)
         local mex = CreateMex(unit);
         local numStorages
 
-        local isDoubleClick = currentTick < lastClickTick + 50
+        local isDoubleClick = currentTick < lastClickTick + 5
         if isDoubleClick and IsKeyDown('Shift') then
             UpgradeUnit(unit)
         elseif mex.armyManager:isCanCountMS() then
