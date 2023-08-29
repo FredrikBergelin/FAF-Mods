@@ -1,18 +1,9 @@
-name = "Idle Engineers Light"
-uid = "idle-engineers-light-v10"
-version = 10
+name = "Unit Overlays"
+uid = "Unit-Overlays-FF-v1"
+version = 1
 copyright = ""
-description = [[Highlights
-
-- T1,T2,T3 Engineers (with numbers too)
-- Factories (with text too)
-- Upgrading Mass Extractors
-- Tactical/nuke silos
-- ACU with text
-
-Options window can be found on main tab in "UI mods options"
-requires UI mod tools and UI  mod loader]]
-author = "4z0t"
+description = [[Forked from Idle Engineers Light v10 by 4z0t. Requires UI mod tools and UI mod loader]]
+author = "FreadyFish"
 url = ""
 icon = "/mods/UnitOverlays/icon.png"
 selectable = true
@@ -21,7 +12,7 @@ exclusive = false
 ui_only = true
 requires = {"ui-mod-loader-v02"}
 requiresNames = {}
-conflicts = {}
+conflicts = {"idle-engineers-light-v10"}
 before = {}
 after = {}
 __umt = true

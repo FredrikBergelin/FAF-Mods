@@ -1,10 +1,10 @@
-name = "Economy Tools FA"
-uid = "2B033CD1-AD77-4A90-A319-11080A399535"
-version = 2
+name = "AutoPause"
+uid = "Auto-Pause-FF-v1"
+version = 1
 copyright = ""
-description = "Semicolon (;) key displays EcoInfo panel. [Shift + ;] activates energy saver Autopause on selected units. [Ctrl+Shift+;] Toggles AutoMassfabs."
-author = "AdmiralZeech"
-url = "http://forums.gaspowered.com/viewtopic.php?p=320236"
+description = "Forked from Economy Tools FA v2 by AdmiralZeech, and extracted only auto-pause function."
+author = "FreadyFish"
+url = ""
 icon = "/mods/AutoPause/mod_icon.png"
 selectable = true
 enabled = true
@@ -12,6 +12,6 @@ exclusive = false
 ui_only = true
 requires = { }
 requiresNames = { }
-conflicts = { }
+conflicts = { "2B033CD1-AD77-4A90-A319-11080A399535" }
 before = { }
 after = { }

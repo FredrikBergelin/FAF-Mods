@@ -1,10 +1,10 @@
 name = "Individual Command Cycler"
 version = 1
-copyright = "Nope but feel free to let me know what you have in mind, maybe we can make it v2 instead"
-description = [[Give individual orders quickly without selecting each unit/command manually. Use for reclaiming/scouting in multiple directions, TML-barrages, spreading ground-fire etc.]]
+copyright = ""
+description = [[Forked from Group Scatter v4 by 4z0t]]
 author = "FreadyFish"
 url = ""
-uid = "individual-command-cycler-v1"
+uid = "Individual-Command-Cycler-FF-v1"
 icon = "/mods/IndividualCommandCycler/icon.png"
 selectable = true
 enabled = true
