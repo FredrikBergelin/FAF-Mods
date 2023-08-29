@@ -8,6 +8,11 @@ end
 
 local displayCategory = "MultiHotkeys"
 
+KeyMapper.SetUserKeyAction("Upgrade selected structures / Cycle templates for engineers", {
+    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").UpgradeSelectedUnits()',
+    category = displayCategory,
+    order = getDisplayOrder()
+})
 KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode / Goto ACU", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOCGoto()",
     category = displayCategory,
@@ -50,12 +55,6 @@ KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T3 Engineers", {
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle SACU", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(true)",
-    category = displayCategory,
-    order = getDisplayOrder()
-})
-
-KeyMapper.SetUserKeyAction("Upgrade selected structures / Cycle templates for engineers", {
-    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").UpgradeSelectedUnits()',
     category = displayCategory,
     order = getDisplayOrder()
 })
@@ -223,13 +222,6 @@ KeyMapper.SetUserKeyAction("Select All IDLE engineers on screen not ACU", {
     order = 19
 })
 
-
-KeyMapper.SetUserKeyAction("Goto ACU", {
-    action = "UI_SelectByCategory +nearest +goto COMMAND",
-    category = "selection",
-    order = 20
-})
-
 KeyMapper.SetUserKeyAction("Select Nearest IDLE T1 engineer / enter reclaim mode", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ReclaimSelectIDLENearestT1()",
     category = "selection",
@@ -254,7 +246,6 @@ KeyMapper.SetUserKeyAction("Shift Select nearest air scout / build sensors", {
     category = "selection",
     order = 24
 })
-
 
 KeyMapper.SetUserKeyAction("Select nearest idle transport / transport order", {
     action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").SelectNearestIdleTransportOrTransport()",
@@ -307,7 +298,6 @@ KeyMapper.SetUserKeyAction("Toggle repeat build of factories / OC mode", {
 })
 
 
-
 KeyMapper.SetUserKeyAction("Order Tech upgrade", {
     action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderTechUpgrade()",
     category = "Upgrade"
@@ -334,7 +324,6 @@ KeyMapper.SetUserKeyAction("Order Laser / Chrono / Gun splash / Billy nuke upgra
     action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderSpecialUpgrade()",
     category = "Upgrade"
 })
-
 
 KeyMapper.SetUserKeyAction("Order Tele upgrade", {
     action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderTeleUpgrade()",
