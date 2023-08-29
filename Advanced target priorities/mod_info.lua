@@ -1,6 +1,6 @@
-name = "FF Advanced target priorities"
+name = "Advanced Target Priorities"
 version = 1
-copyright = "Nope"
+copyright = ""
 description = "Forked from ATP v1.1"
 author = "FreadyFish"
 url = ""
