@@ -5,7 +5,7 @@ copyright = ""
 description = "Semicolon (;) key displays EcoInfo panel. [Shift + ;] activates energy saver Autopause on selected units. [Ctrl+Shift+;] Toggles AutoMassfabs."
 author = "AdmiralZeech"
 url = "http://forums.gaspowered.com/viewtopic.php?p=320236"
-icon = "/mods/EconomyPanel/mod_icon.png"
+icon = "/mods/AutoPause/mod_icon.png"
 selectable = true
 enabled = true
 exclusive = false

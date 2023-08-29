@@ -406,7 +406,7 @@ end
 -------------------------------------------
 function CreatePanel(parent)
 	local panel = Bitmap(parent)
-	panel:SetTexture('/mods/economypanel/textures/panel.dds')
+	panel:SetTexture('/mods/AutoPause/textures/panel.dds')
 	panel.Right:Set(function() return parent.Right() - 100 end)
 	panel.Top:Set(function() return parent.Top() + 100 end)
 	panel.Depth:Set(100)
@@ -520,9 +520,9 @@ function Init()
 	IN_AddKeyMapTable(newSelectionsMap)
 
     local replacementMap = {
-    ['Semicolon']          = {action =	 'UI_Lua import("/mods/economypanel/economypanel.lua").ShowEcon()'}, 
-    ['Shift-Semicolon']    = {action =	 'UI_Lua import("/mods/economypanel/economypanel.lua").AutoPause()'}, 
-    ['Shift-Ctrl-Semicolon']    = {action =	 'UI_Lua import("/mods/economypanel/economypanel.lua").ToggleAutoFabs()'}, 
+    ['Semicolon']          = {action =	 'UI_Lua import("/mods/AutoPause/economypanel.lua").ShowEcon()'}, 
+    ['Shift-Semicolon']    = {action =	 'UI_Lua import("/mods/AutoPause/economypanel.lua").AutoPause()'}, 
+    ['Shift-Ctrl-Semicolon']    = {action =	 'UI_Lua import("/mods/AutoPause/economypanel.lua").ToggleAutoFabs()'}, 
     }
 
     IN_AddKeyMapTable(replacementMap)
