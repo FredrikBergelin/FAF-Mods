@@ -1,7 +1,7 @@
 
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 KeyMapper.SetUserKeyAction('Open HBO editor', {
-    action = 'UI_Lua import("/mods/HBO/modules/views/view.lua").init()',
+    action = 'UI_Lua import("/mods/HotBuildOverhaul/modules/views/view.lua").init()',
     category = 'HotBuild Overhaul Editor',
     order = 404
 })
@@ -9,5 +9,5 @@ KeyMapper.SetUserKeyAction('Open HBO editor', {
 local originalCreateUI = CreateUI
 function CreateUI(isReplay, parent)
     originalCreateUI(isReplay)
-    import("/mods/HBO/modules/main.lua").init(isReplay)
+    import("/mods/HotBuildOverhaul/modules/main.lua").init(isReplay)
 end

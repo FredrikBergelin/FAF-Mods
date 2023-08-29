@@ -21,7 +21,7 @@ local BPItem = import('BlueprintItem.lua')
 local BlueprintItem = BPItem.BlueprintItem
 local BPITEM_WIDTH = BPItem.BPITEM_WIDTH
 local BPITEM_HEIGHT = BPItem.BPITEM_HEIGHT
-local Presenter = import('/mods/HBO/modules/presenter.lua')
+local Presenter = import('/mods/HotBuildOverhaul/modules/presenter.lua')
 
 local skins = {'cybran', 'seraphim', 'aeon', 'uef'}
 

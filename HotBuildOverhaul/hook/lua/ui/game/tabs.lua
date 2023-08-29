@@ -6,4 +6,4 @@ for _, t in menus.main do
     })
 end
 
-actions['HBO'] = import("/mods/HBO/modules/views/view.lua").init
+actions['HBO'] = import("/mods/HotBuildOverhaul/modules/views/view.lua").init

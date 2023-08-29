@@ -6,7 +6,7 @@ description = [[Make your own hotbuild keybinds!
 requires UI mod tools]]
 author = "4z0t"
 url = ""
-icon = "/mods/HBO/icon.png"
+icon = "/mods/HotBuildOverhaul/icon.png"
 selectable = true
 enabled = true
 exclusive = false
