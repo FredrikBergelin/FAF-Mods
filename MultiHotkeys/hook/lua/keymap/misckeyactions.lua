@@ -130,6 +130,11 @@ KeyMapper.SetUserKeyAction("Upgrade selected structures / Cycle templates for en
     category = ordersCategory,
     order = getDisplayOrder()
 })
+KeyMapper.SetUserKeyAction("Shift Upgrade selected structures / Cycle templates for engineers", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").UpgradeStructuresEngineersCycleTemplates()',
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
 KeyMapper.SetUserKeyAction("Remove last queued unit in factory", {
     action = 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").RemoveLastItem()',
     category = ordersCategory,
