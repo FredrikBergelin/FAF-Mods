@@ -3,7 +3,7 @@ do
     function CreateUI(isReplay)
 
         OldCreateUI(isReplay)
-        import('/mods/Move/modules/Main.lua').Main(isReplay)
+        import('/mods/MoveOnly/modules/Main.lua').Main(isReplay)
 
     end
 end

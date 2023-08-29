@@ -41,6 +41,6 @@ function Main(isReplay)
 end
 
 KeyMapper.SetUserKeyAction('Move only', {
-    action = 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()',
+    action = 'UI_Lua import("/mods/MoveOnly/modules/Main.lua").Toggle()',
     category = 'orders'
 })

@@ -6,7 +6,7 @@ Can be stopped with same key bind click or RMB.]]
 author = "4z0t"
 url = ""
 uid = "move-only-v01"
-icon = "/mods/Move/icon.png"
+icon = "/mods/MoveOnly/icon.png"
 selectable = true
 enabled = true
 exclusive = false

@@ -1,6 +1,6 @@
 do
     local oldWorldView = WorldView
-    local MoveOnly = import "/mods/Move/modules/Main.lua"
+    local MoveOnly = import "/mods/MoveOnly/modules/Main.lua"
     WorldView = Class(oldWorldView) {
 
         ---comment
