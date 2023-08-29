@@ -1,4 +1,4 @@
-local modDir = '/mods/Hotkey-Tech-Tabs/'
+local modDir = '/mods/HotkeyTechTabs/'
 
 local oldCreateUI = CreateUI
 function CreateUI(isReplay)
