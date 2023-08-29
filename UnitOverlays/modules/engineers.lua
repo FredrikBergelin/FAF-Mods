@@ -40,11 +40,11 @@ local EngineerOverlay = Class(Overlay)
         self.offsetY = -1
         self.isIdle = false
         if unit:IsInCategory("TECH1") then
-            self:SetTexture("/mods/IEL/textures/t1_idle.dds", 0)
+            self:SetTexture("/mods/UnitOverlays/textures/t1_idle.dds", 0)
         elseif unit:IsInCategory("TECH2") then
-            self:SetTexture("/mods/IEL/textures/t2_idle.dds", 0)
+            self:SetTexture("/mods/UnitOverlays/textures/t2_idle.dds", 0)
         elseif unit:IsInCategory("TECH3") then
-            self:SetTexture("/mods/IEL/textures/t3_idle.dds", 0)
+            self:SetTexture("/mods/UnitOverlays/textures/t3_idle.dds", 0)
         end
     end,
 
@@ -180,10 +180,10 @@ local FactoryOverlay = Class(Overlay)
         self.offsetY = -9
         self.showState = false
         self:SetTexture {
-            "/mods/IEL/textures/repeat.dds",
-            "/mods/IEL/textures/idle_fac.dds",
-            "/mods/IEL/textures/upgrading.dds",
-            "/mods/IEL/textures/engi.dds"
+            "/mods/UnitOverlays/textures/repeat.dds",
+            "/mods/UnitOverlays/textures/idle_fac.dds",
+            "/mods/UnitOverlays/textures/upgrading.dds",
+            "/mods/UnitOverlays/textures/engi.dds"
         }
         LayoutHelpers.SetDimensions(self, 8, 8)
     end,
@@ -227,7 +227,7 @@ local SiloOverlay = Class(Overlay)
         self.offsetX = 5
         self.offsetY = 1
         self.hasSilo = false
-        self:SetTexture("/mods/IEL/textures/loaded.dds", 0)
+        self:SetTexture("/mods/UnitOverlays/textures/loaded.dds", 0)
         LayoutHelpers.SetDimensions(self, 12, 12)
     end,
 
@@ -255,7 +255,7 @@ local MexOverlay = Class(Overlay)
         self.offsetX = 5
         self.offsetY = -7
         self.isUpgrading = false
-        self:SetTexture("/mods/IEL/textures/up.dds", 0)
+        self:SetTexture("/mods/UnitOverlays/textures/up.dds", 0)
         LayoutHelpers.SetDimensions(self, 12, 16)
     end,
 

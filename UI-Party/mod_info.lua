@@ -1,8 +1,8 @@
-name = "Starting Options (from UIP)"
+name = "UI-Party Essentials"
 version = 1
 copyright = ""
-description = "Starting options from UI-Party, to reduce problems with other code."
-author = ""
+description = "UI-Party reduced to essentials"
+author = "FreadyFish"
 url = ""
 uid = "starting-options-freadyfish-v01"
 exclusive = false
