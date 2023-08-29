@@ -3,23 +3,22 @@ do
     local OptionsUtils = import("/mods/UMT/modules/OptionsWindow.lua")
     local OptionVarCreate = import("/mods/UMT/modules/OptionVar.lua").Create
 
-    local modName = "IEL"
-    local function IELOptionVar(name, value)
+    local modName = "UnitOverlays"
+    local function ModOptionVar(name, value)
         return OptionVarCreate(modName, name, value)
     end
 
-    engineersOption = IELOptionVar("engineersOverlay", true)
-    engineersWithNumbersOption = IELOptionVar("engineersWithNumbersOption", false)
-    factoryOverlayWithTextOption = IELOptionVar("factoryOverlayWithTextOption", false)
-    factoriesOption = IELOptionVar("factoriesOverlay", true)
-    supportCommanderOption = IELOptionVar("supportCommanderOverlay", true)
-    commanderOverlayOption = IELOptionVar("commanderOverlayOption", false)
-    tacticalNukesOption = IELOptionVar("tacticalNukesOverlay", true)
-    massExtractorsOption = IELOptionVar("massExtractorsOverlay", true)
-
+    engineersOption = ModOptionVar("engineersOverlay", true)
+    engineersWithNumbersOption = ModOptionVar("engineersWithNumbersOption", false)
+    factoryOverlayWithTextOption = ModOptionVar("factoryOverlayWithTextOption", false)
+    factoriesOption = ModOptionVar("factoriesOverlay", true)
+    supportCommanderOption = ModOptionVar("supportCommanderOverlay", true)
+    commanderOverlayOption = ModOptionVar("commanderOverlayOption", false)
+    tacticalNukesOption = ModOptionVar("tacticalNukesOverlay", true)
+    massExtractorsOption = ModOptionVar("massExtractorsOverlay", true)
 
     function Main(isReplay)
-        GlobalOptions.AddOptions(modName, "Idle Engineers Light",
+        GlobalOptions.AddOptions(modName, "Unit Overlays",
             {
                 OptionsUtils.Filter("Show engineers ovelays", engineersOption),
                 OptionsUtils.Filter("Show commander ovelays", commanderOverlayOption),

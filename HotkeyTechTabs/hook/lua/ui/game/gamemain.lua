@@ -5,7 +5,7 @@ function CreateUI(isReplay)
 	oldCreateUI(isReplay)
 end 
 
-local cat = 'UI Construction'
+local cat = 'HotkeyTechTabs'
 local idx = 1
 
 local KeyMapper = import('/lua/keymap/keymapper.lua')

@@ -6,259 +6,84 @@ local function getDisplayOrder()
     return displayOrder
 end
 
-local displayCategory = "MultiHotkeys"
+local multiHotkeysCategory = "MultiHotkeys"
 
-KeyMapper.SetUserKeyAction("Upgrade selected structures / Cycle templates for engineers", {
-    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").UpgradeSelectedUnits()',
-    category = displayCategory,
-    order = getDisplayOrder()
-})
+-- Selection
 KeyMapper.SetUserKeyAction("Select ACU / Enter OC mode / Goto ACU", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ACUSelectOCGoto()",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T1 Engineers", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, false)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectEngineers(1, false)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T2 Engineers", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, false)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectEngineers(2, false)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All T3 Engineers", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, false)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectEngineers(3, false)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All SACU", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(false)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectSACU(false)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T1 Engineers", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(1, true)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectEngineers(1, true)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T2 Engineers", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(2, true)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectEngineers(2, true)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle T3 Engineers", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectEngineers(3, true)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectEngineers(3, true)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Nearest / Onscreen / All Idle SACU", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").MultiSelectSACU(true)",
-    category = displayCategory,
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectSACU(true)',
+    category = multiHotkeysCategory,
     order = getDisplayOrder()
 })
-
-function UpgradeSelectedUnits()
-    local units = GetSelectedUnits()
-
-    for i, unit in units do
-        if unit:IsInCategory("ENGINEER") then
-            if units then
-                local tech2 = EntityCategoryFilterDown(categories.TECH2, units)
-                local tech3 = EntityCategoryFilterDown(categories.TECH3, units)
-                local sACUs = EntityCategoryFilterDown(categories.SUBCOMMANDER, units)
-
-                if next(sACUs) then
-                    SimCallback({ Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = sACUs[1]:GetEntityId() } }, true)
-                    SelectUnits(sACUs)
-                elseif next(tech3) then
-                    SimCallback({ Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = tech3[1]:GetEntityId() } }, true)
-                    SelectUnits(tech3)
-                elseif next(tech2) then
-                    SimCallback({ Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = tech2[1]:GetEntityId() } }, true)
-                    SelectUnits(tech2)
-                else end
-            end
-
-            import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
-            return
-        end
-    end
-
-    import("/lua/keymap/hotbuild.lua").buildActionUpgrade()
-end
-
--- Select ACU / OC mode/ Goto acu if not on screen
-function ACUSelectOCGoto()
-    local selection = GetSelectedUnits()
-    if not table.empty(selection) and table.getn(selection) == 1 and selection[1]:IsInCategory "COMMAND" then
-        import("/lua/ui/game/orders.lua").EnterOverchargeMode()
-    else
-        ConExecute "UI_SelectByCategory +nearest COMMAND"
-        local acu = GetSelectedUnits()
-        local worldview = import('/lua/ui/game/worldview.lua').viewLeft
-        if acu and not worldview:GetScreenPos(acu[1]) then
-            ConExecute "UI_SelectByCategory +nearest +goto COMMAND"
-        end
-    end
-end
-
--- MultiSelect 
-local lastClickMultiSelect = -9999
-local totalClicksMultiSelect = 0
-local lastMultiClickUniqueString = nil
-
--- Select nearest / onscreen / all engineers
-function MultiSelectEngineers(techlevel, onlyIdle)
-    local idleText = " "
-    if onlyIdle then idleText = " +idle " end
-    local uniqueString = "MultiSelectEngineers"..techlevel..idleText
-    local currentTick = GameTick()
-	local isDoubleClick = currentTick < lastClickMultiSelect + 5
-
-    if uniqueString == lastMultiClickUniqueString and isDoubleClick then
-        if totalClicksMultiSelect == 1 then
-            ConExecute ("UI_SelectByCategory +inview"..idleText.."BUILTBYTIER3FACTORY ENGINEER TECH"..techlevel)
-        else
-            ConExecute ("UI_SelectByCategory"..idleText.."BUILTBYTIER3FACTORY ENGINEER TECH"..techlevel)
-        end
-    else
-        totalClicksMultiSelect = 0
-        ConExecute ("UI_SelectByCategory +nearest"..idleText.."BUILTBYTIER3FACTORY ENGINEER TECH"..techlevel)
-    end
-
-    lastMultiClickUniqueString = uniqueString
-    totalClicksMultiSelect = totalClicksMultiSelect + 1
-    lastClickMultiSelect = currentTick
-end
-
--- Select nearest / onscreen / all SACU
-function MultiSelectSACU(onlyIdle)
-    local idleText = " "
-    if onlyIdle then idleText = " +idle " end
-    local uniqueString = "MultiSelectSACU"..idleText
-    local currentTick = GameTick()
-	local isDoubleClick = currentTick < lastClickMultiSelect + 5
-
-    if uniqueString == lastMultiClickUniqueString and isDoubleClick then
-        if totalClicksMultiSelect == 1 then
-            ConExecute ("UI_SelectByCategory +inview"..idleText.."SUBCOMMANDER")
-        else
-            ConExecute ("UI_SelectByCategory"..idleText.."SUBCOMMANDER")
-        end
-    else
-        totalClicksMultiSelect = 0
-        ConExecute ("UI_SelectByCategory +nearest"..idleText.."SUBCOMMANDER")
-    end
-
-    lastMultiClickUniqueString = uniqueString
-    totalClicksMultiSelect = totalClicksMultiSelect + 1
-    lastClickMultiSelect = currentTick
-end
-
-
--- Select nearest idle engineer / Reclaim mode
-function ReclaimSelectIDLENearestT1()
-    local selection = GetSelectedUnits()
-    if table.empty(selection) then
-        ConExecute "UI_SelectByCategory +inview +nearest +idle ENGINEER TECH1"
-    else
-        ConExecute "StartCommandMode order RULEUCC_Reclaim"
-    end
-end
-
--- Decrease Unit count in factory queue
-local DecreaseBuildCountInQueue = import("/lua/ui/game/construction.lua").DecreaseBuildCountInQueue
-local RefreshUI = import("/lua/ui/game/construction.lua").RefreshUI
-function RemoveLastItem()
-    local selectedUnits = GetSelectedUnits()
-    if selectedUnits and selectedUnits[1]:IsInCategory "FACTORY" then
-        local currentCommandQueue = SetCurrentFactoryForQueueDisplay(selectedUnits[1])
-        local count = 1
-        if IsKeyDown "Shift" then
-            count = 5
-        end
-        DecreaseBuildCountInQueue(table.getsize(currentCommandQueue), count)
-        ClearCurrentFactoryForQueueDisplay()
-        RefreshUI()
-    end
-end
-
--- Select nearest air scout / build sensors
-function SelectAirScoutBuildIntel()
-    local selectedUnits = GetSelectedUnits()
-    if selectedUnits then
-        import("/lua/keymap/hotbuild.lua").buildAction "Sensors"
-    else
-        ConExecute "UI_SelectByCategory +nearest AIR INTELLIGENCE"
-    end
-end
-
-function SelectNearestIdleTransportOrTransport()
-    local selectedUnits = GetSelectedUnits()
-    if selectedUnits then
-        ConExecute "StartCommandMode order RULEUCC_Transport"
-    else
-        ConExecute "UI_SelectByCategory +nearest +idle AIR TRANSPORTATION"
-    end
-end
-
-KeyMapper.SetUserKeyAction("Remove last queued unit in factory", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").RemoveLastItem()",
-    category = "orders",
-    order = 17
+KeyMapper.SetUserKeyAction("Onscreen / All Similar units", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectSimilarUnits()',
+    category = multiHotkeysCategory,
+    order = getDisplayOrder()
 })
-
-KeyMapper.SetUserKeyAction("Shift Remove last queued unit in factory", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").RemoveLastItem()",
-    category = "orders",
-    order = 18
+KeyMapper.SetUserKeyAction("Onscreen Directfire Land units", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectDirectFireLandUnits()',
+    category = multiHotkeysCategory,
+    order = getDisplayOrder(),
 })
-
+KeyMapper.SetUserKeyAction("Onscreen Support Land units", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").MultiSelectSupportLandUnits()',
+    category = multiHotkeysCategory,
+    order = getDisplayOrder(),
+})
+KeyMapper.SetUserKeyAction("Nearest Idle Transport / Transport Order", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectNearestIdleTransportOrTransport()',
+    category = "selection",
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Shift Nearest Idle Transport / Transport Order", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectNearestIdleTransportOrTransport()',
+    category = "selection",
+    order = getDisplayOrder()
+})
 KeyMapper.SetUserKeyAction("Select All IDLE engineers on screen not ACU", {
     action = "UI_SelectByCategory +inview +idle ENGINEER TECH1,ENGINEER TECH2,ENGINEER TECH3",
     category = "selection",
-    order = 19
+    order = getDisplayOrder()
 })
-
-KeyMapper.SetUserKeyAction("Select Nearest IDLE T1 engineer / enter reclaim mode", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ReclaimSelectIDLENearestT1()",
-    category = "selection",
-    order = 21
-})
-
-KeyMapper.SetUserKeyAction("Shift Select Nearest IDLE T1 engineer / enter reclaim mode", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").ReclaimSelectIDLENearestT1()",
-    category = "selection",
-    order = 22
-})
-
-
-KeyMapper.SetUserKeyAction("Select nearest air scout / build sensors", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").SelectAirScoutBuildIntel()",
-    category = "selection",
-    order = 23
-})
-
-KeyMapper.SetUserKeyAction("Shift Select nearest air scout / build sensors", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").SelectAirScoutBuildIntel()",
-    category = "selection",
-    order = 24
-})
-
-KeyMapper.SetUserKeyAction("Select nearest idle transport / transport order", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").SelectNearestIdleTransportOrTransport()",
-    category = "selection",
-    order = 25
-})
-
-KeyMapper.SetUserKeyAction("Shift Select nearest idle transport / transport order", {
-    action = "UI_Lua import(\"/lua/keymap/misckeyactions.lua\").SelectNearestIdleTransportOrTransport()",
-    category = "selection",
-    order = 26
-})
-
 
 local function ExistGlobal(name)
     return rawget(_G, name) ~= nil
@@ -292,40 +117,109 @@ else
     end
 end
 
-KeyMapper.SetUserKeyAction("Toggle repeat build of factories / OC mode", {
-    action = "UI_Lua import('/lua/keymap/misckeyactions.lua').OCOrRepeatBuild()",
-    category = "order"
+local ordersCategory = "order"
+
+-- Orders
+KeyMapper.SetUserKeyAction("Toggle repeat build of Factories / OC mode", {
+    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").OCOrRepeatBuild()',
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Upgrade selected structures / Cycle templates for engineers", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").UpgradeStructuresEngineersCycleTemplates()',
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Remove last queued unit in factory", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").RemoveLastItem()',
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Shift Remove last queued unit in factory", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").RemoveLastItem()',
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Undo last queue order", {
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').UndoLastQueueOrder()",
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Shift Undo last queue order", {
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').UndoLastQueueOrder()",
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Undo all except current queue order", {
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').UndoAllExceptCurrentQueueOrder()",
+    category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Shift Undo all except current queue order", {
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').UndoAllExceptCurrentQueueOrder()",
+    category = ordersCategory,
+    order = getDisplayOrder()
 })
 
+local enhancementsCategory = "Enhancements"
 
+-- Enhancements
 KeyMapper.SetUserKeyAction("Order Tech upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderTechUpgrade()",
-    category = "Upgrade"
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderTechUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Order Engineering upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/SACUEnhancements.lua').OrderTechUpgrade()",
-    category = "Upgrade"
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/SACUEnhancements.lua").OrderTechUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Order RAS upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderRASUpgrade()",
-    category = "Upgrade"
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderRASUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
 })
 KeyMapper.SetUserKeyAction("Order Gun upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderGunUpgrade()",
-    category = "Upgrade"
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderGunUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
 })
-
 KeyMapper.SetUserKeyAction("Order Shield / Stealth / Nano upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderNanoUpgrade()",
-    category = "Upgrade"
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderNanoUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
 })
-
 KeyMapper.SetUserKeyAction("Order Laser / Chrono / Gun splash / Billy nuke upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderSpecialUpgrade()",
-    category = "Upgrade"
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderSpecialUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Order Tele upgrade", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderTeleUpgrade()',
+    category = enhancementsCategory,
+    order = getDisplayOrder()
 })
 
-KeyMapper.SetUserKeyAction("Order Tele upgrade", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/ACUEnhancements.lua').OrderTeleUpgrade()",
-    category = "Upgrade"
-})
+-- KeyMapper.SetUserKeyAction("Select Nearest IDLE T1 engineer / enter reclaim mode", {
+--     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").ReclaimSelectIDLENearestT1()',
+--     category = "selection",
+--     order = getDisplayOrder()
+-- })
+-- KeyMapper.SetUserKeyAction("Shift Select Nearest IDLE T1 engineer / enter reclaim mode", {
+--     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").ReclaimSelectIDLENearestT1()',
+--     category = "selection",
+--     order = getDisplayOrder()
+-- })
+-- KeyMapper.SetUserKeyAction("Select nearest air scout / build sensors", {
+--     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SelectAirScoutBuildIntel()',
+--     category = "selection",
+--     order = getDisplayOrder()
+-- })
+-- KeyMapper.SetUserKeyAction("Shift Select nearest air scout / build sensors", {
+--     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SelectAirScoutBuildIntel()',
+--     category = "selection",
+--     order = getDisplayOrder()
+-- })
+
+
+-- SetUserKeyAction("Remove from control group", {action = "UI_Lua import('/mods/"..modFolder.."/modules/util/Util.lua').RemoveFromGroups()", category = mod_category, order = order})
