@@ -9,12 +9,10 @@ do
     end
 
     engineersOption = ModOptionVar("engineersOverlay", true)
-    engineersWithNumbersOption = ModOptionVar("engineersWithNumbersOption", false)
-    factoryOverlayWithTextOption = ModOptionVar("factoryOverlayWithTextOption", false)
     factoriesOption = ModOptionVar("factoriesOverlay", true)
     supportCommanderOption = ModOptionVar("supportCommanderOverlay", true)
     commanderOverlayOption = ModOptionVar("commanderOverlayOption", false)
-    tacticalNukesOption = ModOptionVar("tacticalNukesOverlay", true)
+    siloOption = ModOptionVar("siloOverlay", true)
     massExtractorsOption = ModOptionVar("massExtractorsOverlay", true)
 
     function Main(isReplay)
@@ -22,10 +20,8 @@ do
             {
                 OptionsUtils.Filter("Show engineers ovelays", engineersOption),
                 OptionsUtils.Filter("Show commander ovelays", commanderOverlayOption),
-                OptionsUtils.Filter("Show engineers ovelays with numbers", engineersWithNumbersOption),
                 OptionsUtils.Filter("Show factories ovelays", factoriesOption),
-                OptionsUtils.Filter("Show facrory ovelays with text", factoryOverlayWithTextOption),
-                OptionsUtils.Filter("Show Nukes and TMLs ovelays", tacticalNukesOption),
+                OptionsUtils.Filter("Show Nukes and TMLs ovelays", siloOption),
                 OptionsUtils.Filter("Show Mex ovelays", massExtractorsOption)
             })
     end
