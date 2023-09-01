@@ -19,7 +19,7 @@ function MexButtonClick:new()
 end
 
 function MexButtonClick:getClickOptionsText()
-    local text = "Mex Button Options:\r\n\r\nSingleClick = Select/Apply To One\r\n DoubleClick = Select/Apply To Row\r\n\r\n[MouseButtons:]\r\n"
+    local text = "Mex Button Options:\r\n\r\nSingleClick = Select/Apply To One\r\n DoubleClick = Select/Apply + to all to Left when upgrading/unpausing and to Right when pausing\r\n\r\n[MouseButtons:]\r\n"
     text = text .. BaseButtonClick.getClickOptionsText(self)
     return text
 end
