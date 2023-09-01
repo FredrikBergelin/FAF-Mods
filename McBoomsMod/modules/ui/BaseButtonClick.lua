@@ -63,6 +63,39 @@ function BaseButtonClick:getAllUnits()
     return units
 end
 
+function BaseButtonClick:getAllUnitsToRight()
+    local clickedUnit = self.obj.items:get(1):getUnit()
+    local selectUnit = false
+    local units = {}
+    for mex in self.obj.row.items:iterator() do
+        local currentUnit = mex:getUnit()
+        if selectUnit == false and clickedUnit == currentUnit then
+            selectUnit = true
+        end
+        if selectUnit then
+            table_insert(units, mex:getUnit())
+        end
+    end
+    return units
+end
+
+function BaseButtonClick:getAllUnitsToLeft()
+    local clickedUnit = self.obj.items:get(1):getUnit()
+    local selectUnit = true
+    local units = {}
+    for mex in self.obj.row.items:iterator() do
+        local currentUnit = mex:getUnit()
+        if selectUnit == true and clickedUnit == currentUnit then
+            selectUnit = false
+            table_insert(units, mex:getUnit())
+        end
+        if selectUnit then
+            table_insert(units, mex:getUnit())
+        end
+    end
+    return units
+end
+
 function BaseButtonClick:pauseOrUpgrade()
     if self.obj.isUpgrading then
         self:pauseUnits()
@@ -76,7 +109,13 @@ function BaseButtonClick:pauseUnits()
     if self.singleUnit then
         SetPaused(self:getSingleUnit(), not isPaused)
     else
-        SetPaused(self:getAllUnits(), not isPaused)
+        local units
+        if isPaused then
+            units = self:getAllUnitsToLeft()
+        else
+            units = self:getAllUnitsToRight()
+        end
+        SetPaused(units, not isPaused)
     end
 end
 
@@ -84,7 +123,7 @@ function BaseButtonClick:upgradeUnits()
     if self.singleUnit then
         Util.SelectAndUpgradeUnits(self:getSingleUnit())
     else
-        Util.SelectAndUpgradeUnits(self:getAllUnits())
+        Util.SelectAndUpgradeUnits(self:getAllUnitsToLeft())
     end
 end
 
