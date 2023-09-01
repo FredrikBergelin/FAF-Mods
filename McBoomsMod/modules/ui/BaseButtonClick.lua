@@ -266,7 +266,7 @@ function BaseButtonClick:processClickEvents(_event)
                     -- Store selection
                     self[option.Func](self)
                     -- restore selection
-                    if not unitsInSelection or table.getn(unitsInSelection) == 0 then
+                    if unitsInSelection and table.getn(unitsInSelection) > 0 then
                         SelectUnits(unitsInSelection)
                     end
                 else
