@@ -1,3 +1,4 @@
+local KeyMapper = import('/lua/keymap/keymapper.lua')
 local modFolder = 'McBoomsMod'
 local virtualCreateUI = CreateUI
 
