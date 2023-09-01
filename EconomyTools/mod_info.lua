@@ -1,11 +1,11 @@
-name = "AutoPause"
+name = "EconomyTools"
 uid = "Auto-Pause-FF-v1"
 version = 1
 copyright = ""
 description = "Forked from Economy Tools FA v2 by AdmiralZeech, and extracted only auto-pause function."
 author = "FreadyFish"
 url = ""
-icon = "/mods/AutoPause/mod_icon.png"
+icon = "/mods/EconomyTools/mod_icon.png"
 selectable = true
 enabled = true
 exclusive = false

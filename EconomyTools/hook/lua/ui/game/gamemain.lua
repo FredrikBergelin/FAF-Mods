@@ -3,6 +3,6 @@ do
 
    function CreateUI(isReplay)
       originalCreateUI(isReplay)
-      import("/mods/AutoPause/economypanel.lua").Init()
+      -- import("/mods/EconomyTools/main.lua").Init()
    end
 end
