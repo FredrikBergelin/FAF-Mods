@@ -21,8 +21,8 @@ local function UpgradeUnit(unit)
     )
 end
 
+-- Make it possible to upgrade extractors from T2 to T3 by assisting, if they are ringed
 local lastClickTick = -9999
-
 function OnGuardUpgrade(guardees, unit)
     if EntityCategoryContains(categories.MASSEXTRACTION * categories.TECH1, unit) and
         Prefs.GetFromCurrentProfile('options.assist_to_upgrade') == 'Tech1Extractors'

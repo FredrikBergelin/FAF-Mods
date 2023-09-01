@@ -221,7 +221,18 @@ function BaseButtonClick:processClickEvents(_event)
         if _event.Modifiers[option.Click] then
             if option.Ctrl == (_event.Modifiers.Ctrl or false) and option.Alt == (_event.Modifiers.Alt or false) and option.Shift == (_event.Modifiers.Shift or false) then
                 --print("Click event = "..tostring(option.Text))
-                self[option.Func](self)
+                if option.Func == "zoomToUnit" then
+                    LOG("zoomToUnit")
+                    local unitsInSelection = GetSelectedUnits()
+                    -- Store selection
+                    self[option.Func](self)
+                    -- restore selection
+                    if not unitsInSelection or table.getn(unitsInSelection) == 0 then
+                        SelectUnits(unitsInSelection)
+                    end
+                else
+                    self[option.Func](self)
+                end
                 return true
             end
         end
