@@ -18,17 +18,17 @@ local workerTypes = {
 	PAUSED = "PAUSED"
 }
 
-local resourceTypes = from( {
-	{ name = "Mass", econDataKey = "massConsumed" },
+local resourceTypes = from({
+	{ name = "Mass",   econDataKey = "massConsumed" },
 	{ name = "Energy", econDataKey = "energyConsumed" },
-} )
+})
 
 local unitTypes;
 
 function GetUnitType(unit)
-	local unitType = unitTypes.first( function(k, unitType)
+	local unitType = unitTypes.first(function(k, unitType)
 		return EntityCategoryContains(unitType.category, unit)
-	end )
+	end)
 
 	if (unitType == nil) then
 		unitType = unitTypes.last()
@@ -38,10 +38,8 @@ function GetUnitType(unit)
 end
 
 function OnUnitBoxClick(self, event, unitBox)
-
 	if event.Type == 'ButtonPress' then
-
-		if event.Modifiers.Ctrl then 
+		if event.Modifiers.Ctrl then
 			if event.Modifiers.Right then
 				EnablePaused(unitBox)
 			else
@@ -55,7 +53,6 @@ function OnUnitBoxClick(self, event, unitBox)
 			end
 		end
 	end
-
 end
 
 function GetWorkers(unitBox)
@@ -75,18 +72,14 @@ function DisableWorkers(unitBox)
 	if table.getn(workers) == 0 then
 
 	else
-
 		if unitBox.spendType == spendTypes.PROD then
-
-			for k,v in unitType.prodUnits do
+			for k, v in unitType.prodUnits do
 				table.insert(unitType.pausedProdUnits, v)
 			end
 			SetPaused(workers, true)
-
 		elseif unitBox.spendType == spendTypes.MAINT then
-
 			local totalMaintMass = 0
-			for k,v in pairs(workers) do
+			for k, v in pairs(workers) do
 				local econData = GetEconData(v)
 				if econData["massConsumed"] > 0 then
 					table.insert(unitType.pausedProdUnits, v)
@@ -94,7 +87,7 @@ function DisableWorkers(unitBox)
 				end
 			end
 
-			for k,v in unitType.maintUnits do
+			for k, v in unitType.maintUnits do
 				table.insert(unitType.pausedMaintUnits, v)
 			end
 
@@ -120,8 +113,8 @@ function GetPaused(unitBox)
 	end
 
 	local stillPaused = {}
-	for k,v in ValidateUnitsList(workers) do
-		if GetIsPausedBySpendType({v}, unitBox.spendType) then
+	for k, v in ValidateUnitsList(workers) do
+		if GetIsPausedBySpendType({ v }, unitBox.spendType) then
 			table.insert(stillPaused, v)
 		end
 	end
@@ -136,7 +129,6 @@ function GetIsPausedBySpendType(units, spendType)
 		return GetIsUnitAbilityEnabled(units)
 	end
 end
-
 
 function EnablePaused(unitBox)
 	local pauseUnits = GetPaused(unitBox)
@@ -174,23 +166,23 @@ function GetOnValueForScriptBit(i)
 end
 
 function DisableUnitsAbility(units)
-    for i = 0,8 do
-        ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
-    end
+	for i = 0, 8 do
+		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
+	end
 end
 
 function EnableUnitsAbility(units)
-    for i = 0,8 do
-        ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
-    end
+	for i = 0, 8 do
+		ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
+	end
 end
 
 function GetIsUnitAbilityEnabled(units)
-	for i = 0,8 do
-        if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
+	for i = 0, 8 do
+		if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
 			return true
 		end
-    end
+	end
 	return false
 end
 
@@ -199,7 +191,7 @@ local selectedUnitType = nil
 
 function OnClick(self, event, unitType)
 	if event.Type == 'MouseExit' then
-	if hoverUnitType ~= nil then
+		if hoverUnitType ~= nil then
 			hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
 		end
 		hoverUnitType = nil
@@ -229,20 +221,20 @@ function OnClick(self, event, unitType)
 				if unitType.typeUi.prodUnitsBox ~= nil then DisableWorkers(unitType.typeUi.prodUnitsBox) end
 				if unitType.typeUi.maintUnitsBox ~= nil then DisableWorkers(unitType.typeUi.maintUnitsBox) end
 			else
-		if selectedUnitType ~= nil then
-			selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
-		end
+				if selectedUnitType ~= nil then
+					selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
+				end
 
-		local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
-		SelectUnits(allUnits)
-	end
+				local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
+				SelectUnits(allUnits)
+			end
 		end
 	end
 
 	if hoverUnitType ~= nil then
 		hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('11ffffff')
 	end
-	if selectedUnitType~= nil then
+	if selectedUnitType ~= nil then
 		selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('33ffffff')
 	end
 
@@ -272,27 +264,26 @@ function DoUpdate()
 end
 
 function UpdateResourcesUi()
-
 	local units = from(CommonUnits.Get())
 
-	unitTypes.foreach( function(k, unitType)
-		unitType.prodUnits = { }
-		unitType.maintUnits = { }
-	end )
+	unitTypes.foreach(function(k, unitType)
+		unitType.prodUnits = {}
+		unitType.maintUnits = {}
+	end)
 
 	-- set unittype resource usages to 0
-	resourceTypes.foreach( function(k, rType)
+	resourceTypes.foreach(function(k, rType)
 		rType.usage = 0
 		rType.maintUsage = 0
-		unitTypes.foreach( function(k, unitType)
+		unitTypes.foreach(function(k, unitType)
 			local unitTypeUsage = unitType.usage[rType.name]
 			unitTypeUsage.usage = 0
 			unitTypeUsage.maintUsage = 0
-		end )
-	end )
+		end)
+	end)
 
 	-- fill unittype resources with real data
-	units.foreach( function(k, unit)
+	units.foreach(function(k, unit)
 		local econData = GetEconData(unit)
 		local unitToGetDataFrom = nil
 		local isMaint = false
@@ -312,7 +303,7 @@ function UpdateResourcesUi()
 		local unitType = GetUnitType(unitToGetDataFrom)
 
 		local unitHasUsage = false
-		resourceTypes.foreach( function(k, rType)
+		resourceTypes.foreach(function(k, rType)
 			local usage = econData[rType.econDataKey]
 
 			if (usage > 0) then
@@ -326,7 +317,6 @@ function UpdateResourcesUi()
 				end
 				unitHasUsage = true
 			end
-
 		end)
 
 		if unitHasUsage then
@@ -348,17 +338,15 @@ function UpdateResourcesUi()
 		-- 		table.insert(unitType.prodUnits, unit)
 		-- 	end
 		-- end
-
 	end)
 
 	-- update ui
 	local relayoutRequired = false
-	unitTypes.foreach( function(k, unitType)
-
+	unitTypes.foreach(function(k, unitType)
 		unitType.typeUi.maintUnitsBox.SetAltOn(table.getn(unitType.pausedMaintUnits) > 0)
 		unitType.typeUi.prodUnitsBox.SetAltOn(table.getn(unitType.pausedProdUnits) > 0)
 
-		resourceTypes.foreach( function(k, rType)
+		resourceTypes.foreach(function(k, rType)
 			local unitTypeUsage = unitType.usage[rType.name]
 			local rTypeUsageTotal = rType.usage + rType.maintUsage
 
@@ -413,12 +401,10 @@ function UpdateResourcesUi()
 			end
 		end)
 		UIP.econtrol.ui.Height:Set(y)
-
 	end
 end
 
 function UnitBox(typeUi, unitType, spendType, workerType)
-
 	local group = Group(typeUi.uiRoot);
 	group.Width:Set(20)
 	group.Height:Set(22)
@@ -430,7 +416,7 @@ function UnitBox(typeUi, unitType, spendType, workerType)
 	LayoutHelpers.AtLeftIn(button, group, 0)
 	LayoutHelpers.AtVerticalCenterIn(button, group, 0)
 
-	local check2 = Bitmap(group	)
+	local check2 = Bitmap(group)
 	check2.Width:Set(12)
 	check2.Height:Set(12)
 	check2:InternalSetSolidColor('bbff0000')
@@ -476,11 +462,11 @@ function UnitBox(typeUi, unitType, spendType, workerType)
 	end
 
 	return unitBox
-
 end
 
 function GetUpgradingUnits(category)
-	local units = from(category.units).where(function(k,u) return u:GetWorkProgress() < 1 and u:GetWorkProgress() > 0 end).toArray()
+	local units = from(category.units).where(function(k, u) return u:GetWorkProgress() < 1 and u:GetWorkProgress() > 0 end)
+		.toArray()
 	local sorted = dosort(units, function(u) return u:GetWorkProgress() end)
 	return sorted
 end
@@ -492,25 +478,24 @@ function SetMexCategoryProgress(category, index, unit)
 	else
 		category.ui.bar1s[index]:Show()
 		category.ui.bar2s[index]:Show()
-		category.ui.bar2s[index].Width:Set(22*unit:GetWorkProgress())
+		category.ui.bar2s[index].Width:Set(22 * unit:GetWorkProgress())
 	end
 end
 
 function dosort(t, func)
 	local keys = {}
-	for k,v in t do keys[table.getn(keys)+1] = k end
-	table.sort(keys, function(a,b) return func(t[a]) > func(t[b]) end)
+	for k, v in t do keys[table.getn(keys) + 1] = k end
+	table.sort(keys, function(a, b) return func(t[a]) > func(t[b]) end)
 	local sorted = {}
 	local i = 1
-    while keys[i] do
-        sorted[i] = t[keys[i]]
-        i = i + 1
-    end
+	while keys[i] do
+		sorted[i] = t[keys[i]]
+		i = i + 1
+	end
 	return sorted;
 end
 
 function IsMexCategoryMatch(mexCategory, unit)
-
 	if unit.isUpgradee then
 		return false
 	end
@@ -530,13 +515,12 @@ function IsMexCategoryMatch(mexCategory, unit)
 	end
 
 	return true
-
 end
 
 local hoverMexCategoryType
 function OnMexCategoryUiClick(self, event, category)
 	if event.Type == 'MouseExit' then
-	if hoverMexCategoryType ~= nil then
+		if hoverMexCategoryType ~= nil then
 			hoverMexCategoryType.ui:InternalSetSolidColor('aa000000')
 		end
 		hoverMexCategoryType = nil
@@ -545,7 +529,6 @@ function OnMexCategoryUiClick(self, event, category)
 		hoverMexCategoryType = category
 	end
 	if event.Type == 'ButtonPress' then
-
 		if event.Modifiers.Right then
 			if category.isPaused ~= nil then
 				if event.Modifiers.Ctrl then
@@ -566,12 +549,10 @@ function OnMexCategoryUiClick(self, event, category)
 			end
 		else
 			if event.Modifiers.Ctrl then
-
 				local sorted = GetUpgradingUnits(category)
 				local best = sorted[1]
 				SelectUnits({ best })
 			else
-
 				SelectUnits(category.units)
 			end
 		end
@@ -582,54 +563,159 @@ function OnMexCategoryUiClick(self, event, category)
 	end
 
 	return true
-
 end
 
 function buildUi()
-	local a, b = pcall( function()
+	local a, b = pcall(function()
 		UIP.econtrol = {}
-		unitTypes = from( {
-			{ name = "Land Units", category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER + categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER + categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land_category", spacer = 0 },
+		unitTypes = from({
+			{
+				name = "Land Units",
+				category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER +
+					categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER +
+					categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER,
+				icon = "icon_land_category",
+				spacer = 0
+			},
 			-- { name = "T1 Land Units", category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land1_generic_rest", spacer = 0 },
 			-- { name = "T2 Land Units", category = categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land2_generic_rest", spacer = 0 },
 			-- { name = "T3 Land Units", category = categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land3_generic_rest", spacer = 0 },
 
-			{ name = "Air Units", category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER + categories.AIR * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER + categories.AIR * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_air_category", spacer = 0 },
+			{
+				name = "Air Units",
+				category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER +
+					categories.AIR * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER +
+					categories.AIR * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER,
+				icon = "icon_air_category",
+				spacer = 0
+			},
 			-- { name = "T1 Air Units", category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter1_generic_rest", spacer = 0 },
 			-- { name = "T2 Air Units", category = categories.AIR * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter2_generic_rest", spacer = 0 },
 			-- { name = "T3 Air Units", category = categories.AIR * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_fighter3_generic_rest", spacer = 0 },
 
-			{ name = "Naval Units", category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER + categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER + categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_navy_category", spacer = 0 },
+			{
+				name = "Naval Units",
+				category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER +
+					categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER +
+					categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER,
+				icon =
+				"icon_navy_category",
+				spacer = 0
+			},
 			-- { name = "T1 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship1_generic_rest", spacer = 0 },
 			-- { name = "T2 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship2_generic_rest", spacer = 0 },
 			-- { name = "T3 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship3_generic_rest", spacer = 0 },
 
-			{ name = "Shields", category = categories.STRUCTURE * categories.SHIELD, icon = "icon_shield_category", spacer = 0 },
-			{ name = "Intel", category = categories.STRUCTURE * categories.RADAR + categories.STRUCTURE * categories.OMNI + categories.STRUCTURE * categories.SONAR + categories.MOBILESONAR, icon = "icon_intel_category", spacer = 0  },
+			{
+				name = "Shields",
+				category = categories.STRUCTURE * categories.SHIELD,
+				icon =
+				"icon_shield_category",
+				spacer = 0
+			},
+			{
+				name = "Intel",
+				category = categories.STRUCTURE * categories.RADAR +
+					categories.STRUCTURE * categories.OMNI + categories.STRUCTURE * categories.SONAR + categories
+					.MOBILESONAR,
+				icon =
+				"icon_intel_category",
+				spacer = 0
+			},
 			-- { name = "Sonar", category = categories.STRUCTURE * categories.SONAR + categories.MOBILESONAR, icon = "icon_structure_intel", spacer = 0  },
-			{ name = "Stealth", category = categories.STRUCTURE * categories.COUNTERINTELLIGENCE, icon = "icon_counterintel_category", spacer = 0 },
+			{
+				name = "Stealth",
+				category = categories.STRUCTURE * categories.COUNTERINTELLIGENCE,
+				icon =
+				"icon_counterintel_category",
+				spacer = 0
+			},
+			{
+				name = "Energy production",
+				category = categories.STRUCTURE * categories.ENERGYPRODUCTION,
+				icon =
+				"icon_energy_category",
+				spacer = 0
+			},
+			{
+				name = "Energy storage",
+				category = categories.STRUCTURE * categories.ENERGYSTORAGE,
+				icon =
+				"icon_energy_storage_category",
+				spacer = 0
+			},
+			{
+				name = "Mass extraction",
+				category = categories.MASSEXTRACTION + categories.MASSSTORAGE +
+					categories.STRUCTURE * categories.MASSFABRICATION,
+				icon =
+				"icon_mass_category",
+				spacer = 0
+			},
+			{
+				name = "Silos",
+				category = categories.SILO,
+				icon =
+				"icon_nuke_category",
+				spacer = 0
+			},
+			{
+				name = "Factories",
+				category = categories.STRUCTURE * categories.FACTORY - categories.GATE,
+				icon =
+				"icon_factory_category",
+				spacer = 0
+			},
+			{
+				name = "Military",
+				category = categories.STRUCTURE * categories.DEFENSE +
+					categories.STRUCTURE * categories.STRATEGIC,
+				icon =
+				"icon_defense_category",
+				spacer = 0
+			},
+			{
+				name = "Experimentals",
+				category = categories.EXPERIMENTAL,
+				icon =
+				"icon_experimental_category",
+				spacer = 0
+			},
+			{
+				name = "ACU",
+				category = categories.COMMAND,
+				icon =
+				"icon_commander_category",
+				spacer = 0
+			},
+			{
+				name = "SACU",
+				category = categories.SUBCOMMANDER,
+				icon =
+				"icon_commander_category",
+				spacer = 0
+			},
+			{
+				name = "Engineers",
+				category = categories.ENGINEER,
+				icon =
+				"icon_engineer_category",
+				spacer = 0
+			},
+			{
+				name = "Everything",
+				category = categories.ALLUNITS,
+				icon =
+				"strat_attack_ping_rest",
+				spacer = 0
+			},
+		})
 
-			{ name = "Energy production", category = categories.STRUCTURE * categories.ENERGYPRODUCTION, icon = "icon_energy_category", spacer = 0 },
-			{ name = "Energy storage", category = categories.STRUCTURE * categories.ENERGYSTORAGE, icon = "icon_energy_storage_category", spacer = 0 },
-			{ name = "Mass extraction", category = categories.MASSEXTRACTION + categories.MASSSTORAGE, icon = "icon_mass_category", spacer = 0 },
-			{ name = "Mass fabrication", category = categories.STRUCTURE * categories.MASSFABRICATION, icon = "icon_mass_fab_category", spacer = 0 },
-
-			{ name = "Silos", category = categories.SILO, icon = "icon_nuke_category", spacer = 0 },
-			{ name = "Factories", category = categories.STRUCTURE * categories.FACTORY - categories.GATE, icon = "icon_factory_category", spacer = 0 },
-			{ name = "Military", category = categories.STRUCTURE * categories.DEFENSE + categories.STRUCTURE * categories.STRATEGIC, icon = "icon_defense_category", spacer = 0 },
-			{ name = "Experimentals", category = categories.EXPERIMENTAL, icon = "icon_experimental_category", spacer = 0 },
-			{ name = "ACU", category = categories.COMMAND, icon = "icon_commander_category", spacer = 0 },
-			{ name = "SACU", category = categories.SUBCOMMANDER, icon = "icon_commander_category", spacer = 0 },
-			{ name = "Engineers", category = categories.ENGINEER, icon = "icon_engineer_category", spacer = 0 },
-
-			{ name = "Everything", category = categories.ALLUNITS, icon = "strat_attack_ping_rest", spacer = 0 },
-		} )
-
-		unitTypes.foreach( function(k, unitType)
-			unitType.usage = { }
-			unitType.pausedProdUnits = { }
-			unitType.pausedMaintUnits = { }
-		end )
+		unitTypes.foreach(function(k, unitType)
+			unitType.usage = {}
+			unitType.pausedProdUnits = {}
+			unitType.pausedMaintUnits = {}
+		end)
 
 		local col0 = 0
 		local col1 = col0 + 20
@@ -655,7 +741,6 @@ function buildUi()
 		LayoutHelpers.AtTopIn(uiRoot, dragger, 45)
 
 		function CreateText(text, x)
-
 			local t = UIUtil.CreateText(uiRoot, text, 9, UIUtil.bodyFont)
 			t.Width:Set(5)
 			t.Height:Set(5)
@@ -665,13 +750,12 @@ function buildUi()
 			LayoutHelpers.AtTopIn(t, uiRoot, -12)
 		end
 
-		CreateText("B", col0+5)
-		CreateText("U", col1+5)
+		CreateText("B", col0 + 5)
+		CreateText("U", col1 + 5)
 		CreateText("Resources", col3)
 
-		unitTypes.foreach( function(k, unitType)
-
-			local typeUi = { }
+		unitTypes.foreach(function(k, unitType)
+			local typeUi = {}
 			unitType.typeUi = typeUi
 
 			typeUi.uiRoot = Bitmap(uiRoot)
@@ -688,7 +772,7 @@ function buildUi()
 			typeUi.stratIcon:SetTexture(iconName)
 			typeUi.stratIcon.Height:Set(typeUi.stratIcon.BitmapHeight)
 			typeUi.stratIcon.Width:Set(typeUi.stratIcon.BitmapWidth)
-			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, col2 + (20-typeUi.stratIcon.Width())/2)
+			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, col2 + (20 - typeUi.stratIcon.Width()) / 2)
 			LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
 
 			typeUi.prodUnitsBox = UnitBox(typeUi, unitType, spendTypes.PROD, workerTypes.WORKING)
@@ -754,15 +838,13 @@ function buildUi()
 			typeUi.massMaintBar:Hide()
 			typeUi.energyBar:Hide()
 			typeUi.energyMaintBar:Hide()
-
-		end )
+		end)
 
 		UIP.econtrol.beat = DoUpdate
 		GameMain.AddBeatFunction(UIP.econtrol.beat)
 
 		DoUpdate()
-
-	end )
+	end)
 
 	if not a then
 		WARN("UI PARTY RESULT: ", a, b)
@@ -770,7 +852,6 @@ function buildUi()
 end
 
 function setEnabled(value)
-	
 	-- tear down old ui
 	if rawget(UIP, "econtrol") ~= nil then
 		if UIP.econtrol.ui then UIP.econtrol.ui:Destroy() end
