@@ -9,7 +9,7 @@ end
 local category = "Economy"
 
 KeyMapper.SetUserKeyAction("Automatically pause construction when low on energy", {
-    action = 'UI_Lua import("/mods/AutoPause/main.lua").AutoPause()',
+    action = 'UI_Lua import("/mods/EconomyTools/main.lua").AutoPause()',
     category = category,
     order = getDisplayOrder()
 })
