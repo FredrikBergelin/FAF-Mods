@@ -140,7 +140,7 @@ function EnablePaused(unitBox)
 		EnableUnitsAbility(pauseUnits)
 		unitType.pausedMaintUnits = {}
 	end
-	unitBox.SetOn(false)
+	-- unitBox.SetOn(false)
 end
 
 function SelectPaused(unitBox)
@@ -221,9 +221,9 @@ function OnClick(self, event, unitType)
 				if unitType.typeUi.prodUnitsBox ~= nil then DisableWorkers(unitType.typeUi.prodUnitsBox) end
 				if unitType.typeUi.maintUnitsBox ~= nil then DisableWorkers(unitType.typeUi.maintUnitsBox) end
 			else
-				if selectedUnitType ~= nil then
-					selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
-				end
+				-- if selectedUnitType ~= nil then
+				-- 	selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
+				-- end
 
 				local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
 				SelectUnits(allUnits)
@@ -231,12 +231,12 @@ function OnClick(self, event, unitType)
 		end
 	end
 
-	if hoverUnitType ~= nil then
-		hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('11ffffff')
-	end
-	if selectedUnitType ~= nil then
-		selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('33ffffff')
-	end
+	-- if hoverUnitType ~= nil then
+	-- 	hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('11ffffff')
+	-- end
+	-- if selectedUnitType ~= nil then
+	-- 	selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('33ffffff')
+	-- end
 
 	return true
 end
@@ -256,6 +256,20 @@ function GetEconData(unit)
 		return unit:GetEconData()
 	end
 end
+
+outerPadding = 3
+barWidth = 100
+barSeparationY = 1
+iconSize = 25
+
+rootWidth = barWidth * 2 + (outerPadding * 4) + iconSize
+iconLeftIn = barWidth + (outerPadding * 2)
+typeHeight = iconSize + (outerPadding * 2)
+leftBarsRight = outerPadding + barWidth
+rightBarsLeftIn = barWidth + (outerPadding * 2) + iconSize + outerPadding
+barHeight = (iconSize / 2) - barSeparationY
+topBarTopIn = outerPadding
+bottomBarTopIn = outerPadding + barHeight + (barSeparationY * 2)
 
 function DoUpdate()
 	if UIP.GetSetting("showEcontrolResources") then
@@ -321,31 +335,31 @@ function UpdateResourcesUi()
 
 		if unitHasUsage then
 			if (isMaint) then
+				LOG("isMaint")
 				table.insert(unitType.maintUnits, unit)
 			else
+				LOG("prodUnits")
 				table.insert(unitType.prodUnits, unit)
 			end
 		end
 
-		-- if unitHasUsage then
-		-- 	if (isMaint) then
-		-- 		if unit:IsInCategory 'COMMAND' then
-		-- 			table.insert(unitType.prodUnits, unit)
-		-- 		else
-		-- 			table.insert(unitType.maintUnits, unit)
-		-- 		end
-		-- 	else
-		-- 		table.insert(unitType.prodUnits, unit)
-		-- 	end
-		-- end
+		if unitHasUsage then
+			if (isMaint) then
+				if unit:IsInCategory 'COMMAND' then
+					LOG("COMMAND")
+					table.insert(unitType.prodUnits, unit)
+				else
+					table.insert(unitType.maintUnits, unit)
+				end
+			else
+				table.insert(unitType.prodUnits, unit)
+			end
+		end
 	end)
 
 	-- update ui
 	local relayoutRequired = false
 	unitTypes.foreach(function(k, unitType)
-		unitType.typeUi.maintUnitsBox.SetAltOn(table.getn(unitType.pausedMaintUnits) > 0)
-		unitType.typeUi.prodUnitsBox.SetAltOn(table.getn(unitType.pausedProdUnits) > 0)
-
 		resourceTypes.foreach(function(k, rType)
 			local unitTypeUsage = unitType.usage[rType.name]
 			local rTypeUsageTotal = rType.usage + rType.maintUsage
@@ -353,17 +367,13 @@ function UpdateResourcesUi()
 			if rTypeUsageTotal == 0 then
 				unitTypeUsage.bar.Width:Set(0)
 				unitTypeUsage.maintBar.Width:Set(0)
-				--unitTypeUsage.text:SetText("")
-				--unitTypeUsage.maintText:SetText("")
-				unitType.typeUi.prodUnitsBox.SetOn(false)
-				unitType.typeUi.maintUnitsBox.SetOn(false)
 			else
 				local bv = unitTypeUsage.usage
 				local bmv = unitTypeUsage.maintUsage
 				local percentify = true
 				if (percentify) then
-					bv = bv / rTypeUsageTotal * 100
-					bmv = bmv / rTypeUsageTotal * 100
+					bv = bv / rTypeUsageTotal * barWidth
+					bmv = bmv / rTypeUsageTotal * barWidth
 				end
 
 				bv = math.ceil(bv)
@@ -379,14 +389,17 @@ function UpdateResourcesUi()
 					relayoutRequired = true
 				end
 
+				local top = unitType.typeUi.uiRoot:Top()
+				local left = unitType.typeUi.uiRoot:Left()
 				unitTypeUsage.bar.Width:Set(bv)
 				unitTypeUsage.maintBar.Width:Set(bmv)
-				local r = unitTypeUsage.bar.Right() + 1
-				if bv == 0 then r = unitTypeUsage.bar.Left() end
-				unitTypeUsage.maintBar.Left:Set(r)
+				if rType.name == "MASS" then
+					unitTypeUsage.maintBar.Top:Set(top + outerPadding)
+				elseif rType.name == "ENERGY" then
+					unitTypeUsage.maintBar.Top:Set(top + outerPadding + barHeight + barSeparationY)
+				end
 
-				unitType.typeUi.prodUnitsBox.SetOn(bv > 0)
-				unitType.typeUi.maintUnitsBox.SetOn(bmv > 0)
+				unitTypeUsage.maintBar.Right:Set(left + leftBarsRight)
 			end
 		end)
 	end)
@@ -404,82 +417,11 @@ function UpdateResourcesUi()
 	end
 end
 
-function UnitBox(typeUi, unitType, spendType, workerType)
-	local group = Group(typeUi.uiRoot);
-	group.Width:Set(20)
-	group.Height:Set(22)
-
-	local buttonBackgroundName = UIUtil.SkinnableFile('/game/avatar-factory-panel/avatar-s-e-f_bmp.dds')
-	local button = Bitmap(group, buttonBackgroundName)
-	button.Width:Set(20)
-	button.Height:Set(22)
-	LayoutHelpers.AtLeftIn(button, group, 0)
-	LayoutHelpers.AtVerticalCenterIn(button, group, 0)
-
-	local check2 = Bitmap(group)
-	check2.Width:Set(12)
-	check2.Height:Set(12)
-	check2:InternalSetSolidColor('bbff0000')
-	LayoutHelpers.AtLeftIn(check2, group, 4)
-	LayoutHelpers.AtVerticalCenterIn(check2, group, 0)
-
-	local check = Bitmap(group, '/textures/ui/uef/game/temp_textures/checkmark.dds')
-	check.Width:Set(8)
-	check.Height:Set(8)
-	LayoutHelpers.AtLeftIn(check, group, 6)
-	LayoutHelpers.AtVerticalCenterIn(check, group, 0)
-
-	local unitBox = {
-		group = group,
-		button = button,
-		check = check,
-		unitType = unitType,
-		spendType = spendType,
-		workerType = workerType,
-	};
-
-	unitBox.SetOn = function(val)
-		if val then
-			check:Show()
-		else
-			check:Hide()
-		end
-	end
-
-	unitBox.SetAltOn = function(val)
-		if val then
-			check2:Show()
-		else
-			check2:Hide()
-		end
-	end
-
-	unitBox.SetOn(false);
-	unitBox.SetAltOn(false);
-	group.HandleEvent = function(self, event)
-		OnUnitBoxClick(self, event, unitBox)
-		return true;
-	end
-
-	return unitBox
-end
-
 function GetUpgradingUnits(category)
 	local units = from(category.units).where(function(k, u) return u:GetWorkProgress() < 1 and u:GetWorkProgress() > 0 end)
 		.toArray()
 	local sorted = dosort(units, function(u) return u:GetWorkProgress() end)
 	return sorted
-end
-
-function SetMexCategoryProgress(category, index, unit)
-	if unit == nil then
-		category.ui.bar1s[index]:Hide()
-		category.ui.bar2s[index]:Hide()
-	else
-		category.ui.bar1s[index]:Show()
-		category.ui.bar2s[index]:Show()
-		category.ui.bar2s[index].Width:Set(22 * unit:GetWorkProgress())
-	end
 end
 
 function dosort(t, func)
@@ -563,6 +505,126 @@ function OnMexCategoryUiClick(self, event, category)
 	end
 
 	return true
+end
+
+function UnitBox(typeUi, unitType, spendType, workerType)
+	local group = Group(typeUi.uiRoot);
+	group.Width:Set(20)
+	group.Height:Set(22)
+
+	local buttonBackgroundName = UIUtil.SkinnableFile('/game/avatar-factory-panel/avatar-s-e-f_bmp.dds')
+	local button = Bitmap(group, buttonBackgroundName)
+	button.Width:Set(20)
+	button.Height:Set(22)
+	LayoutHelpers.AtLeftIn(button, group, 0)
+	LayoutHelpers.AtVerticalCenterIn(button, group, 0)
+
+	-- local check2 = Bitmap(group)
+	-- check2.Width:Set(12)
+	-- check2.Height:Set(12)
+	-- check2:InternalSetSolidColor('bbff0000')
+	-- LayoutHelpers.AtLeftIn(check2, group, 4)
+	-- LayoutHelpers.AtVerticalCenterIn(check2, group, 0)
+
+	-- local check = Bitmap(group, '/textures/ui/uef/game/temp_textures/checkmark.dds')
+	-- check.Width:Set(8)
+	-- check.Height:Set(8)
+	-- LayoutHelpers.AtLeftIn(check, group, 6)
+	-- LayoutHelpers.AtVerticalCenterIn(check, group, 0)
+
+	local unitBox = {
+		group = group,
+		button = button,
+		-- check = check,
+		unitType = unitType,
+		spendType = spendType,
+		workerType = workerType,
+	};
+
+	unitBox.SetOn = function(val)
+		if val then
+			-- check:Show()
+		else
+			-- check:Hide()
+		end
+	end
+
+	unitBox.SetAltOn = function(val)
+		if val then
+			-- check2:Show()
+		else
+			-- check2:Hide()
+		end
+	end
+
+	-- unitBox.SetOn(false);
+	-- unitBox.SetAltOn(false);
+	group.HandleEvent = function(self, event)
+		OnUnitBoxClick(self, event, unitBox)
+		return true;
+	end
+
+	return unitBox
+end
+
+function SpendingBar(typeUi, unitType, spendType, workerType)
+	local group = Group(typeUi.uiRoot);
+	group.Width:Set(20)
+	group.Height:Set(22)
+
+	local buttonBackgroundName = UIUtil.SkinnableFile('/game/avatar-factory-panel/avatar-s-e-f_bmp.dds')
+	local button = Bitmap(group, buttonBackgroundName)
+	button.Width:Set(20)
+	button.Height:Set(22)
+	LayoutHelpers.AtLeftIn(button, group, 0)
+	LayoutHelpers.AtVerticalCenterIn(button, group, 0)
+
+	-- local check2 = Bitmap(group)
+	-- check2.Width:Set(12)
+	-- check2.Height:Set(12)
+	-- check2:InternalSetSolidColor('bbff0000')
+	-- LayoutHelpers.AtLeftIn(check2, group, 4)
+	-- LayoutHelpers.AtVerticalCenterIn(check2, group, 0)
+
+	-- local check = Bitmap(group, '/textures/ui/uef/game/temp_textures/checkmark.dds')
+	-- check.Width:Set(8)
+	-- check.Height:Set(8)
+	-- LayoutHelpers.AtLeftIn(check, group, 6)
+	-- LayoutHelpers.AtVerticalCenterIn(check, group, 0)
+
+	local unitBox = {
+		group = group,
+		button = button,
+		-- check = check,
+		unitType = unitType,
+		spendType = spendType,
+		workerType = workerType,
+	};
+
+	unitBox.SetOn = function(val)
+		if val then
+			-- check:Show()
+		else
+			-- check:Hide()
+		end
+	end
+
+	unitBox.SetAltOn = function(val)
+		if val then
+			-- check2:Show()
+		else
+			-- check2:Hide()
+		end
+	end
+
+	-- unitBox.SetOn(false);
+	-- unitBox.SetAltOn(false);
+	group.HandleEvent = function(self, event)
+		OnUnitBoxClick(self, event, unitBox)
+		return true;
+	end
+
+	return unitBox
 end
 
 function buildUi()
@@ -717,18 +779,6 @@ function buildUi()
 			unitType.pausedMaintUnits = {}
 		end)
 
-		local col0 = 0
-		local col1 = col0 + 20
-		local col2 = col1 + 20
-		local col3 = col2 + 20
-		local col4 = col3 + 105
-		local col5 = col4 + 20
-		local col6 = col5 + 20
-		local col7 = col6 + 20
-		local col8 = 0
-		local col9 = col8 + 20
-		local col10 = col9 + 105
-
 		local dragger = import('/mods/UI-Party/modules/ui.lua').buttons.dragButton
 		local uiRoot = Bitmap(dragger)
 		UIP.econtrol.ui = uiRoot
@@ -750,75 +800,80 @@ function buildUi()
 			LayoutHelpers.AtTopIn(t, uiRoot, -12)
 		end
 
-		CreateText("B", col0 + 5)
-		CreateText("U", col1 + 5)
-		CreateText("Resources", col3)
+		-- CreateText("B", col0 + 5)
+		-- CreateText("U", col1 + 5)
+		-- CreateText("Resources", col3)
 
+
+		-- Loop
 		unitTypes.foreach(function(k, unitType)
 			local typeUi = {}
 			unitType.typeUi = typeUi
 
 			typeUi.uiRoot = Bitmap(uiRoot)
-			typeUi.uiRoot.HandleEvent = function(self, event) return OnClick(self, event, unitType) end
-			typeUi.uiRoot.Width:Set(col4)
-			typeUi.uiRoot.Height:Set(22)
+
+			-- TODO: Move
+			-- typeUi.uiRoot.HandleEvent = function(self, event) return OnClick(self, event, unitType) end
+
+			typeUi.uiRoot.Width:Set(rootWidth)
+			typeUi.uiRoot.Height:Set(typeHeight)
 			typeUi.uiRoot:InternalSetSolidColor('aa000000')
 			typeUi.uiRoot:Hide()
 			LayoutHelpers.AtLeftIn(typeUi.uiRoot, uiRoot, 0)
 			LayoutHelpers.AtTopIn(typeUi.uiRoot, uiRoot, 0)
 
 			typeUi.stratIcon = Bitmap(typeUi.uiRoot)
-			iconName = '/mods/UI-Party/textures/category_icons/' .. unitType.icon .. '.dds'
+			local iconName = '/mods/UI-Party/textures/category_icons/' .. unitType.icon .. '.dds'
 			typeUi.stratIcon:SetTexture(iconName)
-			typeUi.stratIcon.Height:Set(typeUi.stratIcon.BitmapHeight)
-			typeUi.stratIcon.Width:Set(typeUi.stratIcon.BitmapWidth)
-			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, col2 + (20 - typeUi.stratIcon.Width()) / 2)
+			typeUi.stratIcon.Height:Set(iconSize) -- typeUi.stratIcon.BitmapHeight
+			typeUi.stratIcon.Width:Set(iconSize)
+			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, iconLeftIn)
 			LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
 
-			typeUi.prodUnitsBox = UnitBox(typeUi, unitType, spendTypes.PROD, workerTypes.WORKING)
-			LayoutHelpers.AtLeftIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, col0)
-			LayoutHelpers.AtVerticalCenterIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, 0)
+			-- typeUi.prodUnitsBox = UnitBox(typeUi, unitType, spendTypes.PROD, workerTypes.WORKING)
+			-- LayoutHelpers.AtLeftIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, col0)
+			-- LayoutHelpers.AtVerticalCenterIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, 0)
 
-			typeUi.maintUnitsBox = UnitBox(typeUi, unitType, spendTypes.MAINT, workerTypes.WORKING)
-			LayoutHelpers.AtLeftIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, col1)
-			LayoutHelpers.AtVerticalCenterIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, 0)
+			-- typeUi.maintUnitsBox = UnitBox(typeUi, unitType, spendTypes.MAINT, workerTypes.WORKING)
+			-- LayoutHelpers.AtLeftIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, col1)
+			-- LayoutHelpers.AtVerticalCenterIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, 0)
 
 			typeUi.Clear = function()
-				typeUi.prodUnitsBox.check:Hide()
-				typeUi.maintUnitsBox.check:Hide()
+				-- typeUi.prodUnitsBox.check:Hide()
+				-- typeUi.maintUnitsBox.check:Hide()
 			end
-
-			typeUi.massBar = Bitmap(typeUi.uiRoot)
-			typeUi.massBar.Width:Set(10)
-			typeUi.massBar.Height:Set(1)
-			typeUi.massBar:InternalSetSolidColor('lime')
-			typeUi.massBar:DisableHitTest()
-			LayoutHelpers.AtLeftIn(typeUi.massBar, typeUi.uiRoot, col3)
-			LayoutHelpers.AtTopIn(typeUi.massBar, typeUi.uiRoot, 8)
-
-			typeUi.massMaintBar = Bitmap(typeUi.uiRoot)
-			typeUi.massMaintBar.Width:Set(10)
-			typeUi.massMaintBar.Height:Set(1)
-			typeUi.massMaintBar:InternalSetSolidColor('cyan')
-			typeUi.massMaintBar:DisableHitTest()
-			LayoutHelpers.AtLeftIn(typeUi.massMaintBar, typeUi.uiRoot, col3)
-			LayoutHelpers.AtTopIn(typeUi.massMaintBar, typeUi.uiRoot, 8)
 
 			typeUi.energyBar = Bitmap(typeUi.uiRoot)
 			typeUi.energyBar.Width:Set(10)
-			typeUi.energyBar.Height:Set(1)
-			typeUi.energyBar:InternalSetSolidColor('yellow')
+			typeUi.energyBar.Height:Set(barHeight)
+			typeUi.energyBar:InternalSetSolidColor('orange')
 			typeUi.energyBar:DisableHitTest()
-			LayoutHelpers.AtLeftIn(typeUi.energyBar, typeUi.uiRoot, col3)
-			LayoutHelpers.AtTopIn(typeUi.energyBar, typeUi.uiRoot, 11)
+			LayoutHelpers.AtLeftIn(typeUi.energyBar, typeUi.uiRoot, rightBarsLeftIn)
+			LayoutHelpers.AtTopIn(typeUi.energyBar, typeUi.uiRoot, topBarTopIn)
+
+			typeUi.massBar = Bitmap(typeUi.uiRoot)
+			typeUi.massBar.Width:Set(10)
+			typeUi.massBar.Height:Set(barHeight)
+			typeUi.massBar:InternalSetSolidColor('lime')
+			typeUi.massBar:DisableHitTest()
+			LayoutHelpers.AtLeftIn(typeUi.massBar, typeUi.uiRoot, rightBarsLeftIn)
+			LayoutHelpers.AtTopIn(typeUi.massBar, typeUi.uiRoot, bottomBarTopIn)
 
 			typeUi.energyMaintBar = Bitmap(typeUi.uiRoot)
 			typeUi.energyMaintBar.Width:Set(10)
-			typeUi.energyMaintBar.Height:Set(1)
+			typeUi.energyMaintBar.Height:Set(barHeight)
 			typeUi.energyMaintBar:InternalSetSolidColor('orange')
 			typeUi.energyMaintBar:DisableHitTest()
-			LayoutHelpers.AtLeftIn(typeUi.energyMaintBar, typeUi.uiRoot, col3)
-			LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, 11)
+			LayoutHelpers.AtRightIn(typeUi.energyMaintBar, typeUi.stratIcon, 0)
+			LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, topBarTopIn)
+
+			typeUi.massMaintBar = Bitmap(typeUi.uiRoot)
+			typeUi.massMaintBar.Width:Set(10)
+			typeUi.massMaintBar.Height:Set(barHeight)
+			typeUi.massMaintBar:InternalSetSolidColor('lime')
+			typeUi.massMaintBar:DisableHitTest()
+			LayoutHelpers.AtRightIn(typeUi.massMaintBar, typeUi.stratIcon, 0)
+			LayoutHelpers.AtTopIn(typeUi.massMaintBar, typeUi.uiRoot, bottomBarTopIn)
 
 			unitType.usage["Mass"] = {
 				bar = typeUi.massBar,
