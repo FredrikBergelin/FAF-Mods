@@ -335,10 +335,10 @@ function UpdateResourcesUi()
 
 		if unitHasUsage then
 			if (isMaint) then
-				LOG("isMaint")
+				-- LOG("isMaint")
 				table.insert(unitType.maintUnits, unit)
 			else
-				LOG("prodUnits")
+				-- LOG("prodUnits")
 				table.insert(unitType.prodUnits, unit)
 			end
 		end
