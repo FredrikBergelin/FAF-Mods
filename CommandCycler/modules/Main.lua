@@ -13,7 +13,7 @@ local currentUnit
 local selectionIsCurrent
 
 KeyMapper.SetUserKeyAction('Activate/return to individual cycling with saved command', {
-    action = 'UI_Lua import("/mods/IndividualCommandCycler/modules/Main.lua").CreateOrContinueSelection()',
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()',
     category = 'Individual Command Cycler'
 })
 

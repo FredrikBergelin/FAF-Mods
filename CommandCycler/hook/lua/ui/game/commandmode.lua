@@ -7,6 +7,6 @@ do
             return
         end
 
-        import('/mods/IndividualCommandCycler/modules/Main.lua').OnCommandIssued(commandMode, modeData, command)
+        import('/mods/CommandCycler/modules/Main.lua').OnCommandIssued(commandMode, modeData, command)
     end
 end
