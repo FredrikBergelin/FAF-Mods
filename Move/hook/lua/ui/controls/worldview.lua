@@ -7,10 +7,12 @@ do
         ---@param self WorldView
         ---@param event KeyEvent
         HandleEvent = function(self, event)
+
             if event.Modifiers.Right and MoveOnly.IsLocked() then
-                MoveOnly.Toggle()
+                MoveOnly.Cancel()
+            else
+                oldWorldView.HandleEvent(self, event)
             end
-            oldWorldView.HandleEvent(self, event)
         end
 
     }

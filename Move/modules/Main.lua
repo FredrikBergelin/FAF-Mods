@@ -16,6 +16,10 @@ function Toggle()
     Reset()
 end
 
+function Cancel()
+    locked = not locked
+end
+
 ---comment
 ---@param commandMode CommandMode
 ---@param commandModeData CommandModeData
@@ -37,10 +41,9 @@ function Main(isReplay)
 
     CM.AddStartBehavior(OnCommandStarted)
     CM.AddEndBehavior(OnCommandEnded)
-
 end
 
-KeyMapper.SetUserKeyAction('Move only', {
+KeyMapper.SetUserKeyAction('Persistent move order', {
     action = 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()',
     category = 'orders'
 })
