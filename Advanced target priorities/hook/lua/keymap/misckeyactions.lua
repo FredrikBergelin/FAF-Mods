@@ -21,8 +21,26 @@ function SetWeaponPrioritiesHotkey(name)
     SetWeaponPriorities(PrioritySettings.priorityTables[name], name, PrioritySettings.exclusive[name]) 
 end
 
+function SetToMouseTargetOrDefault()
+    local info = GetRolloverInfo()
+    if info and info.blueprintId ~= "unknown" then
+
+        local bpId = info.blueprintId
+        local text = LOC(__blueprints[bpId].General.UnitName)
+        if not text then
+            text = LOC(__blueprints[bpId].Interface.HelpText)
+        end
+
+        SetWeaponPriorities(findPriority(bpId), text, false)
+    else
+        SetWeaponPriorities(0, "Default", false)
+    end
+end
 
 --------HOTKEYS-----------
+
+-- Multi
+KeyMapper.SetUserKeyAction('Set to target at mouse, or back to default if no target', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetToMouseTargetOrDefault()', category = 'Target priorities', order = 74})
 
 --Default
 KeyMapper.SetUserKeyAction('Default', {action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Default")', category = 'Target priorities', order = 75})
