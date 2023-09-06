@@ -1,5 +1,5 @@
 name = "ZeP_MiniMapZoom"
-uid = "5F593E02-FEF3-487C-916F-D6020903054B"
+uid = "Mini-Map-Zoom-v2"
 version = 2
 copyright = ""
 description = "Disabling minimap when zoomed out"

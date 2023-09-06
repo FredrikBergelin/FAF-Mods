@@ -1,5 +1,5 @@
 name = "Strategic Rings"
-uid = "c28a8edc-33e2-466c-b318-f8c36601e5c0"
+uid = "Strategic-Rings-v9"
 version = 9
 copyright = ""
 description = [[Allows you to manually mark range of SMD, TMD, TML etc on the map (see 'Key Bindings'). Supports custom configuration via text editor.

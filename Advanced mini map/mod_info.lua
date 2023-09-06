@@ -1,0 +1,11 @@
+name = "Advanced mini map"
+version = 3
+copyright = "Eternal-"
+description = "New look of mini-map. Border only"
+icon = "/mods/Advanced mini map/logo.png"
+author = "Eternal-"
+url = ""
+uid = "b0d9ac94-cetet-11e5-9912-ba0be0144"
+exclusive = false
+ui_only = true
+conflicts = {}

@@ -1,5 +1,5 @@
 name = "5iver Nukem"
-uid = "d36d33e5-3927-499f-8990-dc86fee30962"
+uid = "5iver-Nukem-v4"
 version = 4
 description = "View T2, T3 and T4 Missile Launchers with unfired missiles in the Avatar Bar (with idle engineers and factories)."
 author = "ThwagmoStar"

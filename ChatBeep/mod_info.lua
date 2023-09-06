@@ -1,5 +1,5 @@
 name = "ChatBeep"
-uid = "24959F44-sdfw-3656-0212-C703E489A257"
+uid = "Chat-Beep-v2"
 version = 2
 copyright = "2018 Uveso"
 description = "Gives an Audable Beep in chat whenever a message is sent can be configured helps with game ingame communication. All credit goes to Uveso"

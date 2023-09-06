@@ -9,7 +9,7 @@ Click options include: Select, Append Select, Upgrade, Pause, Assist With Select
 UI icons display, depending on its unit, information like: Health, Progress, Surrounding Storages, Loaded Missiles. And E.T.A. for Exp's and Nuke/Anti-Nuke.
 (!not compatible with supreme economy!)]]
 author = "McBoomBoom"
-uid = "3e352860-9fe7-4806-b913-fb562022ce43"
+uid = "McBoomBooms-Mod-v2-FF"
 icon = "/mods/McBoomsMod/mcblogo.png"
 exclusive = false
 ui_only = true

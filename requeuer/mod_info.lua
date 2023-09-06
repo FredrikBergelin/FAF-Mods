@@ -1,11 +1,11 @@
 name = "Svart's RequeueR"
 version = 1.0
-copyright = "Copyright © 2020, SvartfaR"
+copyright = "Copyright ï¿½ 2020, SvartfaR"
 description = "Adds an unit or update to the buildqueue of a factory while pressing the alt key. It removes all items from the queue except the one which is produced and puts the selected item next to it. Extracted from my FA mod mimc - Makes it more comfortable!"
 icon = "/mods/requeuer/mimc.png"
 author = "SvartfaR"
 url = ""
-uid = "4a7829ec-9aea-4735-9ee7-808ec81cc245"
+uid = "Requeuer-SvartfaR-v1"
 
 exclusive = false
 ui_only = true

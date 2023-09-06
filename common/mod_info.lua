@@ -1,5 +1,5 @@
 name = "Common Mod Tools"
-uid = "zcbf6277-24e3-437a-b968-Common-v1"
+uid = "Common-Mod-Tools-v1-FF"
 version = 1
 copyright = "Crotalus"
 description = "Common ModTools v1, toolbox for other mods"

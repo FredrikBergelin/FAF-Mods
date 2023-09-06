@@ -1,0 +1,16 @@
+name = "Additional Game Speed Keybinds"
+uid = "Additional-Game-Speed-Keybinds-v1"
+version = 1
+copyright = "none"
+description = "This mod adds user assignable keybinds to the F1 Keybinds menu for setting the game speed to +/-10, for making adjustments in increments of +/-3 and for toggling the wind to run the sim as fast as possible. Ideal for casters/streamers or watching replays for troubleshooting."
+author = "MostLostNoob with assistance from Balthazar and Hdt80bro"
+url = ""
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
+requires = {}
+requiresNames = {}
+conflicts = {}
+before = {}
+after = {}

@@ -4,7 +4,7 @@ copyright = ""
 description = "Зatrol command converted to move command on key press!"
 author = "techmind_"
 url = ""
-uid = "TECHMIND-0000-0000-0000-00000001715"
+uid = "Patrol-2-Move-v6"
 
 exclusive = false
 ui_only = true

@@ -1,5 +1,5 @@
 name = "FilterSelection FF"
-uid = "Filter-Selection-FF-v1"
+uid = "Filter-Selection-v1-FF"
 version = 1
 copyright = ""
 description = "Forked from FilterSelection v1 by 4z0t"

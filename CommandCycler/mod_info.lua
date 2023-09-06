@@ -1,10 +1,10 @@
-name = "Individual Command Cycler"
+name = "Command Cycler"
 version = 1
 copyright = ""
 description = [[Forked from Group Scatter v4 by 4z0t]]
 author = "FreadyFish"
 url = ""
-uid = "Individual-Command-Cycler-FF-v1"
+uid = "Command-Cycler-v1-FF"
 icon = "/mods/CommandCycler/icon.png"
 selectable = true
 enabled = true

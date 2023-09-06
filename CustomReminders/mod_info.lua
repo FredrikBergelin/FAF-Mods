@@ -1,5 +1,5 @@
 name = "Custom reminders"
-uid = "f889196a-1555-11ed-861d-0242ac120002"
+uid = "Custom-Reminders-v1-FF"
 version = 1
 description = "Several timed reminder presets"
 author = "Fiard"
