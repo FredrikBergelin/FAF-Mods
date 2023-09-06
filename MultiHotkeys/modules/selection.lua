@@ -124,6 +124,26 @@ function SelectNearestIdleTransportOrTransport()
     end
 end
 
+function SelectTmlFireMissile()
+    LOG("SelectTmlFireMissile")
+    local selection = GetSelectedUnits()
+
+    local tml = {}
+    if selection and not table.empty(selection) then
+        from(selection).foreach(function(i, unit)
+            if unit:IsInCategory("TACTICALMISSILEPLATFORM") and unit:IsInCategory("STRUCTURE") then
+                table.insert(tml, unit)
+            end
+        end)
+    end
+
+    if table.empty(tml) then
+        ConExecute "UI_SelectByCategory STRUCTURE TACTICALMISSILEPLATFORM"
+    end
+
+    ConExecute "StartCommandMode order RULEUCC_Tactical"
+end
+
 -- -- Select nearest idle engineer/Reclaim mode
 -- function ReclaimSelectIDLENearestT1()
 --     local selection = GetSelectedUnits()

@@ -84,6 +84,11 @@ KeyMapper.SetUserKeyAction("Select All IDLE engineers on screen not ACU", {
     category = "selection",
     order = getDisplayOrder()
 })
+KeyMapper.SetUserKeyAction("Select all TML if none selected + fire missile mode", {
+    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()',
+    category = multiHotkeysCategory,
+    order = getDisplayOrder()
+})
 
 local function ExistGlobal(name)
     return rawget(_G, name) ~= nil
@@ -163,6 +168,11 @@ KeyMapper.SetUserKeyAction("Undo all except current queue order", {
 KeyMapper.SetUserKeyAction("Shift Undo all except current queue order", {
     action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').UndoAllExceptCurrentQueueOrder()",
     category = ordersCategory,
+    order = getDisplayOrder()
+})
+KeyMapper.SetUserKeyAction("Toggle all resource draining functions", {
+    action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').MultiPauser()",
+    category = "Economy",
     order = getDisplayOrder()
 })
 

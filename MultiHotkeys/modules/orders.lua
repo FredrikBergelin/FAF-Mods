@@ -50,33 +50,127 @@ function RemoveLastItem()
 end
 
 function UndoLastQueueOrder()
-	local units = GetSelectedUnits()
-	if (units ~= nil) then
-		local u = units[1]
-		local queue = SetCurrentFactoryForQueueDisplay(u);
-		if queue ~= nil then
-			local lastIndex = table.getn(queue)
-			local count = 1
-			if IsKeyDown('Shift') then
-				count = 5
-			end
-			DecreaseBuildCountInQueue(lastIndex, count)
-		end
-	end
+    local units = GetSelectedUnits()
+    if (units ~= nil) then
+        local u = units[1]
+        local queue = SetCurrentFactoryForQueueDisplay(u);
+        if queue ~= nil then
+            local lastIndex = table.getn(queue)
+            local count = 1
+            if IsKeyDown('Shift') then
+                count = 5
+            end
+            DecreaseBuildCountInQueue(lastIndex, count)
+        end
+    end
 end
 
 function UndoAllExceptCurrentQueueOrder()
-	local units = GetSelectedUnits()
-	if (units ~= nil) then
-		local u = units[1]
-		local queue = SetCurrentFactoryForQueueDisplay(u);
-		if queue ~= nil then
-			local lastIndex = table.getn(queue)
-			local count = 1
-			if IsKeyDown('Shift') then
-				count = 5
-			end
-			DecreaseBuildCountInQueue(lastIndex, lastIndex - 1)
-		end
-	end
+    local units = GetSelectedUnits()
+    if (units ~= nil) then
+        local u = units[1]
+        local queue = SetCurrentFactoryForQueueDisplay(u);
+        if queue ~= nil then
+            local lastIndex = table.getn(queue)
+            local count = 1
+            if IsKeyDown('Shift') then
+                count = 5
+            end
+            DecreaseBuildCountInQueue(lastIndex, lastIndex - 1)
+        end
+    end
+end
+
+-- function toggleScript(name)
+--     local selection = GetSelectedUnits()
+--     local number = unitToggleRules[name]
+--     local currentBit = GetScriptBit(selection, number)
+--     ToggleScriptBit(selection, number, currentBit)
+-- end
+
+-- function toggleAllScript()
+--     local selection = GetSelectedUnits()
+--     for i = 0, 8 do
+--         local currentBit = GetScriptBit(selection, i)
+--         ToggleScriptBit(selection, i, currentBit)
+--     end
+-- end
+
+unitToggleRules = {
+    Shield = 0,
+    Weapon = 1,
+    Jamming = 2,
+    Intel = 3,
+    Production = 4,
+    Stealth = 5,
+    Gceneric = 6,
+    Special = 7,
+    Cloak = 8,
+}
+
+function GetOnValueForScriptBit(i)
+    if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
+    return true
+end
+
+function MultiPause(setActive, selection, abilities)
+    if setActive then
+        PlaySound(Sound { Cue = "UI_Tab_Click_02", Bank = "Interface" })
+    else
+        PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
+    end
+
+    SetPaused(selection, not setActive)
+
+    from(abilities).foreach(function(i, a)
+        local ruleNumber = unitToggleRules[a]
+        if ruleNumber then
+            local onValue = GetOnValueForScriptBit(i)
+            ToggleScriptBit(selection, i, setActive and onValue or not onValue)
+        end
+    end)
+    -- local currentBit = GetScriptBit(selection, i)
+    -- ToggleScriptBit(selection, i, currentBit)
+
+end
+
+local SingleOrDoubleClick = import("/mods/common/modules/misc.lua").SingleOrDoubleClick
+function MultiPauser(abilities)
+    local selection = GetSelectedUnits()
+    if not selection or table.getn(selection) == 0 then return end
+
+    abilities = abilities or
+    { "Pause", "Shield", "Weapon", "Jamming", "Intel", "Stealth", "Generic", "Special" } -- "Production" left out
+
+    local uniqueId = "MultiPauser:" .. selection[1]:GetBlueprint().BlueprintId
+
+    SingleOrDoubleClick(uniqueId,
+        function() -- Single
+            local setActive = false
+            from(selection).foreach(function(i, currUnit)
+                if not setActive then
+                    if GetIsPaused({ currUnit }) then
+                        setActive = true
+                    end
+
+                    from(abilities).foreach(function(i, a)
+                        local ruleNumber = unitToggleRules[a]
+
+                        if ruleNumber then
+                            LOG(GetScriptBit(currUnit, ruleNumber))
+                        end
+
+                        if ruleNumber and not GetScriptBit(currUnit, ruleNumber) then
+                            LOG("TRUE")
+                            setActive = true
+                        end
+                    end)
+                end
+            end)
+            MultiPause(setActive, selection, abilities)
+        end,
+        function() -- Double
+            MultiPause(false, selection, abilities)
+        end
+    )
 end
