@@ -1,7 +1,7 @@
 local Options = UMT.Options
 local OptionVar = UMT.OptionVar.Create
 
-local modName = "Disable-Zoom-In-For-Groups-v4"
+local modName = "DisableZoomInForGroups"
 
 ---@param option string
 ---@return OptionVar
@@ -16,7 +16,7 @@ function Init(isReplay)
 
     local UIUtil = import('/lua/ui/uiutil.lua')
 
-    Options.AddOptions(modName .. "General", "Disable-Zoom-In-For-Groups-v4",
+    Options.AddOptions(modName .. "General", "DisableZoomInForGroups",
         {
             Options.Slider("zoomLevel", 1, 3000, 1, zoomLevel, 4),
         })

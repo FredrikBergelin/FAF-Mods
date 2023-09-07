@@ -1,4 +1,4 @@
-local Options = import("/mods/Disable-Zoom-In-For-Groups-v4/modules/Options.lua")
+local Options = import("/mods/DisableZoomInForGroups/modules/Options.lua")
 
 function DoubleTapBehavior(name, units)
     ---@type SelectionSetDoubleTapBehavior
