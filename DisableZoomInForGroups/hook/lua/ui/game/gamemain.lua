@@ -7,7 +7,7 @@ if ExistGlobal "UMT" and UMT.Version >= 8 then
     function CreateUI(isReplay)
         OriginalCreateUI(isReplay)
 
-        local Options = import("/mods/Disable-Zoom-In-For-Groups-v4/modules/Options.lua")
+        local Options = import("/mods/DisableZoomInForGroups/modules/Options.lua")
         Options.Init(isReplay or IsObserver()) 
     end
 else

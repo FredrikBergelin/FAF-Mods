@@ -2,6 +2,32 @@
     ['ui-mod-loader-v02'] = true,
     ['ui-mod-tools-4z0t-v10'] = true,
     ['Command-Cycler-v1-FF'] = true,
+    ['Colored-Strategic-Icons-v1-FF'] = true,
+    ['Unit-Overlays-FF-v1'] = true,
+    ['UI-Party-v1-FF'] = true
+    ['Zoom-Acceleration-v1'] = true,
+    ['Extra-Mini-Map-v3'] = true,
+    ['Mini-Map-Zoom-v2'] = true,
+    ['Advanced-Target-Priorities-v1-FF'] = true,
+    ['Move-Only-v1-FF'] = true,
+    ['Requeuer-SvartfaR-v1'] = true,
+    ['Ctrl-Group-Zoom-v4'] = true,
+    ['Group-Controls-v3'] = true,
+    ['Move-Only-v1-FF'] = true  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    ['Common-Mod-Tools-v1-FF'] = true,
+    ['ui-mod-loader-v02'] = true,
+    ['ui-mod-tools-4z0t-v10'] = true,
+    ['Command-Cycler-v1-FF'] = true,
 
     ['Requeuer-SvartfaR-v1'] = true,
     ['Group-Controls-v3'] = true,
