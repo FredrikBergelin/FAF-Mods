@@ -21,10 +21,14 @@ local focus_list = IndexedTable:new()
 local table_insert = table.insert
 local table_getsize = table.getsize
 
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
+
 local function OnUpdateUnitsBySelection()
     update_units = {}
 
+    SetHiddenSelect(true)
     UISelectionByCategory("ALLUNITS", false, false, false, false)
+    SetHiddenSelect(false)
     for _, unit in GetSelectedUnits() or {} do
         update_units[unit:GetEntityId()] = unit
     end

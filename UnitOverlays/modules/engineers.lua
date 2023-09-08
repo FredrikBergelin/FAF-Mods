@@ -211,6 +211,7 @@ local function UpdateOverlays()
 end
 
 local function CreateUnitOverlays()
+    -- TODO
     local allunits = GetUnits()
     local worldView = import("/lua/ui/game/worldview.lua").viewLeft
     for id, unit in allunits do
@@ -228,7 +229,6 @@ local function CreateUnitOverlays()
             end
         end
     end
-
     UpdateOverlays()
 end
 

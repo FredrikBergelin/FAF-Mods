@@ -9,7 +9,11 @@ local cached = {}
 local last_reset = 0
 local last_cached = 0
 
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
+
 function UpdateUnits()
+    -- TODO
+    SetHiddenSelect(true)
     Select.Hidden(function()
         units = {}
         UISelectionByCategory("ALLUNITS", false, false, false, false)
@@ -17,6 +21,7 @@ function UpdateUnits()
             units[u:GetEntityId()] = u
         end
     end)
+    SetHiddenSelect(false)
 end
 
 local function UpdateCache()

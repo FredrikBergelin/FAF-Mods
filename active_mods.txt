@@ -1,3 +1,140 @@
+Working (2) with cycling, but placing the inital factory doesn' work, it deselects when placing
+
+    ['Strategic-Rings-v9'] = true,
+    ['Requeuer-SvartfaR-v1'] = true,
+    ['McBoomBooms-Mod-v2-FF'] = true,
+    ['4z0ts-Scoreboard-v1-FF'] = true,
+    ['Fix-Weapon-Tooltip-v4'] = true,
+    ['Zoom-Acceleration-v1'] = true,
+    ['5iver-Nukem-v4'] = true,
+    ['Group-Controls-v3'] = true,
+    ['Patrol-2-Move-v6'] = true,
+    ['Selection-Deprioritizer-v6'] = true,
+    ['Common-Mod-Tools-v1-FF'] = true,
+    ['ui-mod-loader-v02'] = true,
+    ['Ejsstiil-HotkeyTechTabs-v1'] = true,
+    ['Command-Cycler-v1-FF'] = true,
+    ['ui-mod-tools-4z0t-v10'] = true,
+    ['hotbuild-overhaul-4z0t-v06'] = true,
+    ['Unit-Overlays-FF-v1'] = true,
+    ['Advanced-Target-Priorities-v1-FF'] = true,
+    ['Custom-Reminders-v1-FF'] = true,
+    ['engineer-alt-selection-v01'] = true,
+    ['Extra-Mini-Map-v3'] = true,
+    ['Multi-Hotkeys-FF-v1'] = true,
+    ['b0d9ac94-cetet-11e5-9912-ba0be0144'] = true,
+    ['context-based-templates-04'] = true,
+    ['Mini-Map-Zoom-v2'] = true,
+    ['Colored-Strategic-Icons-v1-FF'] = true,
+    ['UI-Party-v1-FF'] = true,
+    ['Disable-Zoom-In-For-Groups-v4'] = true,
+    ['Filter-Selection-v1-FF'] = true,
+    ['Move-Only-v1-FF'] = true,
+    ['EzReclaim-4z0t-v03'] = true,
+    ['Additional-Game-Speed-Keybinds-v1'] = true
+
+Working as of commit 1
+
+    ['Ejsstiil-HotkeyTechTabs-v1'] = true,
+    ['Strategic-Rings-v9'] = true,
+    ['Requeuer-SvartfaR-v1'] = true,
+    ['4z0ts-Scoreboard-v1-FF'] = true,
+    ['Fix-Weapon-Tooltip-v4'] = true,
+    ['ui-mod-tools-4z0t-v10'] = true,
+    ['hotbuild-overhaul-4z0t-v06'] = true,
+    ['Advanced-Target-Priorities-v1-FF'] = true,
+    ['UI-Party-v1-FF'] = true,
+    ['Custom-Reminders-v1-FF'] = true,
+    ['Zoom-Acceleration-v1'] = true,
+    ['engineer-alt-selection-v01'] = true,
+    ['EzReclaim-4z0t-v03'] = true,
+    ['Group-Controls-v3'] = true,
+    ['Patrol-2-Move-v6'] = true,
+    ['Extra-Mini-Map-v3'] = true,
+    ['Multi-Hotkeys-FF-v1'] = true,
+    ['b0d9ac94-cetet-11e5-9912-ba0be0144'] = true,
+    ['Colored-Strategic-Icons-v1-FF'] = true,
+    ['Mini-Map-Zoom-v2'] = true,
+    ['Common-Mod-Tools-v1-FF'] = true,
+    ['Filter-Selection-v1-FF'] = true,
+    ['Disable-Zoom-In-For-Groups-v4'] = true,
+    ['ui-mod-loader-v02'] = true,
+    ['Move-Only-v1-FF'] = true,
+    ['Command-Cycler-v1-FF'] = true,
+    ['Additional-Game-Speed-Keybinds-v1'] = true
+
+Working, so UI-Party isn't the problem per se, seems to be a combination that causes the error
+
+    ['hotbuild-overhaul-4z0t-v06'] = true,
+    ['Common-Mod-Tools-v1-FF'] = true,
+    ['UI-Party-v1-FF'] = true,
+    ['Command-Cycler-v1-FF'] = true
+
+Working
+
+    ['4z0ts-Scoreboard-v1-FF'] = true,
+    ['Command-Cycler-v1-FF'] = true,
+    ['ui-mod-tools-4z0t-v10'] = true,
+    ['hotbuild-overhaul-4z0t-v06'] = true,
+    ['Common-Mod-Tools-v1-FF'] = true,
+    ['Colored-Strategic-Icons-v1-FF'] = true,
+    ['ui-mod-loader-v02'] = true,
+    ['b0d9ac94-cetet-11e5-9912-ba0be0144'] = true,
+    ['Advanced-Target-Priorities-v1-FF'] = true,
+    ['Additional-Game-Speed-Keybinds-v1'] = true
+
+    BREAKS when adding 
+        ['Unit-Overlays-FF-v1'] = true,
+    OR  ['UI-Party-v1-FF'] = true,
+
+
+Old
+
+    ['Advanced-Target-Priorities-v1-FF'] = true,
+    ['engineer-alt-selection-v01'] = true,
+    ['Zoom-Acceleration-v1'] = true,
+    ['Patrol-2-Move-v6'] = true,
+    ['Extra-Mini-Map-v3'] = true,
+    ['Multi-Hotkeys-FF-v1'] = true,
+    ['Disable-Zoom-In-For-Groups-v4'] = true,
+    ['Selection-Deprioritizer-v6'] = true,
+    ['Mini-Map-Zoom-v2'] = true,
+    ['Colored-Strategic-Icons-v1-FF'] = true,
+    ['Filter-Selection-v1-FF'] = true,
+    ['Move-Only-v1-FF'] = true,
+    ['SubGroups-Extended-FF-v1'] = true,
+    ['Additional-Game-Speed-Keybinds-v1'] = true
+
+
+
+
+    ['Requeuer-SvartfaR-v1'] = true,
+    ['4z0ts-Scoreboard-v1-FF'] = true,
+    ['Command-Cycler-v1-FF'] = true,
+    ['ui-mod-tools-4z0t-v10'] = true,
+    ['hotbuild-overhaul-4z0t-v06'] = true,
+    ['Unit-Overlays-FF-v1'] = true,
+    ['Advanced-Target-Priorities-v1-FF'] = true,
+    ['UI-Party-v1-FF'] = true,
+    ['engineer-alt-selection-v01'] = true,
+    ['Zoom-Acceleration-v1'] = true,
+    ['Patrol-2-Move-v6'] = true,
+    ['Extra-Mini-Map-v3'] = true,
+    ['Multi-Hotkeys-FF-v1'] = true,
+    ['Disable-Zoom-In-For-Groups-v4'] = true,
+    ['Selection-Deprioritizer-v6'] = true,
+    ['Mini-Map-Zoom-v2'] = true,
+    ['Common-Mod-Tools-v1-FF'] = true,
+    ['Colored-Strategic-Icons-v1-FF'] = true,
+    ['Filter-Selection-v1-FF'] = true,
+    ['ui-mod-loader-v02'] = true,
+    ['Move-Only-v1-FF'] = true,
+    ['SubGroups-Extended-FF-v1'] = true,
+    ['Additional-Game-Speed-Keybinds-v1'] = true
+
+
+
+
     ['Common-Mod-Tools-v1-FF'] = true,
     ['ui-mod-loader-v02'] = true,
     ['ui-mod-tools-4z0t-v10'] = true,
@@ -14,12 +151,6 @@
     ['Ctrl-Group-Zoom-v4'] = true,
     ['Group-Controls-v3'] = true,
     ['Move-Only-v1-FF'] = true  
-  
-  
-  
-  
-  
-  
   
   
   

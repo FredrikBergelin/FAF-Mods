@@ -10,6 +10,7 @@ function SelectBegin()
 	isAutoSelection = true
 end
 function SelectEnd()
+	-- TODO
 	SelectUnits(oldSelection)
 	isAutoSelection = false
 end
@@ -45,14 +46,18 @@ function UpdateAllUnits()
 	end
 end
 
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
 
 function Reset()
 	local currentlySelected = GetSelectedUnits() or {}
+	-- TODO
+	SetHiddenSelect(true)
 	isAutoSelection = true
 	UISelectionByCategory("ALLUNITS", false, false, false, false)
 	AddSelection()
 	SelectUnits(currentlySelected)
 	isAutoSelection = false
+	SetHiddenSelect(false)
 end
 
 

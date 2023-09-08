@@ -25,13 +25,18 @@ function UpdateAllUnits()
 	end
 end
 
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
+
 function Reset()
 	local currentlySelected = GetSelectedUnits() or {}
+	SetHiddenSelect(true)
 	isAutoSelection = true
 	--UISelectionByCategory("AIR", false, false, false, false)
 	AddSelection()
+	-- TODO
 	SelectUnits(currentlySelected)
 	isAutoSelection = false
+	SetHiddenSelect(false)
 end
 
 function AddSelection()

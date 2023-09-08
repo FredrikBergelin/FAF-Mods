@@ -37,6 +37,10 @@ UnitOverlay = Class(Bitmap)
     ---updates the position of the unit overlay on screen
     ---@param self UnitOverlay
     Update = function(self)
+        if not self or not self.unit or self.unit:IsDead() then
+            self:Hide()
+        end
+
         local pos = self:GetParent():GetScreenPos(self.unit)
         if pos then
             self:Show()

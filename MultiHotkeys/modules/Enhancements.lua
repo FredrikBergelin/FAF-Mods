@@ -112,16 +112,21 @@ function OrderUnitEnhancement(unit, enhancement)
 
 end
 
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
+
 function ApplyToSelectedUnits(fn)
     local selection = GetSelectedUnits()
     if not selection then return end
 
+    -- TODO
+    SetHiddenSelect(true)
     UMT.Units.HiddenSelect(function()
         for _, unit in selection do
             SelectUnits { unit }
             fn(unit)
         end
     end)
+    SetHiddenSelect(false)
 end
 
 function HasPrerequisite(unit, prerequisite)

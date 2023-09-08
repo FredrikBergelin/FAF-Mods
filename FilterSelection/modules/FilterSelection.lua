@@ -33,6 +33,7 @@ function AddFilterSelection(group)
 end
 
 local lastClickTick = -9999
+
 function FilterSelect(group)
     local currentTick = GameTick()
 	if Filters[group] == nil then return AddFilterSelection(group) end
@@ -47,6 +48,7 @@ function FilterSelect(group)
 			table.insert(SelectedUnits,unit)
 		end
 	end
+	-- TODO ?
 	SelectUnits(SelectedUnits)
 	lastClickTick = currentTick
 end
