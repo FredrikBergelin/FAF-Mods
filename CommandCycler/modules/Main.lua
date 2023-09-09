@@ -3,6 +3,8 @@ local CM = import("/lua/ui/game/commandmode.lua")
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
+local cycleOrder = ""
+
 local currentUnit
 local currentUnitWithoutOrderIndex
 local selectionWithoutOrder
@@ -10,10 +12,31 @@ local selectionWithOrder
 local commandMode
 local commandModeData
 
-KeyMapper.SetUserKeyAction('Activate/return to individual cycling with saved command', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()',
-    category = 'Individual Command Cycler'
+KeyMapper.SetUserKeyAction('Cycle from closest', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")',
+    category = 'Command Cycler'
 })
+KeyMapper.SetUserKeyAction('Cycle from furthest', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('Cycle from most damaged', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage")',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('Cycle from most health', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")',
+    category = 'Command Cycler'
+})
+
+-- KeyMapper.SetUserKeyAction('Add one more unit to each selection', {
+--     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(true)',
+--     category = 'Command Cycler'
+-- })
+-- KeyMapper.SetUserKeyAction('Select rest / all', {
+--     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(true)',
+--     category = 'Command Cycler'
+-- })
 
 local function Reset(deselect)
     currentUnit = nil
@@ -53,22 +76,60 @@ function SelectNext()
     end
 
     local mousePos = GetMouseWorldPos()
-    local shortestDistance = 99999999
-    local closestUnit = nil
-    local closestUnitIndex = nil
+    local nextOrderValue = 99999999
+    local nextUnit = nil
+    local nextUnitIndex = nil
+
+    if cycleOrder == "closest" then
+        nextOrderValue = 99999999
+    elseif cycleOrder == "furthest" then
+        nextOrderValue = 0
+    elseif cycleOrder == "damage" then
+        nextOrderValue = 99999999
+    elseif cycleOrder == "health" then
+        nextOrderValue = 0
+    end
 
     for key,unit in pairs(selectionWithoutOrder) do
 
         if unit:IsDead() then
             table.remove(selectionWithoutOrder, key)
         else
+            local distanceToCursor
+            local unitHealthPercent
+            local bp
+            if cycleOrder == "closest" then
+                distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                if distanceToCursor < nextOrderValue then
+                    nextOrderValue = distanceToCursor
+                    nextUnit = unit
+                    nextUnitIndex = key
+                end
+            elseif cycleOrder == "furthest" then
+                distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                if distanceToCursor > nextOrderValue then
+                    nextOrderValue = distanceToCursor
+                    nextUnit = unit
+                    nextUnitIndex = key
+                end
+            elseif cycleOrder == "damage" then
+                bp = unit:GetBlueprint()
+                unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-            local distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                if unitHealthPercent < nextOrderValue then
+                    nextOrderValue = unitHealthPercent
+                    nextUnit = unit
+                    nextUnitIndex = key
+                end
+            elseif cycleOrder == "health" then
+                bp = unit:GetBlueprint()
+                unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-            if distanceToCursor < shortestDistance then
-                shortestDistance = distanceToCursor
-                closestUnit = unit
-                closestUnitIndex = key
+                if unitHealthPercent > nextOrderValue then
+                    nextOrderValue = unitHealthPercent
+                    nextUnit = unit
+                    nextUnitIndex = key
+                end
             end
         end
     end
@@ -78,10 +139,10 @@ function SelectNext()
         return
     end
 
-    currentUnit = closestUnit
-    currentUnitWithoutOrderIndex = closestUnitIndex
+    currentUnit = nextUnit
+    currentUnitWithoutOrderIndex = nextUnitIndex
 
-    SelectUnits { closestUnit }
+    SelectUnits { nextUnit }
     CM.StartCommandMode(commandMode, commandModeData)
 
     selectionChangedSinceLastCycle = false
@@ -102,7 +163,9 @@ function MoveCurrentToWithOrder()
     table.remove(selectionWithoutOrder, currentUnitWithoutOrderIndex)
 end
 
-function CreateOrContinueSelection()
+function CreateOrContinueSelection(order)
+    cycleOrder = order
+
     local selectedUnits = GetSelectedUnits()
 
     if selectedUnits then
@@ -120,7 +183,6 @@ function CreateOrContinueSelection()
 
     SelectNext()
 end
-
 
 function SelectionIsCurrent(units)
     if currentUnit == nil or currentUnit:IsDead() then
