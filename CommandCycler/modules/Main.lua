@@ -2,6 +2,7 @@ local Util = import('/lua/utilities.lua')
 local CM = import("/lua/ui/game/commandmode.lua")
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
+local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
 local cycleOrder = ""
 
@@ -120,6 +121,10 @@ function SelectNext()
                     nextOrderValue = unitHealthPercent
                     nextUnit = unit
                     nextUnitIndex = key
+                end
+
+                if unitHealthPercent == 1 then
+                    PlaySound(completePartialCycleSound)
                 end
             elseif cycleOrder == "health" then
                 bp = unit:GetBlueprint()
