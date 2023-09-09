@@ -13,6 +13,10 @@ local selectionWithOrder
 local commandMode
 local commandModeData
 
+KeyMapper.SetUserKeyAction('Cycle next, defaults to closest', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()',
+    category = 'Command Cycler'
+})
 KeyMapper.SetUserKeyAction('Cycle from closest', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")',
     category = 'Command Cycler'
@@ -27,6 +31,15 @@ KeyMapper.SetUserKeyAction('Cycle from most damaged', {
 })
 KeyMapper.SetUserKeyAction('Cycle from most health', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")',
+    category = 'Command Cycler'
+})
+
+KeyMapper.SetUserKeyAction('Select all and reset selection', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('Select remaining, without command', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()',
     category = 'Command Cycler'
 })
 
@@ -169,7 +182,11 @@ function MoveCurrentToWithOrder()
 end
 
 function CreateOrContinueSelection(order)
-    cycleOrder = order
+    if order == nil and cycleOrder == nil then
+        cycleOrder = "closest"
+    else
+        cycleOrder = order
+    end
 
     local selectedUnits = GetSelectedUnits()
 
@@ -187,6 +204,23 @@ function CreateOrContinueSelection(order)
     end
 
     SelectNext()
+end
+
+function SelectAll()
+    local unitsToSelect = table.unpack(selectionWithoutOrder)
+
+    for _, v in ipairs(unitsToSelect) do
+        table.insert(unitsToSelect, v)
+    end
+
+    table.insert(selectionWithoutOrder, selectionWithOrder)
+    selectionWithOrder = {}
+
+    SelectUnits(unitsToSelect)
+end
+
+function SelectRest()
+    SelectUnits(selectionWithoutOrder)
 end
 
 function SelectionIsCurrent(units)
