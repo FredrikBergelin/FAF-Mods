@@ -4,7 +4,7 @@ local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
-local cycleOrder = ""
+local cycleMode = ""
 
 local currentUnit
 local currentUnitWithoutOrderIndex
@@ -94,13 +94,13 @@ function SelectNext()
     local nextUnit = nil
     local nextUnitIndex = nil
 
-    if cycleOrder == "closest" then
+    if cycleMode == "closest" then
         nextOrderValue = 99999999
-    elseif cycleOrder == "furthest" then
+    elseif cycleMode == "furthest" then
         nextOrderValue = 0
-    elseif cycleOrder == "damage" then
+    elseif cycleMode == "damage" then
         nextOrderValue = 99999999
-    elseif cycleOrder == "health" then
+    elseif cycleMode == "health" then
         nextOrderValue = 0
     end
 
@@ -112,21 +112,21 @@ function SelectNext()
             local distanceToCursor
             local unitHealthPercent
             local bp
-            if cycleOrder == "closest" then
+            if cycleMode == "closest" then
                 distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
                 if distanceToCursor < nextOrderValue then
                     nextOrderValue = distanceToCursor
                     nextUnit = unit
                     nextUnitIndex = key
                 end
-            elseif cycleOrder == "furthest" then
+            elseif cycleMode == "furthest" then
                 distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
                 if distanceToCursor > nextOrderValue then
                     nextOrderValue = distanceToCursor
                     nextUnit = unit
                     nextUnitIndex = key
                 end
-            elseif cycleOrder == "damage" then
+            elseif cycleMode == "damage" then
                 bp = unit:GetBlueprint()
                 unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
@@ -135,11 +135,7 @@ function SelectNext()
                     nextUnit = unit
                     nextUnitIndex = key
                 end
-
-                if unitHealthPercent == 1 then
-                    PlaySound(completePartialCycleSound)
-                end
-            elseif cycleOrder == "health" then
+            elseif cycleMode == "health" then
                 bp = unit:GetBlueprint()
                 unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
@@ -150,6 +146,10 @@ function SelectNext()
                 end
             end
         end
+    end
+
+    if cycleMode == "damage" and nextOrderValue == 1 then
+        PlaySound(completePartialCycleSound)
     end
 
     if selectionWithoutOrder == nil or table.getn(selectionWithoutOrder) == 0 then
@@ -181,17 +181,17 @@ function MoveCurrentToWithOrder()
     table.remove(selectionWithoutOrder, currentUnitWithoutOrderIndex)
 end
 
-function CreateOrContinueSelection(order)
-    if order == nil and cycleOrder == nil then
-        cycleOrder = "closest"
-    else
-        cycleOrder = order
-    end
-
+function CreateOrContinueSelection(mode)
     local selectedUnits = GetSelectedUnits()
 
     if selectedUnits then
         if table.getn(selectedUnits) > 1 then
+            if mode == nil then
+                cycleMode = "closest"
+            else
+                cycleMode = mode
+            end
+
             CreateSelection()
             return
         end
@@ -207,16 +207,18 @@ function CreateOrContinueSelection(order)
 end
 
 function SelectAll()
-    local unitsToSelect = table.unpack(selectionWithoutOrder)
-
-    for _, v in ipairs(unitsToSelect) do
-        table.insert(unitsToSelect, v)
+    local allUnits = {}
+    for _, v in ipairs(selectionWithoutOrder) do
+        table.insert(allUnits, v)
+    end
+    for _, v in ipairs(selectionWithOrder) do
+        table.insert(allUnits, v)
     end
 
-    table.insert(selectionWithoutOrder, selectionWithOrder)
+    selectionWithoutOrder = allUnits
     selectionWithOrder = {}
 
-    SelectUnits(unitsToSelect)
+    SelectUnits(selectionWithoutOrder)
 end
 
 function SelectRest()
