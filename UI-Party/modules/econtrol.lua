@@ -9,8 +9,8 @@ local GameMain = import('/lua/ui/game/gamemain.lua')
 local LayoutHelpers = import('/lua/maui/layouthelpers.lua')
 
 local spendTypes = {
-	PROD = "PROD",
-	MAINT = "MAINT"
+	PRODUCTION = "PRODUCTION",
+	UPKEEP = "UPKEEP"
 }
 
 local workerTypes = {
@@ -23,7 +23,7 @@ local resourceTypes = from({
 	{ name = "Energy", econDataKey = "energyConsumed" },
 })
 
-local unitTypes;
+local unitTypes
 
 function GetUnitType(unit)
 	local unitType = unitTypes.first(function(k, unitType)
@@ -37,58 +37,41 @@ function GetUnitType(unit)
 	return unitType
 end
 
-function OnUnitBoxClick(self, event, unitBox)
-	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Ctrl then
-			if event.Modifiers.Right then
-				EnablePaused(unitBox)
-			else
-				SelectPaused(unitBox)
-			end
-		else
-			if event.Modifiers.Right then
-				DisableWorkers(unitBox)
-			else
-				SelectWorkers(unitBox)
-			end
-		end
-	end
-end
 
-function GetWorkers(unitBox)
-	local unitType = unitBox.unitType
+function GetWorkers(unitType, spendType)
+	local unitType = unitType
 	local workers = nil
-	if unitBox.spendType == spendTypes.PROD then
-		workers = unitType.prodUnits
-	elseif unitBox.spendType == spendTypes.MAINT then
-		workers = unitType.maintUnits
+	if spendType == spendTypes.PRODUCTION then
+		workers = unitType.productionUnits
+	elseif spendType == spendTypes.UPKEEP then
+		workers = unitType.upkeepUnits
 	end
 	return ValidateUnitsList(workers)
 end
 
-function DisableWorkers(unitBox)
-	local unitType = unitBox.unitType
-	local workers = GetWorkers(unitBox)
+function DisableWorkers(unitType, spendType)
+	local unitType = unitType
+	local workers = GetWorkers(unitType, spendType)
 	if table.getn(workers) == 0 then
 
 	else
-		if unitBox.spendType == spendTypes.PROD then
-			for k, v in unitType.prodUnits do
-				table.insert(unitType.pausedProdUnits, v)
+		if spendType == spendTypes.PRODUCTION then
+			for k, v in unitType.productionUnits do
+				table.insert(unitType.pausedProductionUnits, v)
 			end
 			SetPaused(workers, true)
-		elseif unitBox.spendType == spendTypes.MAINT then
-			local totalMaintMass = 0
+		elseif spendType == spendTypes.UPKEEP then
+			local totalUpkeepMass = 0
 			for k, v in pairs(workers) do
 				local econData = GetEconData(v)
 				if econData["massConsumed"] > 0 then
-					table.insert(unitType.pausedProdUnits, v)
+					table.insert(unitType.pausedProductionUnits, v)
 					SetPaused(workers, true)
 				end
 			end
 
-			for k, v in unitType.maintUnits do
-				table.insert(unitType.pausedMaintUnits, v)
+			for k, v in unitType.upkeepUnits do
+				table.insert(unitType.pausedUpkeepUnits, v)
 			end
 
 			DisableUnitsAbility(workers)
@@ -96,25 +79,24 @@ function DisableWorkers(unitBox)
 	end
 end
 
-function SelectWorkers(unitBox)
-	local unitType = unitBox.unitType
-	local workers = GetWorkers(unitBox)
-	SelectUnits(workers)
+function SelectWorkers(unitType, spendType)
+	local unitType = unitType
+	local workers = GetWorkers(unitType, spendType)
 end
 
-function GetPaused(unitBox)
-	local unitType = unitBox.unitType
+function GetPaused(unitType, spendType)
+	local unitType = unitType
 	local workers = nil
 
-	if unitBox.spendType == spendTypes.PROD then
-		workers = unitType.pausedProdUnits
-	elseif unitBox.spendType == spendTypes.MAINT then
-		workers = unitType.pausedMaintUnits
+	if spendType == spendTypes.PRODUCTION then
+		workers = unitType.pausedProductionUnits
+	elseif spendType == spendTypes.UPKEEP then
+		workers = unitType.pausedUpkeepUnits
 	end
 
 	local stillPaused = {}
 	for k, v in ValidateUnitsList(workers) do
-		if GetIsPausedBySpendType({ v }, unitBox.spendType) then
+		if GetIsPausedBySpendType({ v }, spendType) then
 			table.insert(stillPaused, v)
 		end
 	end
@@ -123,29 +105,29 @@ function GetPaused(unitBox)
 end
 
 function GetIsPausedBySpendType(units, spendType)
-	if spendType == spendTypes.PROD then
+	if spendType == spendTypes.PRODUCTION then
 		return GetIsPaused(units)
-	elseif spendType == spendTypes.MAINT then
+	elseif spendType == spendTypes.UPKEEP then
 		return GetIsUnitAbilityEnabled(units)
 	end
 end
 
-function EnablePaused(unitBox)
-	local pauseUnits = GetPaused(unitBox)
-	local unitType = unitBox.unitType
-	if unitBox.spendType == spendTypes.PROD then
+function EnablePaused(unitType, spendType)
+	local pauseUnits = GetPaused(unitType, spendType)
+	local unitType = unitType
+	if spendType == spendTypes.PRODUCTION then
 		SetPaused(pauseUnits, false)
-		unitType.pausedProdUnits = {}
-	elseif unitBox.spendType == spendTypes.MAINT then
+		unitType.pausedProductionUnits = {}
+	elseif spendType == spendTypes.UPKEEP then
 		EnableUnitsAbility(pauseUnits)
-		unitType.pausedMaintUnits = {}
+		unitType.pausedUpkeepUnits = {}
 	end
 	-- unitBox.SetOn(false)
 end
 
-function SelectPaused(unitBox)
+function SelectPaused(unitType)
 	local pauseUnits = GetPaused(unitBox)
-	local unitType = unitBox.unitType
+	local unitType = unitType
 	SelectUnits(pauseUnits)
 end
 
@@ -186,10 +168,80 @@ function GetIsUnitAbilityEnabled(units)
 	return false
 end
 
+
+local energyPercent = 0
+
+function UpdateEconTotals()
+	local econTotals = GetEconomyTotals()
+
+	local globalEnergyMax = econTotals["maxStorage"]["ENERGY"]
+	local globalEnergyCurrent = econTotals["stored"]["ENERGY"]
+
+	energyPercent = 100 * (globalEnergyCurrent / globalEnergyMax)
+	return energyPercent
+end
+
+function ActivateAutoPause(totalSel)
+	-- local totalSel = GetSelectedUnits()
+	totalSel = ValidateUnitsList(totalSel)
+	if totalSel then
+		for i, unit in totalSel do
+			local currUnit = unit
+
+			-- Update thread, per unit.
+			if (currUnit:GetWorkProgress() > 0) and (currUnit.AutoUpdateThread == nil) then
+				-- Set label in name
+				unit.originalName = unit:GetCustomName(unit)
+				local newName = "[AUTOPAUSE]"
+				if unit.originalName then
+					newName = unit.originalName .. " " .. newName
+				end
+				unit:SetCustomName(newName)
+
+				currUnit.AutoUpdateThread = ForkThread(function()
+					local prevProgress = 0
+					while not currUnit:IsDead() do
+						-- If we're done, return to original name and end.
+						if currUnit:GetWorkProgress() < prevProgress then
+							EndAutoPause(currUnit)
+							KillThread(CurrentThread())
+						end
+
+						prevProgress = currUnit:GetWorkProgress()
+
+						-- Otherwise check and pause
+						UpdateEconTotals()
+						if not GetIsPaused({ currUnit }) and (energyPercent < 70) then
+							SetPaused({ currUnit }, true)
+						elseif GetIsPaused({ currUnit }) and (energyPercent > 90) then
+							SetPaused({ currUnit }, false)
+						end
+						WaitSeconds(0.5)
+					end
+					currUnit.AutoUpdateThread = nil
+				end)
+			end
+			-- End update thread.
+		end
+	end
+end
+
+function EndAutoPause(currUnit)
+	SetPaused({ currUnit }, false)
+
+	if currUnit.originalName then
+		currUnit:SetCustomName(currUnit.originalName)
+		currUnit.originalName = nil
+	else
+		currUnit:SetCustomName("")
+	end
+	currUnit.AutoUpdateThread = nil
+end
+
 local hoverUnitType = nil
 local selectedUnitType = nil
 
-function OnClick(self, event, unitType)
+function RootEvents(self, event, unitType)
 	if event.Type == 'MouseExit' then
 		if hoverUnitType ~= nil then
 			hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
@@ -202,30 +254,30 @@ function OnClick(self, event, unitType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl then
 			if event.Modifiers.Right then
-				if unitType.typeUi.prodUnitsBox ~= nil then EnablePaused(unitType.typeUi.prodUnitsBox) end
-				if unitType.typeUi.maintUnitsBox ~= nil then EnablePaused(unitType.typeUi.maintUnitsBox) end
+				if unitType.typeUi.productionUnitsBox ~= nil then EnablePaused(unitType) end
+				if unitType.typeUi.upkeepUnitsBox ~= nil then EnablePaused(unitType.typeUi.upkeepUnitsBox) end
 			else
 				local pausedUnits = {}
-				if unitType.typeUi.prodUnitsBox ~= nil then
-					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.prodUnitsBox))).toArray()
+				if unitType.typeUi.productionUnitsBox ~= nil then
+					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.productionUnitsBox))).toArray()
 				end
 
-				if unitType.typeUi.maintUnitsBox ~= nil then
-					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.maintUnitsBox))).toArray()
+				if unitType.typeUi.upkeepUnitsBox ~= nil then
+					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.upkeepUnitsBox))).toArray()
 				end
 
 				SelectUnits(pausedUnits)
 			end
 		else
 			if event.Modifiers.Right then
-				if unitType.typeUi.prodUnitsBox ~= nil then DisableWorkers(unitType.typeUi.prodUnitsBox) end
-				if unitType.typeUi.maintUnitsBox ~= nil then DisableWorkers(unitType.typeUi.maintUnitsBox) end
+				if unitType.typeUi.productionUnitsBox ~= nil then DisableWorkers(unitType.typeUi.productionUnitsBox) end
+				if unitType.typeUi.upkeepUnitsBox ~= nil then DisableWorkers(unitType.typeUi.upkeepUnitsBox) end
 			else
 				-- if selectedUnitType ~= nil then
 				-- 	selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
 				-- end
 
-				local allUnits = from(unitType.prodUnits).concat(from(unitType.maintUnits)).toArray()
+				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
 				SelectUnits(allUnits)
 			end
 		end
@@ -241,6 +293,66 @@ function OnClick(self, event, unitType)
 	return true
 end
 
+function IconEvents(self, event, unitType)
+	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl and event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Ctrl then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		else
+			if event.Modifiers.Left then
+				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
+				SelectUnits(allUnits)
+			elseif event.Modifiers.Right then
+				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
+				ActivateAutoPause(allUnits)
+			end
+		end
+	end
+	return true
+
+	-- EnablePaused(unitBox)
+	-- SelectPaused(unitBox)
+	-- DisableWorkers(unitBox)
+	-- SelectWorkers(unitBox)
+
+end
+
+function UsageContainerEvents(self, event, unitType)
+	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl and event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Ctrl then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		else
+			if event.Modifiers.Left then
+				LOG("Select all units")
+				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
+				SelectUnits(allUnits)
+			elseif event.Modifiers.Right then
+			end
+		end
+	end
+
+	return true
+end
+
 function GetEconData(unit)
 	local mi = unit:GetMissileInfo()
 	if (mi.nukeSiloBuildCount > 0 or mi.tacticalSiloBuildCount > 0) then
@@ -250,7 +362,7 @@ function GetEconData(unit)
 
 	if Sync.FixedEcoData ~= nil then
 		local data = FixedEcoData[unit:GetEntityId()]
-		return data;
+		return data
 	else
 		-- legacy broken way, works in ui mod
 		return unit:GetEconData()
@@ -258,22 +370,23 @@ function GetEconData(unit)
 end
 
 outerPadding = 3
-barWidth = 100
+usageContainerWidth = 100
 barSeparationY = 1
 iconSize = 25
 
-rootWidth = barWidth * 2 + (outerPadding * 4) + iconSize
-iconLeftIn = barWidth + (outerPadding * 2)
+rootWidth = usageContainerWidth * 2 + (outerPadding * 4) + iconSize
+iconLeftIn = usageContainerWidth + (outerPadding * 2)
 typeHeight = iconSize + (outerPadding * 2)
-leftBarsRight = outerPadding + barWidth
-rightBarsLeftIn = barWidth + (outerPadding * 2) + iconSize + outerPadding
-barHeight = (iconSize / 2) - barSeparationY
+leftBarsRight = outerPadding + usageContainerWidth
+leftBarsLeftIn = outerPadding
+rightBarsLeftIn = usageContainerWidth + (outerPadding * 2) + iconSize + outerPadding
+usageContainerHeight = (iconSize / 2) - barSeparationY
 topBarTopIn = outerPadding
-bottomBarTopIn = outerPadding + barHeight + (barSeparationY * 2)
+bottomBarTopIn = outerPadding + usageContainerHeight + (barSeparationY * 2)
 
 function DoUpdate()
 	if UIP.GetSetting("showEcontrolResources") then
-		UpdateResourcesUi();
+		UpdateResourcesUi()
 	end
 end
 
@@ -281,18 +394,18 @@ function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
 	unitTypes.foreach(function(k, unitType)
-		unitType.prodUnits = {}
-		unitType.maintUnits = {}
+		unitType.productionUnits = {}
+		unitType.upkeepUnits = {}
 	end)
 
 	-- set unittype resource usages to 0
-	resourceTypes.foreach(function(k, rType)
-		rType.usage = 0
-		rType.maintUsage = 0
+	resourceTypes.foreach(function(k, resourceType)
+		resourceType.productionUsage = 0
+		resourceType.upkeepUsage = 0
 		unitTypes.foreach(function(k, unitType)
-			local unitTypeUsage = unitType.usage[rType.name]
-			unitTypeUsage.usage = 0
-			unitTypeUsage.maintUsage = 0
+			local unitTypeUsage = unitType.usage[resourceType.name]
+			unitTypeUsage.productionUsage = 0
+			unitTypeUsage.upkeepUsage = 0
 		end)
 	end)
 
@@ -300,106 +413,113 @@ function UpdateResourcesUi()
 	units.foreach(function(k, unit)
 		local econData = GetEconData(unit)
 		local unitToGetDataFrom = nil
-		local isMaint = false
+		local isUpkeep = false
 
 		if (econData == nil) then
-			return;
+			return
 		end
 
 		if unit:GetFocus() then
 			unitToGetDataFrom = unit:GetFocus()
-			isMaint = false
+			isUpkeep = false
 		else
 			unitToGetDataFrom = unit
-			isMaint = true
+			-- LOG("1: isUpkeep = true")
+			isUpkeep = true
 		end
 
 		local unitType = GetUnitType(unitToGetDataFrom)
 
 		local unitHasUsage = false
-		resourceTypes.foreach(function(k, rType)
-			local usage = econData[rType.econDataKey]
+		resourceTypes.foreach(function(k, resourceType)
+			local usage = econData[resourceType.econDataKey]
 
 			if (usage > 0) then
-				local unitTypeUsage = unitType.usage[rType.name]
-				if (isMaint) then
-					rType.maintUsage = rType.maintUsage + usage
-					unitTypeUsage.maintUsage = unitTypeUsage.maintUsage + usage
+				local unitTypeUsage = unitType.usage[resourceType.name]
+				if (isUpkeep) then
+					-- LOG("2: resourceType.upkeepUsage + usage")
+
+					resourceType.upkeepUsage = resourceType.upkeepUsage + usage
+					unitTypeUsage.upkeepUsage = unitTypeUsage.upkeepUsage + usage
 				else
-					rType.usage = rType.usage + usage
-					unitTypeUsage.usage = unitTypeUsage.usage + usage
+					resourceType.productionUsage = resourceType.productionUsage + usage
+					unitTypeUsage.productionUsage = unitTypeUsage.productionUsage + usage
 				end
 				unitHasUsage = true
 			end
 		end)
 
 		if unitHasUsage then
-			if (isMaint) then
-				-- LOG("isMaint")
-				table.insert(unitType.maintUnits, unit)
+			if (isUpkeep) then
+				-- LOG("3: unitHasUsage table.insert(unitType.upkeepUnits, unit)")
+				table.insert(unitType.upkeepUnits, unit)
 			else
-				-- LOG("prodUnits")
-				table.insert(unitType.prodUnits, unit)
+				-- LOG("productionUnits")
+				table.insert(unitType.productionUnits, unit)
 			end
 		end
 
-		if unitHasUsage then
-			if (isMaint) then
-				if unit:IsInCategory 'COMMAND' then
-					LOG("COMMAND")
-					table.insert(unitType.prodUnits, unit)
-				else
-					table.insert(unitType.maintUnits, unit)
-				end
-			else
-				table.insert(unitType.prodUnits, unit)
-			end
-		end
+		-- TODO:
+		-- if unitHasUsage then
+		-- 	if (isUpkeep) then
+		-- 		if unit:IsInCategory 'COMMAND' then
+		-- 			LOG("COMMAND")
+		-- 			table.insert(unitType.productionUnits, unit)
+		-- 		else
+		-- 			table.insert(unitType.upkeepUnits, unit)
+		-- 		end
+		-- 	else
+		-- 		table.insert(unitType.productionUnits, unit)
+		-- 	end
+		-- end
 	end)
 
 	-- update ui
 	local relayoutRequired = false
 	unitTypes.foreach(function(k, unitType)
-		resourceTypes.foreach(function(k, rType)
-			local unitTypeUsage = unitType.usage[rType.name]
-			local rTypeUsageTotal = rType.usage + rType.maintUsage
+		resourceTypes.foreach(function(k, resourceType)
+			local unitTypeUsage = unitType.usage[resourceType.name]
+			local resourceTypeUsageTotal = resourceType.productionUsage + resourceType.upkeepUsage
 
-			if rTypeUsageTotal == 0 then
-				unitTypeUsage.bar.Width:Set(0)
-				unitTypeUsage.maintBar.Width:Set(0)
+			if resourceTypeUsageTotal == 0 then
+				unitTypeUsage.productionContainer.bar.Width:Set(0)
+				unitTypeUsage.upkeepContainer.bar.Width:Set(0)
 			else
-				local bv = unitTypeUsage.usage
-				local bmv = unitTypeUsage.maintUsage
-				local percentify = true
-				if (percentify) then
-					bv = bv / rTypeUsageTotal * barWidth
-					bmv = bmv / rTypeUsageTotal * barWidth
-				end
+				local productionValue = unitTypeUsage.productionUsage
+				local upkeepValue = unitTypeUsage.upkeepUsage
 
-				bv = math.ceil(bv)
-				bmv = math.ceil(bmv)
+				productionValue = productionValue / resourceTypeUsageTotal * usageContainerWidth
+				upkeepValue = upkeepValue / resourceTypeUsageTotal * usageContainerWidth
 
-				if (bv > 0 and bv < 1) then bv = 1 end
-				if (bmv > 0 and bmv < 1) then bmv = 1 end
+				productionValue = math.ceil(productionValue)
+				upkeepValue = math.ceil(upkeepValue)
 
-				local shouldShow = bv + bmv > 0
+				-- Percentify
+				if (productionValue > 0 and productionValue < 1) then productionValue = 1 end
+				if (upkeepValue > 0 and upkeepValue < 1) then upkeepValue = 1 end
+
+				local shouldShow = productionValue + upkeepValue > 0
 				if (shouldShow and unitType.typeUi.uiRoot:IsHidden()) then
 					unitType.typeUi.uiRoot:Show()
-					unitType.typeUi.Clear()
+					-- unitType.typeUi.Clear()
 					relayoutRequired = true
 				end
 
 				local top = unitType.typeUi.uiRoot:Top()
 				local left = unitType.typeUi.uiRoot:Left()
-				unitTypeUsage.bar.Width:Set(bv)
-				unitTypeUsage.maintBar.Width:Set(bmv)
-				if rType.name == "MASS" then
-					unitTypeUsage.maintBar.Top:Set(top + outerPadding)
-				elseif rType.name == "ENERGY" then
-					unitTypeUsage.maintBar.Top:Set(top + outerPadding + barHeight + barSeparationY)
+				unitTypeUsage.productionContainer.bar.Width:Set(productionValue)
+
+				-- LOG("unitTypeUsage.upkeepContainer.bar.Width:Set(upkeepValue): " .. tostring(upkeepValue))
+				-- LOG(unitTypeUsage.upkeepContainer.bar)
+
+				unitTypeUsage.upkeepContainer.bar.Width:Set(upkeepValue)
+				if resourceType.name == "MASS" then
+					unitTypeUsage.upkeepContainer.bar.Top:Set(top + outerPadding)
+				elseif resourceType.name == "ENERGY" then
+					unitTypeUsage.upkeepContainer.bar.Top:Set(top + outerPadding + usageContainerHeight + barSeparationY)
 				end
 
-				unitTypeUsage.maintBar.Right:Set(left + leftBarsRight)
+				unitTypeUsage.upkeepContainer.bar.Left:Set(left + outerPadding + usageContainerWidth - upkeepValue) --  + leftBarsRight
 			end
 		end)
 	end)
@@ -434,7 +554,7 @@ function dosort(t, func)
 		sorted[i] = t[keys[i]]
 		i = i + 1
 	end
-	return sorted;
+	return sorted
 end
 
 function IsMexCategoryMatch(mexCategory, unit)
@@ -507,124 +627,22 @@ function OnMexCategoryUiClick(self, event, category)
 	return true
 end
 
-function UnitBox(typeUi, unitType, spendType, workerType)
-	local group = Group(typeUi.uiRoot);
-	group.Width:Set(20)
-	group.Height:Set(22)
 
-	local buttonBackgroundName = UIUtil.SkinnableFile('/game/avatar-factory-panel/avatar-s-e-f_bmp.dds')
-	local button = Bitmap(group, buttonBackgroundName)
-	button.Width:Set(20)
-	button.Height:Set(22)
-	LayoutHelpers.AtLeftIn(button, group, 0)
-	LayoutHelpers.AtVerticalCenterIn(button, group, 0)
+function UsageContainer(typeUi, unitType, spendType, color)
+	local container = Bitmap(typeUi.uiRoot)
+	container.Width:Set(usageContainerWidth)
+	container.Height:Set(usageContainerHeight)
+	container:InternalSetSolidColor("30"..color)
 
-	-- local check2 = Bitmap(group)
-	-- check2.Width:Set(12)
-	-- check2.Height:Set(12)
-	-- check2:InternalSetSolidColor('bbff0000')
-	-- LayoutHelpers.AtLeftIn(check2, group, 4)
-	-- LayoutHelpers.AtVerticalCenterIn(check2, group, 0)
+	container.bar = Bitmap(container)
+	container.bar.Width:Set(10)
+	container.bar.Height:Set(usageContainerHeight)
+	container.bar:InternalSetSolidColor(color)
+	container.bar:DisableHitTest()
+	LayoutHelpers.AtLeftIn(container.bar, container, 0)
+	LayoutHelpers.AtTopIn(container.bar, container, 0)
 
-	-- local check = Bitmap(group, '/textures/ui/uef/game/temp_textures/checkmark.dds')
-	-- check.Width:Set(8)
-	-- check.Height:Set(8)
-	-- LayoutHelpers.AtLeftIn(check, group, 6)
-	-- LayoutHelpers.AtVerticalCenterIn(check, group, 0)
-
-	local unitBox = {
-		group = group,
-		button = button,
-		-- check = check,
-		unitType = unitType,
-		spendType = spendType,
-		workerType = workerType,
-	};
-
-	unitBox.SetOn = function(val)
-		if val then
-			-- check:Show()
-		else
-			-- check:Hide()
-		end
-	end
-
-	unitBox.SetAltOn = function(val)
-		if val then
-			-- check2:Show()
-		else
-			-- check2:Hide()
-		end
-	end
-
-	-- unitBox.SetOn(false);
-	-- unitBox.SetAltOn(false);
-	group.HandleEvent = function(self, event)
-		OnUnitBoxClick(self, event, unitBox)
-		return true;
-	end
-
-	return unitBox
-end
-
-function SpendingBar(typeUi, unitType, spendType, workerType)
-	local group = Group(typeUi.uiRoot);
-	group.Width:Set(20)
-	group.Height:Set(22)
-
-	local buttonBackgroundName = UIUtil.SkinnableFile('/game/avatar-factory-panel/avatar-s-e-f_bmp.dds')
-	local button = Bitmap(group, buttonBackgroundName)
-	button.Width:Set(20)
-	button.Height:Set(22)
-	LayoutHelpers.AtLeftIn(button, group, 0)
-	LayoutHelpers.AtVerticalCenterIn(button, group, 0)
-
-	-- local check2 = Bitmap(group)
-	-- check2.Width:Set(12)
-	-- check2.Height:Set(12)
-	-- check2:InternalSetSolidColor('bbff0000')
-	-- LayoutHelpers.AtLeftIn(check2, group, 4)
-	-- LayoutHelpers.AtVerticalCenterIn(check2, group, 0)
-
-	-- local check = Bitmap(group, '/textures/ui/uef/game/temp_textures/checkmark.dds')
-	-- check.Width:Set(8)
-	-- check.Height:Set(8)
-	-- LayoutHelpers.AtLeftIn(check, group, 6)
-	-- LayoutHelpers.AtVerticalCenterIn(check, group, 0)
-
-	local unitBox = {
-		group = group,
-		button = button,
-		-- check = check,
-		unitType = unitType,
-		spendType = spendType,
-		workerType = workerType,
-	};
-
-	unitBox.SetOn = function(val)
-		if val then
-			-- check:Show()
-		else
-			-- check:Hide()
-		end
-	end
-
-	unitBox.SetAltOn = function(val)
-		if val then
-			-- check2:Show()
-		else
-			-- check2:Hide()
-		end
-	end
-
-	-- unitBox.SetOn(false);
-	-- unitBox.SetAltOn(false);
-	group.HandleEvent = function(self, event)
-		OnUnitBoxClick(self, event, unitBox)
-		return true;
-	end
-
-	return unitBox
+	return container
 end
 
 function buildUi()
@@ -642,7 +660,6 @@ function buildUi()
 			-- { name = "T1 Land Units", category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land1_generic_rest", spacer = 0 },
 			-- { name = "T2 Land Units", category = categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land2_generic_rest", spacer = 0 },
 			-- { name = "T3 Land Units", category = categories.LAND * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_land3_generic_rest", spacer = 0 },
-
 			{
 				name = "Air Units",
 				category = categories.AIR * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER +
@@ -667,7 +684,6 @@ function buildUi()
 			-- { name = "T1 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship1_generic_rest", spacer = 0 },
 			-- { name = "T2 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship2_generic_rest", spacer = 0 },
 			-- { name = "T3 Naval Units", category = categories.NAVAL * categories.BUILTBYTIER3FACTORY * categories.MOBILE - categories.ENGINEER, icon = "icon_ship3_generic_rest", spacer = 0 },
-
 			{
 				name = "Shields",
 				category = categories.STRUCTURE * categories.SHIELD,
@@ -775,8 +791,10 @@ function buildUi()
 
 		unitTypes.foreach(function(k, unitType)
 			unitType.usage = {}
-			unitType.pausedProdUnits = {}
-			unitType.pausedMaintUnits = {}
+			unitType.productionPaused = false
+			unitType.upkeepPaused = false
+			unitType.pausedProductionUnits = {}
+			unitType.pausedUpkeepUnits = {}
 		end)
 
 		local dragger = import('/mods/UI-Party/modules/ui.lua').buttons.dragButton
@@ -800,28 +818,22 @@ function buildUi()
 			LayoutHelpers.AtTopIn(t, uiRoot, -12)
 		end
 
-		-- CreateText("B", col0 + 5)
-		-- CreateText("U", col1 + 5)
-		-- CreateText("Resources", col3)
-
-
 		-- Loop
 		unitTypes.foreach(function(k, unitType)
 			local typeUi = {}
 			unitType.typeUi = typeUi
 
+			-- Root
 			typeUi.uiRoot = Bitmap(uiRoot)
-
-			-- TODO: Move
-			-- typeUi.uiRoot.HandleEvent = function(self, event) return OnClick(self, event, unitType) end
-
 			typeUi.uiRoot.Width:Set(rootWidth)
 			typeUi.uiRoot.Height:Set(typeHeight)
 			typeUi.uiRoot:InternalSetSolidColor('aa000000')
 			typeUi.uiRoot:Hide()
 			LayoutHelpers.AtLeftIn(typeUi.uiRoot, uiRoot, 0)
 			LayoutHelpers.AtTopIn(typeUi.uiRoot, uiRoot, 0)
+			typeUi.uiRoot.HandleEvent = function(self, event) return RootEvents(self, event, unitType) end
 
+			-- Icon
 			typeUi.stratIcon = Bitmap(typeUi.uiRoot)
 			local iconName = '/mods/UI-Party/textures/category_icons/' .. unitType.icon .. '.dds'
 			typeUi.stratIcon:SetTexture(iconName)
@@ -829,70 +841,50 @@ function buildUi()
 			typeUi.stratIcon.Width:Set(iconSize)
 			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, iconLeftIn)
 			LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
+			typeUi.stratIcon.HandleEvent = function(self, event) return IconEvents(self, event, unitType) end
 
-			-- typeUi.prodUnitsBox = UnitBox(typeUi, unitType, spendTypes.PROD, workerTypes.WORKING)
-			-- LayoutHelpers.AtLeftIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, col0)
-			-- LayoutHelpers.AtVerticalCenterIn(typeUi.prodUnitsBox.group, typeUi.uiRoot, 0)
+			-- Production Energy Bar
+			typeUi.productionEnergyContainer = UsageContainer(typeUi, unitType, spendTypes.PRODUCTION, "ff0000")
+			LayoutHelpers.AtLeftIn(typeUi.productionEnergyContainer, typeUi.uiRoot, rightBarsLeftIn)
+			LayoutHelpers.AtTopIn(typeUi.productionEnergyContainer, typeUi.uiRoot, topBarTopIn)
+			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
 
-			-- typeUi.maintUnitsBox = UnitBox(typeUi, unitType, spendTypes.MAINT, workerTypes.WORKING)
-			-- LayoutHelpers.AtLeftIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, col1)
-			-- LayoutHelpers.AtVerticalCenterIn(typeUi.maintUnitsBox.group, typeUi.uiRoot, 0)
+			-- Production Mass Bar
+			typeUi.productionMassContainer = UsageContainer(typeUi, unitType, spendTypes.PRODUCTION, "00ffff")
+			LayoutHelpers.AtLeftIn(typeUi.productionMassContainer, typeUi.uiRoot, rightBarsLeftIn)
+			LayoutHelpers.AtTopIn(typeUi.productionMassContainer, typeUi.uiRoot, bottomBarTopIn)
+			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
 
-			typeUi.Clear = function()
-				-- typeUi.prodUnitsBox.check:Hide()
-				-- typeUi.maintUnitsBox.check:Hide()
-			end
+			-- Upkeep Energy Bar
+			typeUi.upkeepEnergyContainer = UsageContainer(typeUi, unitType, spendTypes.UPKEEP, "ffa500")
+			LayoutHelpers.AtLeftIn(typeUi.upkeepEnergyContainer, typeUi.uiRoot, leftBarsLeftIn)
+			LayoutHelpers.AtTopIn(typeUi.upkeepEnergyContainer, typeUi.uiRoot, topBarTopIn)
+			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
 
-			typeUi.energyBar = Bitmap(typeUi.uiRoot)
-			typeUi.energyBar.Width:Set(10)
-			typeUi.energyBar.Height:Set(barHeight)
-			typeUi.energyBar:InternalSetSolidColor('orange')
-			typeUi.energyBar:DisableHitTest()
-			LayoutHelpers.AtLeftIn(typeUi.energyBar, typeUi.uiRoot, rightBarsLeftIn)
-			LayoutHelpers.AtTopIn(typeUi.energyBar, typeUi.uiRoot, topBarTopIn)
-
-			typeUi.massBar = Bitmap(typeUi.uiRoot)
-			typeUi.massBar.Width:Set(10)
-			typeUi.massBar.Height:Set(barHeight)
-			typeUi.massBar:InternalSetSolidColor('lime')
-			typeUi.massBar:DisableHitTest()
-			LayoutHelpers.AtLeftIn(typeUi.massBar, typeUi.uiRoot, rightBarsLeftIn)
-			LayoutHelpers.AtTopIn(typeUi.massBar, typeUi.uiRoot, bottomBarTopIn)
-
-			typeUi.energyMaintBar = Bitmap(typeUi.uiRoot)
-			typeUi.energyMaintBar.Width:Set(10)
-			typeUi.energyMaintBar.Height:Set(barHeight)
-			typeUi.energyMaintBar:InternalSetSolidColor('orange')
-			typeUi.energyMaintBar:DisableHitTest()
-			LayoutHelpers.AtRightIn(typeUi.energyMaintBar, typeUi.stratIcon, 0)
-			LayoutHelpers.AtTopIn(typeUi.energyMaintBar, typeUi.uiRoot, topBarTopIn)
-
-			typeUi.massMaintBar = Bitmap(typeUi.uiRoot)
-			typeUi.massMaintBar.Width:Set(10)
-			typeUi.massMaintBar.Height:Set(barHeight)
-			typeUi.massMaintBar:InternalSetSolidColor('lime')
-			typeUi.massMaintBar:DisableHitTest()
-			LayoutHelpers.AtRightIn(typeUi.massMaintBar, typeUi.stratIcon, 0)
-			LayoutHelpers.AtTopIn(typeUi.massMaintBar, typeUi.uiRoot, bottomBarTopIn)
+			-- Upkeep Mass Bar
+			typeUi.upkeepMassContainer = UsageContainer(typeUi, unitType, spendTypes.UPKEEP, "00ff00")
+			LayoutHelpers.AtLeftIn(typeUi.upkeepMassContainer, typeUi.uiRoot, leftBarsLeftIn)
+			LayoutHelpers.AtTopIn(typeUi.upkeepMassContainer, typeUi.uiRoot, bottomBarTopIn)
+			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
 
 			unitType.usage["Mass"] = {
-				bar = typeUi.massBar,
-				maintBar = typeUi.massMaintBar,
+				productionContainer = typeUi.productionMassContainer,
+				upkeepContainer = typeUi.upkeepMassContainer,
 				text = typeUi.massText,
-				maintText = typeUi.massMaintText,
+				upkeepText = typeUi.massUpkeepText,
 			}
 
 			unitType.usage["Energy"] = {
-				bar = typeUi.energyBar,
-				maintBar = typeUi.energyMaintBar,
+				productionContainer = typeUi.productionEnergyContainer,
+				upkeepContainer = typeUi.upkeepEnergyContainer,
 				text = typeUi.energyText,
-				maintText = typeUi.energyMaintText,
+				upkeepText = typeUi.energyUpkeepText,
 			}
 
-			typeUi.massBar:Hide()
-			typeUi.massMaintBar:Hide()
-			typeUi.energyBar:Hide()
-			typeUi.energyMaintBar:Hide()
+			-- typeUi.massProductionBar:Hide()
+			-- typeUi.massUpkeepBar:Hide()
+			-- typeUi.energyProductionBar:Hide()
+			-- typeUi.energyUpkeepBar:Hide()
 		end)
 
 		UIP.econtrol.beat = DoUpdate
