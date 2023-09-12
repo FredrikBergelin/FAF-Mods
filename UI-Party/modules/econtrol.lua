@@ -37,7 +37,6 @@ function GetUnitType(unit)
 	return unitType
 end
 
-
 function GetWorkers(unitType, spendType)
 	local unitType = unitType
 	local workers = nil
@@ -51,12 +50,18 @@ end
 
 function DisableWorkers(unitType, spendType)
 	local unitType = unitType
+	unitType.workersDisabled = true
+
 	local workers = GetWorkers(unitType, spendType)
 	if table.getn(workers) == 0 then
 
 	else
 		if spendType == spendTypes.PRODUCTION then
 			for k, v in unitType.productionUnits do
+				local econData = GetEconData(v)
+				if v.econtrol == nil then v.econtrol = {} end
+				v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+				v.econtrol.pausedMassConsumed = econData["massConsumed"]
 				table.insert(unitType.pausedProductionUnits, v)
 			end
 			SetPaused(workers, true)
@@ -65,12 +70,19 @@ function DisableWorkers(unitType, spendType)
 			for k, v in pairs(workers) do
 				local econData = GetEconData(v)
 				if econData["massConsumed"] > 0 then
+					if v.econtrol == nil then v.econtrol = {} end
+					v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+					v.econtrol.pausedMassConsumed = econData["massConsumed"]
 					table.insert(unitType.pausedProductionUnits, v)
 					SetPaused(workers, true)
 				end
 			end
 
 			for k, v in unitType.upkeepUnits do
+				local econData = GetEconData(v)
+				if v.econtrol == nil then v.econtrol = {} end
+				v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+				v.econtrol.pausedMassConsumed = econData["massConsumed"]
 				table.insert(unitType.pausedUpkeepUnits, v)
 			end
 
@@ -167,7 +179,6 @@ function GetIsUnitAbilityEnabled(units)
 	end
 	return false
 end
-
 
 local energyPercent = 0
 
@@ -326,7 +337,7 @@ function IconEvents(self, event, unitType)
 
 end
 
-function UsageContainerEvents(self, event, unitType)
+function UsageContainerEvents(self, event, unitType, spendType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl and event.Modifiers.Alt then
 			if event.Modifiers.Left then
@@ -342,10 +353,14 @@ function UsageContainerEvents(self, event, unitType)
 			end
 		else
 			if event.Modifiers.Left then
-				LOG("Select all units")
 				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
 				SelectUnits(allUnits)
 			elseif event.Modifiers.Right then
+				if spendType == spendTypes.PRODUCTION then
+					DisableWorkers(unitType, spendTypes.PRODUCTION)
+				elseif spendType == spendTypes.UPKEEP then
+					DisableWorkers(unitType, spendTypes.UPKEEP)
+				end
 			end
 		end
 	end
@@ -396,6 +411,10 @@ function UpdateResourcesUi()
 	unitTypes.foreach(function(k, unitType)
 		unitType.productionUnits = {}
 		unitType.upkeepUnits = {}
+		-- TODO
+		if unitType.workersDisabled then
+			DisableWorkers(unitType, spendTypes.PRODUCTION)
+		end
 	end)
 
 	-- set unittype resource usages to 0
@@ -412,10 +431,18 @@ function UpdateResourcesUi()
 	-- fill unittype resources with real data
 	units.foreach(function(k, unit)
 		local econData = GetEconData(unit)
+		local pausedEconData = {
+			energyConsumed = unit.econtrol and unit.econtrol.pausedEnergyConsumed or 0,
+			massConsumed = unit.econtrol and unit.econtrol.pausedMassConsumed or 0,
+		}
 		local unitToGetDataFrom = nil
 		local isUpkeep = false
 
-		if (econData == nil) then
+		if (econData == nil and
+			(pausedEconData.energyConsumed == nil or
+				pausedEconData.energyConsumed == 0) and
+			(pausedEconData.massConsumed == nil or
+				pausedEconData.massConsumed == 0)) then
 			return
 		end
 
@@ -424,7 +451,6 @@ function UpdateResourcesUi()
 			isUpkeep = false
 		else
 			unitToGetDataFrom = unit
-			-- LOG("1: isUpkeep = true")
 			isUpkeep = true
 		end
 
@@ -434,11 +460,11 @@ function UpdateResourcesUi()
 		resourceTypes.foreach(function(k, resourceType)
 			local usage = econData[resourceType.econDataKey]
 
+			usage = usage + pausedEconData[resourceType.econDataKey] or 0
+
 			if (usage > 0) then
 				local unitTypeUsage = unitType.usage[resourceType.name]
 				if (isUpkeep) then
-					-- LOG("2: resourceType.upkeepUsage + usage")
-
 					resourceType.upkeepUsage = resourceType.upkeepUsage + usage
 					unitTypeUsage.upkeepUsage = unitTypeUsage.upkeepUsage + usage
 				else
@@ -451,10 +477,8 @@ function UpdateResourcesUi()
 
 		if unitHasUsage then
 			if (isUpkeep) then
-				-- LOG("3: unitHasUsage table.insert(unitType.upkeepUnits, unit)")
 				table.insert(unitType.upkeepUnits, unit)
 			else
-				-- LOG("productionUnits")
 				table.insert(unitType.productionUnits, unit)
 			end
 		end
@@ -508,9 +532,6 @@ function UpdateResourcesUi()
 				local top = unitType.typeUi.uiRoot:Top()
 				local left = unitType.typeUi.uiRoot:Left()
 				unitTypeUsage.productionContainer.bar.Width:Set(productionValue)
-
-				-- LOG("unitTypeUsage.upkeepContainer.bar.Width:Set(upkeepValue): " .. tostring(upkeepValue))
-				-- LOG(unitTypeUsage.upkeepContainer.bar)
 
 				unitTypeUsage.upkeepContainer.bar.Width:Set(upkeepValue)
 				if resourceType.name == "MASS" then
@@ -626,7 +647,6 @@ function OnMexCategoryUiClick(self, event, category)
 
 	return true
 end
-
 
 function UsageContainer(typeUi, unitType, spendType, color)
 	local container = Bitmap(typeUi.uiRoot)
@@ -847,25 +867,25 @@ function buildUi()
 			typeUi.productionEnergyContainer = UsageContainer(typeUi, unitType, spendTypes.PRODUCTION, "ff0000")
 			LayoutHelpers.AtLeftIn(typeUi.productionEnergyContainer, typeUi.uiRoot, rightBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.productionEnergyContainer, typeUi.uiRoot, topBarTopIn)
-			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
+			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType, spendTypes.PRODUCTION) end
 
 			-- Production Mass Bar
 			typeUi.productionMassContainer = UsageContainer(typeUi, unitType, spendTypes.PRODUCTION, "00ffff")
 			LayoutHelpers.AtLeftIn(typeUi.productionMassContainer, typeUi.uiRoot, rightBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.productionMassContainer, typeUi.uiRoot, bottomBarTopIn)
-			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
+			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType, spendTypes.PRODUCTION) end
 
 			-- Upkeep Energy Bar
 			typeUi.upkeepEnergyContainer = UsageContainer(typeUi, unitType, spendTypes.UPKEEP, "ffa500")
 			LayoutHelpers.AtLeftIn(typeUi.upkeepEnergyContainer, typeUi.uiRoot, leftBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.upkeepEnergyContainer, typeUi.uiRoot, topBarTopIn)
-			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
+			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType, spendTypes.UPKEEP) end
 
 			-- Upkeep Mass Bar
 			typeUi.upkeepMassContainer = UsageContainer(typeUi, unitType, spendTypes.UPKEEP, "00ff00")
 			LayoutHelpers.AtLeftIn(typeUi.upkeepMassContainer, typeUi.uiRoot, leftBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.upkeepMassContainer, typeUi.uiRoot, bottomBarTopIn)
-			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType) end
+			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, unitType, spendTypes.UPKEEP) end
 
 			unitType.usage["Mass"] = {
 				productionContainer = typeUi.productionMassContainer,
