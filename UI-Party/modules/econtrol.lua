@@ -8,6 +8,17 @@ local UIUtil = import('/lua/ui/uiutil.lua')
 local GameMain = import('/lua/ui/game/gamemain.lua')
 local LayoutHelpers = import('/lua/maui/layouthelpers.lua')
 
+colors = {
+	energy = {
+		active = "ffa500",
+		paused = "ff0000"
+	},
+	mass = {
+		active = "00ff00",
+		paused = "00ffff",
+	}
+}
+
 local spendTypes = {
 	PRODUCTION = "PRODUCTION",
 	UPKEEP = "UPKEEP"
@@ -217,10 +228,10 @@ function ActivateAutoPause(totalSel)
 					local prevProgress = 0
 					while not currUnit:IsDead() do
 						-- If we're done, return to original name and end.
-						if currUnit:GetWorkProgress() < prevProgress then
-							EndAutoPause(currUnit)
-							KillThread(CurrentThread())
-						end
+						-- if currUnit:GetWorkProgress() < prevProgress then
+						-- 	EndAutoPause(currUnit)
+						-- 	KillThread(CurrentThread())
+						-- end
 
 						prevProgress = currUnit:GetWorkProgress()
 
@@ -308,6 +319,31 @@ function RootEvents(self, event, unitType)
 	return true
 end
 
+function StatusIconEvents(self, event, unitType, spendType)
+	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl and event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Ctrl then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		else
+			LOG("Click Status ICON")
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+				LOG("Deactivate AUTOPAUSE")
+			end
+		end
+	end
+	return true
+end
+
 function IconEvents(self, event, unitType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl and event.Modifiers.Alt then
@@ -323,31 +359,54 @@ function IconEvents(self, event, unitType)
 			elseif event.Modifiers.Right then
 			end
 		else
+			LOG("Click ICON")
 			if event.Modifiers.Left then
 				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
 				SelectUnits(allUnits)
 			elseif event.Modifiers.Right then
+				LOG("AUTOPAUSE")
 				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
 				ActivateAutoPause(allUnits)
 			end
 		end
 	end
 	return true
-
-	-- EnablePaused(unitBox)
-	-- SelectPaused(unitBox)
-	-- DisableWorkers(unitBox)
-	-- SelectWorkers(unitBox)
-
 end
+
+function SetBarColor(typeUi, spendType, active)
+	if spendType == spendTypes.PRODUCTION then
+		typeUi.productionEnergyContainer.bar:InternalSetSolidColor(active and colors.energy.active or colors.energy.paused)
+		typeUi.productionMassContainer.bar:InternalSetSolidColor(active and colors.mass.active or colors.mass.paused)
+	elseif spendType == spendTypes.UPKEEP then
+		typeUi.upkeepEnergyContainer.bar:InternalSetSolidColor(active and colors.energy.active or colors.energy.paused)
+		typeUi.upkeepMassContainer.bar:InternalSetSolidColor(active and colors.mass.active or colors.mass.paused)
+	end
+end
+
+function UpdateStatusIcon(typeUi, spendType, type)
+	if spendType == spendTypes.PRODUCTION then
+		typeUi.productionPausedStatusIcon:Hide()
+
+		if type == "paused" then
+			typeUi.productionPausedStatusIcon:Show()
+		elseif type == "autopaused" then
+		elseif type == "prioritized" then
+		end
+	elseif spendType == spendTypes.UPKEEP then
+		typeUi.upkeepPausedStatusIcon:Hide()
+
+		if type == "paused" then
+			typeUi.upkeepPausedStatusIcon:Show()
+		elseif type == "autopaused" then
+		elseif type == "prioritized" then
+		end
+	end
+end
+
 
 -- SpendTypeContainerEvents
 -- Set color from here to have both colors change
-function SpendTypeContainerEvents(self, event, container, unitType, spendType, colors)
-	LOG("SpendTypeContainerEvents")
-end
-
-function UsageContainerEvents(self, event, container, unitType, spendType, colors)
+function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl and event.Modifiers.Alt then
 			if event.Modifiers.Left then
@@ -367,23 +426,38 @@ function UsageContainerEvents(self, event, container, unitType, spendType, color
 				SelectUnits(allUnits)
 			elseif event.Modifiers.Right then
 				if unitType.workersDisabled then
-					LOG("Click Enable")
 					EnablePaused(unitType, spendType)
-					container.bar:InternalSetSolidColor(colors.active)
+					SetBarColor(typeUi, spendType, true)
+					UpdateStatusIcon(typeUi, spendType, "")
 				else
-					LOG("Click Disable")
 					DisableWorkers(unitType, spendType)
-					container.bar:InternalSetSolidColor(colors.paused)
+					SetBarColor(typeUi, spendType, false)
+					UpdateStatusIcon(typeUi, spendType, "paused")
 				end
-				-- if spendType == spendTypes.PRODUCTION then
-				-- 	DisableWorkers(unitType, spendTypes.PRODUCTION)
-				-- elseif spendType == spendTypes.UPKEEP then
-				-- 	DisableWorkers(unitType, spendTypes.UPKEEP)
-				-- end
 			end
 		end
 	end
+	return true
+end
 
+function UsageContainerEvents(self, event, typeUi, unitType, spendType, resourceType)
+	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl and event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Ctrl then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		else
+			SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
+		end
+	end
 	return true
 end
 
@@ -403,32 +477,23 @@ function GetEconData(unit)
 	end
 end
 
-colors = {
-	energy = {
-		active = "ffa500",
-		paused = "ff0000"
-	},
-	mass = {
-		active = "00ff00",
-		paused = "00ffff",
-	}
-}
-
 outerPadding = 3
 usageContainerWidth = 100
 barSeparationY = 1
 iconSize = 25
 
-rootWidth = usageContainerWidth * 2 + (outerPadding * 4) + iconSize
-iconLeftIn = usageContainerWidth + (outerPadding * 2)
+rootWidth = (iconSize * 2) + usageContainerWidth * 2 + (outerPadding * 6) + iconSize
+iconLeftIn = iconSize + usageContainerWidth + (outerPadding * 2)
 typeHeight = iconSize + (outerPadding * 2)
-leftBarsRight = outerPadding + usageContainerWidth
-leftBarsLeftIn = outerPadding
-rightBarsLeftIn = usageContainerWidth + (outerPadding * 2) + iconSize + outerPadding
+leftBarsLeftIn = iconSize + outerPadding * 2
+rightBarsLeftIn = iconSize + usageContainerWidth + (outerPadding * 4) + iconSize
 usageContainerHeight = (iconSize / 2) - barSeparationY
 
 topBarTopIn = outerPadding
 bottomBarTopIn = usageContainerHeight + barSeparationY
+
+upkeepStatusIconLeftIn = outerPadding
+productionStatusIconLeftIn = rootWidth - iconSize - outerPadding
 
 function DoUpdate()
 	if UIP.GetSetting("showEcontrolResources") then
@@ -470,13 +535,18 @@ function UpdateResourcesUi()
 		local unitToGetDataFrom = nil
 		local isUpkeep = false
 
-		if (econData == nil and
-			(pausedEconData.energyConsumed == nil or
-				pausedEconData.energyConsumed == 0) and
-			(pausedEconData.massConsumed == nil or
-				pausedEconData.massConsumed == 0)) then
+		if econData == nil then
 			return
 		end
+
+		-- Causes problem, sometimes shows upkeep usage after prod usage is finished, seems to work without it 
+		-- if (econData == nil and
+		-- 	(pausedEconData.energyConsumed == nil or
+		-- 		pausedEconData.energyConsumed == 0) and
+		-- 	(pausedEconData.massConsumed == nil or
+		-- 		pausedEconData.massConsumed == 0)) then
+		-- 	return
+		-- end
 
 		if unit:GetFocus() then
 			unitToGetDataFrom = unit:GetFocus()
@@ -492,7 +562,7 @@ function UpdateResourcesUi()
 		resourceTypes.foreach(function(k, resourceType)
 			local usage = econData[resourceType.econDataKey]
 
-			usage = usage + pausedEconData[resourceType.econDataKey] or 0
+			usage = usage + (pausedEconData[resourceType.econDataKey] or 0)
 
 			if (usage > 0) then
 				local unitTypeUsage = unitType.usage[resourceType.name]
@@ -572,7 +642,7 @@ function UpdateResourcesUi()
 					unitTypeUsage.upkeepContainer.bar.Top:Set(top + outerPadding + usageContainerHeight + barSeparationY)
 				end
 
-				unitTypeUsage.upkeepContainer.bar.Left:Set(left + outerPadding + usageContainerWidth - upkeepValue) --  + leftBarsRight
+				unitTypeUsage.upkeepContainer.bar.Left:Set(left + outerPadding * 2 + iconSize + usageContainerWidth - upkeepValue)
 			end
 		end)
 	end)
@@ -689,11 +759,18 @@ function SpendTypeContainer(root, spendType)
 	return container
 end
 
-function UsageContainer(root, unitType, spendType, color)
+function UsageContainer(root, unitType, spendType, resourceType)
+	local color
+	if resourceType == "Energy" then
+		color = colors.energy.active
+	elseif resourceType == "Mass" then
+		color = colors.mass.active
+	end
+
 	local container = Bitmap(root)
 	container.Width:Set(usageContainerWidth)
 	container.Height:Set(usageContainerHeight)
-	container:InternalSetSolidColor("30"..color)
+	container:InternalSetSolidColor("15"..color)
 
 	container.bar = Bitmap(container)
 	container.bar.Width:Set(10)
@@ -702,6 +779,17 @@ function UsageContainer(root, unitType, spendType, color)
 	container.bar:DisableHitTest()
 	LayoutHelpers.AtLeftIn(container.bar, container, 0)
 	LayoutHelpers.AtTopIn(container.bar, container, 0)
+
+	return container
+end
+
+function StatusIcon(root, spendType, iconPath)
+	local container = Bitmap(root)
+	container:SetTexture(iconPath)
+	container.Height:Set(iconSize)
+	container.Width:Set(iconSize)
+	LayoutHelpers.AtLeftIn(container, root, spendType == spendTypes.PRODUCTION and productionStatusIconLeftIn or upkeepStatusIconLeftIn)
+	LayoutHelpers.AtVerticalCenterIn(container, root, 0)
 
 	return container
 end
@@ -904,57 +992,54 @@ function buildUi()
 			LayoutHelpers.AtVerticalCenterIn(typeUi.stratIcon, typeUi.uiRoot, 0)
 			typeUi.stratIcon.HandleEvent = function(self, event) return IconEvents(self, event, unitType) end
 
-			-- Production bars Container
+			-- Production paused status icon
+			typeUi.productionPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
+			typeUi.productionPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
+			typeUi.productionPausedStatusIcon:Hide()
+
+			-- Upkeep paused status icon
+			typeUi.upkeepPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
+			typeUi.upkeepPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
+			typeUi.upkeepPausedStatusIcon:Hide()
+
+
+			-- Production Container
 			typeUi.productionContainer = SpendTypeContainer(typeUi.uiRoot, spendTypes.PRODUCTION)
 			LayoutHelpers.AtLeftIn(typeUi.productionContainer, typeUi.uiRoot, rightBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.productionContainer, typeUi.uiRoot, topBarTopIn)
-			typeUi.productionContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi.productionEnergyContainer, unitType, spendTypes.PRODUCTION, colors.energy) end
+			typeUi.productionContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi, unitType, spendTypes.PRODUCTION) end
 
-			-- Production Energy Bar
-			typeUi.productionEnergyContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION, colors.energy.active)
+			-- Production energy bar
+			typeUi.productionEnergyContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION, "Energy")
 			LayoutHelpers.AtLeftIn(typeUi.productionEnergyContainer, typeUi.productionContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.productionEnergyContainer, typeUi.productionContainer, 0)
-			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi.productionEnergyContainer, unitType, spendTypes.PRODUCTION, colors.energy) end
+			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.PRODUCTION, "Energy") end
 
-			-- Production Mass Bar
-			typeUi.productionMassContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION, colors.mass.active)
+			-- Production mass bar
+			typeUi.productionMassContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION, "Mass")
 			LayoutHelpers.AtLeftIn(typeUi.productionMassContainer, typeUi.productionContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.productionMassContainer, typeUi.productionContainer, bottomBarTopIn)
-			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi.productionMassContainer, unitType, spendTypes.PRODUCTION, colors.mass) end
+			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.PRODUCTION, "Mass") end
 
-			-- Upkeep bars Container
+			-- Upkeep Container
 			typeUi.upkeepContainer = SpendTypeContainer(typeUi.uiRoot, spendTypes.UPKEEP)
 			LayoutHelpers.AtLeftIn(typeUi.upkeepContainer, typeUi.uiRoot, leftBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.upkeepContainer, typeUi.uiRoot, topBarTopIn)
-			typeUi.upkeepContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi.upkeepEnergyContainer, unitType, spendTypes.PRODUCTION, colors.energy) end
+			typeUi.upkeepContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP) end
 
-			-- Upkeep Energy Bar
-			typeUi.upkeepEnergyContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, colors.energy.active)
+			-- Upkeep energy bar
+			typeUi.upkeepEnergyContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, "Energy")
 			LayoutHelpers.AtLeftIn(typeUi.upkeepEnergyContainer, typeUi.upkeepContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.upkeepEnergyContainer, typeUi.upkeepContainer, 0)
-			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi.upkeepEnergyContainer, unitType, spendTypes.PRODUCTION, colors.energy) end
+			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP, "Energy") end
 
-			-- Upkeep Mass Bar
-			typeUi.upkeepMassContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, colors.mass.active)
+			-- Upkeep mass bar
+			typeUi.upkeepMassContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, "Mass")
 			LayoutHelpers.AtLeftIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, bottomBarTopIn)
-			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi.upkeepMassContainer, unitType, spendTypes.PRODUCTION, colors.mass) end
-			
+			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP, "Mass") end
 
-			-- -- Upkeep bars Container
-			-- typeUi.upkeepContainer = SpendTypeContainer(typeUi,spendTypes.UPKEEP)
 
-			-- -- Upkeep Energy Bar
-			-- typeUi.upkeepEnergyContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, colors.energy.active)
-			-- LayoutHelpers.AtLeftIn(typeUi.upkeepEnergyContainer, typeUi.upkeepContainer, leftBarsLeftIn)
-			-- LayoutHelpers.AtTopIn(typeUi.upkeepEnergyContainer, typeUi.upkeepContainer, topBarTopIn)
-			-- typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi.upkeepEnergyContainer, unitType, spendTypes.UPKEEP, colors.energy) end
-
-			-- -- Upkeep Mass Bar
-			-- typeUi.upkeepMassContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, colors.mass.active)
-			-- LayoutHelpers.AtLeftIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, leftBarsLeftIn)
-			-- LayoutHelpers.AtTopIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, bottomBarTopIn)
-			-- typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi.upkeepMassContainer, unitType, spendTypes.UPKEEP, colors.mass) end
 
 			unitType.usage["Mass"] = {
 				productionContainer = typeUi.productionMassContainer,
@@ -969,11 +1054,6 @@ function buildUi()
 				text = typeUi.energyText,
 				upkeepText = typeUi.energyUpkeepText,
 			}
-
-			-- typeUi.massProductionBar:Hide()
-			-- typeUi.massUpkeepBar:Hide()
-			-- typeUi.energyProductionBar:Hide()
-			-- typeUi.energyUpkeepBar:Hide()
 		end)
 
 		UIP.econtrol.beat = DoUpdate
