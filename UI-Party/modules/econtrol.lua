@@ -483,10 +483,10 @@ barSeparationY = 1
 iconSize = 25
 
 rootWidth = (iconSize * 2) + usageContainerWidth * 2 + (outerPadding * 6) + iconSize
-iconLeftIn = iconSize + usageContainerWidth + (outerPadding * 2)
+iconLeftIn = iconSize + usageContainerWidth + (outerPadding * 3)
 typeHeight = iconSize + (outerPadding * 2)
-leftBarsLeftIn = iconSize + outerPadding * 2
-rightBarsLeftIn = iconSize + usageContainerWidth + (outerPadding * 4) + iconSize
+leftBarsLeftIn = (outerPadding * 2) + iconSize
+rightBarsLeftIn = (outerPadding * 4) + (iconSize * 2) + usageContainerWidth
 usageContainerHeight = (iconSize / 2) - barSeparationY
 
 topBarTopIn = outerPadding
@@ -627,7 +627,9 @@ function UpdateResourcesUi()
 				local shouldShow = productionValue + upkeepValue > 0
 				if (shouldShow and unitType.typeUi.uiRoot:IsHidden()) then
 					unitType.typeUi.uiRoot:Show()
-					-- unitType.typeUi.Clear()
+					-- unitType.typeUi.productionPausedStatusIcon.Hide()
+					-- unitType.typeUi.upkeepPausedStatusIcon.Hide()
+					unitType.typeUi.Clear()
 					relayoutRequired = true
 				end
 
@@ -995,13 +997,15 @@ function buildUi()
 			-- Production paused status icon
 			typeUi.productionPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
 			typeUi.productionPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
-			typeUi.productionPausedStatusIcon:Hide()
 
 			-- Upkeep paused status icon
 			typeUi.upkeepPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
 			typeUi.upkeepPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
-			typeUi.upkeepPausedStatusIcon:Hide()
 
+			typeUi.Clear = function()
+				typeUi.productionPausedStatusIcon:Hide()
+				typeUi.upkeepPausedStatusIcon:Hide()
+			end
 
 			-- Production Container
 			typeUi.productionContainer = SpendTypeContainer(typeUi.uiRoot, spendTypes.PRODUCTION)
@@ -1038,7 +1042,6 @@ function buildUi()
 			LayoutHelpers.AtLeftIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, bottomBarTopIn)
 			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP, "Mass") end
-
 
 
 			unitType.usage["Mass"] = {
