@@ -106,6 +106,7 @@ end
 function SelectWorkers(unitType, spendType)
 	local unitType = unitType
 	local workers = GetWorkers(unitType, spendType)
+	SelectUnits(workers)
 end
 
 function GetPaused(unitType, spendType)
@@ -238,6 +239,10 @@ function ActivateAutoPause(totalSel)
 						-- Otherwise check and pause
 						UpdateEconTotals()
 						if not GetIsPaused({ currUnit }) and (energyPercent < 70) then
+							local econData = GetEconData(currUnit)
+							if currUnit.econtrol == nil then currUnit.econtrol = {} end
+							currUnit.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+							currUnit.econtrol.pausedMassConsumed = econData["massConsumed"]
 							SetPaused({ currUnit }, true)
 						elseif GetIsPaused({ currUnit }) and (energyPercent > 90) then
 							SetPaused({ currUnit }, false)
@@ -252,16 +257,21 @@ function ActivateAutoPause(totalSel)
 	end
 end
 
-function EndAutoPause(currUnit)
-	SetPaused({ currUnit }, false)
+function EndAutoPause(units)
+	LOG("EndAutoPause")
+	from(units).foreach(function (k, unit)
+		LOG("unit")
+		SetPaused({ unit }, false)
 
-	if currUnit.originalName then
-		currUnit:SetCustomName(currUnit.originalName)
-		currUnit.originalName = nil
-	else
-		currUnit:SetCustomName("")
-	end
-	currUnit.AutoUpdateThread = nil
+		if unit.originalName then
+			unit:SetCustomName(unit.originalName)
+			unit.originalName = nil
+		else
+			unit:SetCustomName("")
+		end
+		KillThread(unit.AutoUpdateThread)
+		unit.AutoUpdateThread = nil
+	end)
 end
 
 local hoverUnitType = nil
@@ -353,6 +363,8 @@ function IconEvents(self, event, unitType)
 		elseif event.Modifiers.Ctrl then
 			if event.Modifiers.Left then
 			elseif event.Modifiers.Right then
+				-- local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
+				-- ActivateAutoPause(allUnits)
 			end
 		elseif event.Modifiers.Alt then
 			if event.Modifiers.Left then
@@ -364,9 +376,7 @@ function IconEvents(self, event, unitType)
 				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
 				SelectUnits(allUnits)
 			elseif event.Modifiers.Right then
-				LOG("AUTOPAUSE")
-				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
-				ActivateAutoPause(allUnits)
+
 			end
 		end
 	end
@@ -386,26 +396,31 @@ end
 function UpdateStatusIcon(typeUi, spendType, type)
 	if spendType == spendTypes.PRODUCTION then
 		typeUi.productionPausedStatusIcon:Hide()
+		typeUi.productionAutoPausedStatusIcon:Hide()
+		typeUi.productionPrioritizedStatusIcon:Hide()
 
 		if type == "paused" then
 			typeUi.productionPausedStatusIcon:Show()
 		elseif type == "autopaused" then
+			typeUi.productionAutoPausedStatusIcon:Show()
 		elseif type == "prioritized" then
+			typeUi.productionPrioritizedStatusIcon:Show()
 		end
 	elseif spendType == spendTypes.UPKEEP then
 		typeUi.upkeepPausedStatusIcon:Hide()
+		typeUi.upkeepAutoPausedStatusIcon:Hide()
+		typeUi.upkeepPrioritizedStatusIcon:Hide()
 
 		if type == "paused" then
 			typeUi.upkeepPausedStatusIcon:Show()
 		elseif type == "autopaused" then
+			typeUi.upkeepAutoPausedStatusIcon:Show()
 		elseif type == "prioritized" then
+			typeUi.upkeepPrioritizedStatusIcon:Show()
 		end
 	end
 end
 
-
--- SpendTypeContainerEvents
--- Set color from here to have both colors change
 function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl and event.Modifiers.Alt then
@@ -418,22 +433,27 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 			end
 		elseif event.Modifiers.Alt then
 			if event.Modifiers.Left then
+				if spendType == spendTypes.PRODUCTION then
+					SelectUnits(unitType.productionUnits)
+				elseif spendType == spendTypes.PRODUCTION then
+					SelectUnits(unitType.upkeepUnits)
+				end
 			elseif event.Modifiers.Right then
+				if spendType == spendTypes.PRODUCTION then
+					SelectWorkers(unitType, spendType)
+				elseif spendType == spendTypes.PRODUCTION then
+					SelectWorkers(unitType, spendType)
+				end
 			end
 		else
 			if event.Modifiers.Left then
-				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
-				SelectUnits(allUnits)
+				EnablePaused(unitType, spendType)
+				SetBarColor(typeUi, spendType, true)
+				UpdateStatusIcon(typeUi, spendType, "")
 			elseif event.Modifiers.Right then
-				if unitType.workersDisabled then
-					EnablePaused(unitType, spendType)
-					SetBarColor(typeUi, spendType, true)
-					UpdateStatusIcon(typeUi, spendType, "")
-				else
-					DisableWorkers(unitType, spendType)
-					SetBarColor(typeUi, spendType, false)
-					UpdateStatusIcon(typeUi, spendType, "paused")
-				end
+				DisableWorkers(unitType, spendType)
+				SetBarColor(typeUi, spendType, false)
+				UpdateStatusIcon(typeUi, spendType, "paused")
 			end
 		end
 	end
@@ -448,11 +468,23 @@ function UsageContainerEvents(self, event, typeUi, unitType, spendType, resource
 			end
 		elseif event.Modifiers.Ctrl then
 			if event.Modifiers.Left then
+				LOG("END AUTOPAUSE")
+				if spendType == spendTypes.PRODUCTION then
+					EndAutoPause(unitType.productionUnits)
+					UpdateStatusIcon(typeUi, spendType, "")
+				elseif spendType == spendTypes.UPKEEP then
+					EndAutoPause(unitType.upkeepUnits)
+					UpdateStatusIcon(typeUi, spendType, "")
+				end
 			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Alt then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
+				LOG("AUTOPAUSE")
+				if spendType == spendTypes.PRODUCTION then
+					ActivateAutoPause(unitType.productionUnits)
+					UpdateStatusIcon(typeUi, spendType, "autopaused")
+				elseif spendType == spendTypes.UPKEEP then
+					ActivateAutoPause(unitType.upkeepUnits)
+					UpdateStatusIcon(typeUi, spendType, "autopaused")
+				end
 			end
 		else
 			SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
@@ -539,15 +571,6 @@ function UpdateResourcesUi()
 			return
 		end
 
-		-- Causes problem, sometimes shows upkeep usage after prod usage is finished, seems to work without it 
-		-- if (econData == nil and
-		-- 	(pausedEconData.energyConsumed == nil or
-		-- 		pausedEconData.energyConsumed == 0) and
-		-- 	(pausedEconData.massConsumed == nil or
-		-- 		pausedEconData.massConsumed == 0)) then
-		-- 	return
-		-- end
-
 		if unit:GetFocus() then
 			unitToGetDataFrom = unit:GetFocus()
 			isUpkeep = false
@@ -577,6 +600,7 @@ function UpdateResourcesUi()
 			end
 		end)
 
+		LOG("unitHasUsage: "..tostring(unitHasUsage))
 		if unitHasUsage then
 			if (isUpkeep) then
 				table.insert(unitType.upkeepUnits, unit)
@@ -998,13 +1022,33 @@ function buildUi()
 			typeUi.productionPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
 			typeUi.productionPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
 
+			-- Production autopaused status icon
+			typeUi.productionAutoPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_autopaused.dds')
+			typeUi.productionAutoPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
+
+			-- Production prioritized status icon
+			typeUi.productionPrioritizedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_prioritized.dds')
+			typeUi.productionPrioritizedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
+
 			-- Upkeep paused status icon
 			typeUi.upkeepPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
 			typeUi.upkeepPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
 
+			-- Upkeep autopaused status icon
+			typeUi.upkeepAutoPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_autopaused.dds')
+			typeUi.upkeepAutoPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
+
+			-- Upkeep prioritized status icon
+			typeUi.upkeepPrioritizedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_prioritized.dds')
+			typeUi.upkeepPrioritizedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
+
 			typeUi.Clear = function()
 				typeUi.productionPausedStatusIcon:Hide()
+				typeUi.productionAutoPausedStatusIcon:Hide()
+				typeUi.productionPrioritizedStatusIcon:Hide()
 				typeUi.upkeepPausedStatusIcon:Hide()
+				typeUi.upkeepAutoPausedStatusIcon:Hide()
+				typeUi.upkeepPrioritizedStatusIcon:Hide()
 			end
 
 			-- Production Container
