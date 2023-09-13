@@ -59,6 +59,42 @@ function GetWorkers(unitType, spendType)
 	return ValidateUnitsList(workers)
 end
 
+function PauseProduction(unitType, spendType)
+	local workers = GetWorkers(unitType, spendType)
+	for k, v in unitType.productionUnits do
+		local econData = GetEconData(v)
+		if v.econtrol == nil then v.econtrol = {} end
+		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+		v.econtrol.pausedMassConsumed = econData["massConsumed"]
+		table.insert(unitType.pausedProductionUnits, v)
+	end
+	SetPaused(workers, true)
+end
+
+function DisableUpkeep(unitType, spendType)
+	local workers = GetWorkers(unitType, spendType)
+	for k, v in pairs(workers) do
+		local econData = GetEconData(v)
+		if econData["massConsumed"] > 0 then
+			if v.econtrol == nil then v.econtrol = {} end
+			v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+			v.econtrol.pausedMassConsumed = econData["massConsumed"]
+			table.insert(unitType.pausedProductionUnits, v)
+			SetPaused(workers, true)
+		end
+	end
+
+	for k, v in unitType.upkeepUnits do
+		local econData = GetEconData(v)
+		if v.econtrol == nil then v.econtrol = {} end
+		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+		v.econtrol.pausedMassConsumed = econData["massConsumed"]
+		table.insert(unitType.pausedUpkeepUnits, v)
+	end
+
+	DisableUnitsAbility(unitType.upkeepUnits)
+end
+
 function DisableWorkers(unitType, spendType)
 	local unitType = unitType
 
@@ -67,36 +103,9 @@ function DisableWorkers(unitType, spendType)
 	if table.getn(workers) == 0 then
 	else
 		if spendType == spendTypes.PRODUCTION then
-			for k, v in unitType.productionUnits do
-				local econData = GetEconData(v)
-				if v.econtrol == nil then v.econtrol = {} end
-				v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
-				v.econtrol.pausedMassConsumed = econData["massConsumed"]
-				table.insert(unitType.pausedProductionUnits, v)
-			end
-			SetPaused(workers, true)
+			PauseProduction(unitType, spendType)
 		elseif spendType == spendTypes.UPKEEP then
-			local totalUpkeepMass = 0
-			for k, v in pairs(workers) do
-				local econData = GetEconData(v)
-				if econData["massConsumed"] > 0 then
-					if v.econtrol == nil then v.econtrol = {} end
-					v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
-					v.econtrol.pausedMassConsumed = econData["massConsumed"]
-					table.insert(unitType.pausedProductionUnits, v)
-					SetPaused(workers, true)
-				end
-			end
-
-			for k, v in unitType.upkeepUnits do
-				local econData = GetEconData(v)
-				if v.econtrol == nil then v.econtrol = {} end
-				v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
-				v.econtrol.pausedMassConsumed = econData["massConsumed"]
-				table.insert(unitType.pausedUpkeepUnits, v)
-			end
-
-			DisableUnitsAbility(workers)
+			DisableUpkeep(unitType, spendType)
 		end
 	end
 end
@@ -202,7 +211,7 @@ function AutoPauseSelection(totalSel)
 		for i, unit in totalSel do
 			local currUnit = unit
 			-- Update thread, per unit.
-			if (currUnit:GetWorkProgress() > 0) and (currUnit.AutoUpdateThread == nil) then
+			if currUnit.AutoUpdateThread == nil then
 				-- Set label in name
 				currUnit.originalName = currUnit:GetCustomName(currUnit)
 				local newName = "[AUTOPAUSE]"
@@ -210,78 +219,65 @@ function AutoPauseSelection(totalSel)
 					newName = currUnit.originalName .. " " .. newName
 				end
 				currUnit:SetCustomName(newName)
-
-				currUnit.AutoUpdateThread = ForkThread(function()
-					local prevProgress = 0
-					while not currUnit:IsDead() do
-						-- Check if still working on same construction type, otherwise end autopause
-						-- Also, should reactivate autopause automatically for new units just like pause
-						-- Do this by ForkThread each unit just like above, also for pause
-
-						-- if currUnit:GetWorkProgress() < prevProgress then
-						-- 	EndAutoPause(currUnit)
-						-- 	KillThread(CurrentThread())
-						-- end
-
-						prevProgress = currUnit:GetWorkProgress()
-
-						-- Otherwise check and pause
-						UpdateEconTotals()
-						if not GetIsPaused({ currUnit }) and (energyPercent < 70) then
-							local econData = GetEconData(currUnit)
-							if currUnit.econtrol == nil then currUnit.econtrol = {} end
-							currUnit.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
-							currUnit.econtrol.pausedMassConsumed = econData["massConsumed"]
-							SetPaused({ currUnit }, true)
-						elseif GetIsPaused({ currUnit }) and (energyPercent > 90) then
-							SetPaused({ currUnit }, false)
-						end
-						WaitSeconds(0.5)
-					end
-					currUnit.AutoUpdateThread = nil
-				end)
 			end
-			-- End update thread.
 		end
 	end
 end
 
 function ActivateAutoPause(unitType, spendType)
-	if spendType == spendTypes.PRODUCTION then
-		unitType.productionAutoPaused = true
-		AutoPauseSelection(unitType.productionUnits, spendType)
-	elseif spendType == spendTypes.UPKEEP then
-		unitType.upkeepAutoPaused = true
-		AutoPauseSelection(unitType.upkeepUnits, spendType)
-	end
+	unitType[spendType].autoPaused = true
+
+	unitType.AutoUpdateThread = ForkThread(function()
+		-- TODO: update everywhere
+		while unitType[spendType].autoPaused do
+			-- Check if still working on same construction type, otherwise end autopause
+			-- Also, should reactivate autopause automatically for new units just like pause
+			-- Do this by ForkThread each unit just like above, also for pause
+
+			-- if currUnit:GetWorkProgress() < prevProgress then
+			-- 	EndAutoPause(currUnit)
+			-- 	KillThread(CurrentThread())
+			-- end
+
+			UpdateEconTotals()
+			if energyPercent < 70 then
+				DisableWorkers(unitType, spendType)
+			elseif energyPercent > 90 then
+				EnablePaused(unitType, spendType)
+			end
+			WaitSeconds(0.5)
+		end
+		unitType.AutoUpdateThread = nil
+	end)
+	-- End update thread.
 end
 
 function EndAutoPause(unitType, spendType)
+	unitType[spendType].autoPaused = false
 	local units
 	if spendType == spendTypes.PRODUCTION then
 		units = unitType.productionUnits
-		unitType.productionAutoPaused = false
 	elseif spendType == spendTypes.UPKEEP then
 		units = unitType.upkeepUnits
-		unitType.upkeepAutoPaused = false
 	end
 
 	EndAutoPauseSelection(units)
+
+	KillThread(unitType.AutoUpdateThread)
+	unitType.AutoUpdateThread = nil
+
+	EnablePaused(unitType, spendType)
 end
 
 function EndAutoPauseSelection(units)
 	LOG("EndAutoPauseSelection")
 	from(units).foreach(function (k, unit)
-		SetPaused({ unit }, false)
-
 		if unit.originalName then
 			unit:SetCustomName(unit.originalName)
 			unit.originalName = nil
 		else
 			unit:SetCustomName("")
 		end
-		KillThread(unit.AutoUpdateThread)
-		unit.AutoUpdateThread = nil
 	end)
 end
 
@@ -499,11 +495,11 @@ function UpdateResourcesUi()
 			DisableWorkers(unitType, spendTypes.UPKEEP)
 		end
 
-		if unitType.productionAutoPaused then
-			ActivateAutoPause(unitType, spendTypes.PRODUCTION)
-		elseif unitType.upkeepAutoPaused then
-			ActivateAutoPause(unitType, spendTypes.UPKEEP)
-		end
+		-- if unitType[spendTypes.PRODUCTION].autoPaused then
+		-- 	ActivateAutoPause(unitType, spendTypes.PRODUCTION)
+		-- elseif unitType[spendTypes.UPKEEP].autoPaused then
+		-- 	ActivateAutoPause(unitType, spendTypes.UPKEEP)
+		-- end
 
 		unitType.productionUnits = {}
 		unitType.upkeepUnits = {}
@@ -930,8 +926,10 @@ function buildUi()
 			unitType.usage = {}
 			unitType.productionPaused = false
 			unitType.upkeepPaused = false
-			unitType.productionAutoPaused = false
-			unitType.upkeepAutoPaused = false
+			unitType[spendTypes.PRODUCTION] = {}
+			unitType[spendTypes.PRODUCTION].autoPaused = false
+			unitType[spendTypes.UPKEEP] = {}
+			unitType[spendTypes.UPKEEP].autoPaused = false
 			unitType.pausedProductionUnits = {}
 			unitType.pausedUpkeepUnits = {}
 		end)
