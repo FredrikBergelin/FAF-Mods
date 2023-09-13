@@ -60,13 +60,11 @@ function GetWorkers(unitType, spendType)
 end
 
 function DisableWorkers(unitType, spendType)
-	LOG("Disable "..tostring(unitType).." "..tostring(spendType))
 	local unitType = unitType
-	unitType.workersDisabled = true
 
 	local workers = GetWorkers(unitType, spendType)
-	if table.getn(workers) == 0 then
 
+	if table.getn(workers) == 0 then
 	else
 		if spendType == spendTypes.PRODUCTION then
 			for k, v in unitType.productionUnits do
@@ -139,14 +137,15 @@ end
 
 function EnablePaused(unitType, spendType)
 	LOG("Enable "..tostring(unitType).." "..tostring(spendType))
-	unitType.workersDisabled = false
 
 	local pauseUnits = GetPaused(unitType, spendType)
 	local unitType = unitType
 	if spendType == spendTypes.PRODUCTION then
+		unitType.productionWorkersDisabled = false
 		SetPaused(pauseUnits, false)
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
+		unitType.upkeepWorkersDisabled = false
 		EnableUnitsAbility(pauseUnits)
 		unitType.pausedUpkeepUnits = {}
 	end
@@ -158,17 +157,6 @@ function SelectPaused(unitType)
 	local unitType = unitType
 	SelectUnits(pauseUnits)
 end
-
---unitToggleRules = {
---    Shield =  0,
---    Weapon = 1, --?
---    Jamming = 2,
---    Intel = 3,
---    Production = 4, --?
---    Stealth = 5,
---    Generic = 6,
---    Special = 7,
---	  Cloak = 8,}
 
 function GetOnValueForScriptBit(i)
 	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
@@ -209,26 +197,27 @@ function UpdateEconTotals()
 end
 
 function ActivateAutoPause(totalSel)
-	-- local totalSel = GetSelectedUnits()
 	totalSel = ValidateUnitsList(totalSel)
 	if totalSel then
 		for i, unit in totalSel do
 			local currUnit = unit
-
 			-- Update thread, per unit.
 			if (currUnit:GetWorkProgress() > 0) and (currUnit.AutoUpdateThread == nil) then
 				-- Set label in name
-				unit.originalName = unit:GetCustomName(unit)
+				currUnit.originalName = currUnit:GetCustomName(currUnit)
 				local newName = "[AUTOPAUSE]"
-				if unit.originalName then
-					newName = unit.originalName .. " " .. newName
+				if currUnit.originalName then
+					newName = currUnit.originalName .. " " .. newName
 				end
-				unit:SetCustomName(newName)
+				currUnit:SetCustomName(newName)
 
 				currUnit.AutoUpdateThread = ForkThread(function()
 					local prevProgress = 0
 					while not currUnit:IsDead() do
-						-- If we're done, return to original name and end.
+						-- Check if still working on same construction type, otherwise end autopause
+						-- Also, should reactivate autopause automatically for new units just like pause
+						-- Do this by ForkThread each unit just like above, also for pause
+
 						-- if currUnit:GetWorkProgress() < prevProgress then
 						-- 	EndAutoPause(currUnit)
 						-- 	KillThread(CurrentThread())
@@ -260,7 +249,6 @@ end
 function EndAutoPause(units)
 	LOG("EndAutoPause")
 	from(units).foreach(function (k, unit)
-		LOG("unit")
 		SetPaused({ unit }, false)
 
 		if unit.originalName then
@@ -278,54 +266,6 @@ local hoverUnitType = nil
 local selectedUnitType = nil
 
 function RootEvents(self, event, unitType)
-	if event.Type == 'MouseExit' then
-		if hoverUnitType ~= nil then
-			hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
-		end
-		hoverUnitType = nil
-	end
-	if event.Type == 'MouseEnter' then
-		hoverUnitType = unitType
-	end
-	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Ctrl then
-			if event.Modifiers.Right then
-				if unitType.typeUi.productionUnitsBox ~= nil then EnablePaused(unitType) end
-				if unitType.typeUi.upkeepUnitsBox ~= nil then EnablePaused(unitType.typeUi.upkeepUnitsBox) end
-			else
-				local pausedUnits = {}
-				if unitType.typeUi.productionUnitsBox ~= nil then
-					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.productionUnitsBox))).toArray()
-				end
-
-				if unitType.typeUi.upkeepUnitsBox ~= nil then
-					pausedUnits = from(pausedUnits).concat(from(GetPaused(unitType.typeUi.upkeepUnitsBox))).toArray()
-				end
-
-				SelectUnits(pausedUnits)
-			end
-		else
-			if event.Modifiers.Right then
-				if unitType.typeUi.productionUnitsBox ~= nil then DisableWorkers(unitType.typeUi.productionUnitsBox) end
-				if unitType.typeUi.upkeepUnitsBox ~= nil then DisableWorkers(unitType.typeUi.upkeepUnitsBox) end
-			else
-				-- if selectedUnitType ~= nil then
-				-- 	selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('aa000000')
-				-- end
-
-				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
-				SelectUnits(allUnits)
-			end
-		end
-	end
-
-	-- if hoverUnitType ~= nil then
-	-- 	hoverUnitType.typeUi.uiRoot:InternalSetSolidColor('11ffffff')
-	-- end
-	-- if selectedUnitType ~= nil then
-	-- 	selectedUnitType.typeUi.uiRoot:InternalSetSolidColor('33ffffff')
-	-- end
-
 	return true
 end
 
@@ -363,8 +303,6 @@ function IconEvents(self, event, unitType)
 		elseif event.Modifiers.Ctrl then
 			if event.Modifiers.Left then
 			elseif event.Modifiers.Right then
-				-- local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
-				-- ActivateAutoPause(allUnits)
 			end
 		elseif event.Modifiers.Alt then
 			if event.Modifiers.Left then
@@ -378,6 +316,83 @@ function IconEvents(self, event, unitType)
 			elseif event.Modifiers.Right then
 
 			end
+		end
+	end
+	return true
+end
+
+function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
+	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl and event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Ctrl then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Alt then
+			if event.Modifiers.Left then
+				if spendType == spendTypes.PRODUCTION then
+					SelectUnits(unitType.productionUnits)
+				elseif spendType == spendTypes.PRODUCTION then
+					SelectUnits(unitType.upkeepUnits)
+				end
+			elseif event.Modifiers.Right then
+				if spendType == spendTypes.PRODUCTION then
+					SelectWorkers(unitType, spendType)
+				elseif spendType == spendTypes.PRODUCTION then
+					SelectWorkers(unitType, spendType)
+				end
+			end
+		else
+			if event.Modifiers.Left then
+				EnablePaused(unitType, spendType)
+				SetBarColor(typeUi, spendType, true)
+				UpdateStatusIcon(typeUi, spendType, "")
+			elseif event.Modifiers.Right then
+				if spendType == spendTypes.PRODUCTION then
+					unitType.productionWorkersDisabled = true
+				elseif spendType == spendTypes.UPKEEP then
+					unitType.upkeepWorkersDisabled = true
+				end
+				DisableWorkers(unitType, spendType)
+				SetBarColor(typeUi, spendType, false)
+				UpdateStatusIcon(typeUi, spendType, "paused")
+			end
+		end
+	end
+	return true
+end
+
+function UsageContainerEvents(self, event, typeUi, unitType, spendType, resourceType)
+	if event.Type == 'ButtonPress' then
+		if event.Modifiers.Ctrl and event.Modifiers.Alt then
+			if event.Modifiers.Left then
+			elseif event.Modifiers.Right then
+			end
+		elseif event.Modifiers.Ctrl then
+			if event.Modifiers.Left then
+				LOG("END AUTOPAUSE")
+				if spendType == spendTypes.PRODUCTION then
+					EndAutoPause(unitType.productionUnits)
+					UpdateStatusIcon(typeUi, spendType, "")
+				elseif spendType == spendTypes.UPKEEP then
+					EndAutoPause(unitType.upkeepUnits)
+					UpdateStatusIcon(typeUi, spendType, "")
+				end
+			elseif event.Modifiers.Right then
+				LOG("AUTOPAUSE")
+				if spendType == spendTypes.PRODUCTION then
+					ActivateAutoPause(unitType.productionUnits)
+					UpdateStatusIcon(typeUi, spendType, "autopaused")
+				elseif spendType == spendTypes.UPKEEP then
+					ActivateAutoPause(unitType.upkeepUnits)
+					UpdateStatusIcon(typeUi, spendType, "autopaused")
+				end
+			end
+		else
+			SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 		end
 	end
 	return true
@@ -419,78 +434,6 @@ function UpdateStatusIcon(typeUi, spendType, type)
 			typeUi.upkeepPrioritizedStatusIcon:Show()
 		end
 	end
-end
-
-function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
-	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Ctrl and event.Modifiers.Alt then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Ctrl then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Alt then
-			if event.Modifiers.Left then
-				if spendType == spendTypes.PRODUCTION then
-					SelectUnits(unitType.productionUnits)
-				elseif spendType == spendTypes.PRODUCTION then
-					SelectUnits(unitType.upkeepUnits)
-				end
-			elseif event.Modifiers.Right then
-				if spendType == spendTypes.PRODUCTION then
-					SelectWorkers(unitType, spendType)
-				elseif spendType == spendTypes.PRODUCTION then
-					SelectWorkers(unitType, spendType)
-				end
-			end
-		else
-			if event.Modifiers.Left then
-				EnablePaused(unitType, spendType)
-				SetBarColor(typeUi, spendType, true)
-				UpdateStatusIcon(typeUi, spendType, "")
-			elseif event.Modifiers.Right then
-				DisableWorkers(unitType, spendType)
-				SetBarColor(typeUi, spendType, false)
-				UpdateStatusIcon(typeUi, spendType, "paused")
-			end
-		end
-	end
-	return true
-end
-
-function UsageContainerEvents(self, event, typeUi, unitType, spendType, resourceType)
-	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Ctrl and event.Modifiers.Alt then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Ctrl then
-			if event.Modifiers.Left then
-				LOG("END AUTOPAUSE")
-				if spendType == spendTypes.PRODUCTION then
-					EndAutoPause(unitType.productionUnits)
-					UpdateStatusIcon(typeUi, spendType, "")
-				elseif spendType == spendTypes.UPKEEP then
-					EndAutoPause(unitType.upkeepUnits)
-					UpdateStatusIcon(typeUi, spendType, "")
-				end
-			elseif event.Modifiers.Right then
-				LOG("AUTOPAUSE")
-				if spendType == spendTypes.PRODUCTION then
-					ActivateAutoPause(unitType.productionUnits)
-					UpdateStatusIcon(typeUi, spendType, "autopaused")
-				elseif spendType == spendTypes.UPKEEP then
-					ActivateAutoPause(unitType.upkeepUnits)
-					UpdateStatusIcon(typeUi, spendType, "autopaused")
-				end
-			end
-		else
-			SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
-		end
-	end
-	return true
 end
 
 function GetEconData(unit)
@@ -537,13 +480,13 @@ function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
 	unitTypes.foreach(function(k, unitType)
+		if unitType.productionWorkersDisabled then
+			DisableWorkers(unitType, spendTypes.PRODUCTION)
+		elseif unitType.upkeepWorkersDisabled then
+			DisableWorkers(unitType, spendTypes.UPKEEP)
+		end
 		unitType.productionUnits = {}
 		unitType.upkeepUnits = {}
-		-- TODO
-		if unitType.workersDisabled then
-			LOG("workersDisabled")
-			DisableWorkers(unitType, spendTypes.PRODUCTION)
-		end
 	end)
 
 	-- set unittype resource usages to 0
@@ -600,7 +543,6 @@ function UpdateResourcesUi()
 			end
 		end)
 
-		LOG("unitHasUsage: "..tostring(unitHasUsage))
 		if unitHasUsage then
 			if (isUpkeep) then
 				table.insert(unitType.upkeepUnits, unit)
