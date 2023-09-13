@@ -24,11 +24,6 @@ local spendTypes = {
 	UPKEEP = "UPKEEP"
 }
 
-local workerTypes = {
-	WORKING = "WORKING",
-	PAUSED = "PAUSED"
-}
-
 local resourceTypes = from({
 	{ name = "Mass",   econDataKey = "massConsumed" },
 	{ name = "Energy", econDataKey = "energyConsumed" },
