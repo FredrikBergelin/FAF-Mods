@@ -9,10 +9,10 @@ function CreateIdleTab(unitData, id, expandFunc)
 
 		if (id == "factory") then
 			bg.overlay = Bitmap(bg)
-			LayoutHelpers.AtLeftTopIn(bg.overlay, bg, 7, 7)
+			LayoutHelpers.AtLeftTopIn(bg.overlay, bg, 8, 8)
 			bg.overlay:SetSolidColor('aaFF0000')
-			bg.overlay.Width:Set(34)
-			bg.overlay.Height:Set(34)
+			bg.overlay.Width:Set(32)
+			bg.overlay.Height:Set(32)
 			bg.overlay:DisableHitTest()
 			bg.overlay.dir = -1
 			bg.overlay.cycles = 0

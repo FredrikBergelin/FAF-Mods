@@ -141,11 +141,11 @@ function EnablePaused(unitType, spendType)
 	local pauseUnits = GetPaused(unitType, spendType)
 	local unitType = unitType
 	if spendType == spendTypes.PRODUCTION then
-		unitType.productionWorkersDisabled = false
+		unitType.productionPaused = false
 		SetPaused(pauseUnits, false)
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
-		unitType.upkeepWorkersDisabled = false
+		unitType.upkeepPaused = false
 		EnableUnitsAbility(pauseUnits)
 		unitType.pausedUpkeepUnits = {}
 	end
@@ -196,7 +196,7 @@ function UpdateEconTotals()
 	return energyPercent
 end
 
-function ActivateAutoPause(totalSel)
+function AutoPauseSelection(totalSel)
 	totalSel = ValidateUnitsList(totalSel)
 	if totalSel then
 		for i, unit in totalSel do
@@ -246,8 +246,31 @@ function ActivateAutoPause(totalSel)
 	end
 end
 
-function EndAutoPause(units)
-	LOG("EndAutoPause")
+function ActivateAutoPause(unitType, spendType)
+	if spendType == spendTypes.PRODUCTION then
+		unitType.productionAutoPaused = true
+		AutoPauseSelection(unitType.productionUnits, spendType)
+	elseif spendType == spendTypes.UPKEEP then
+		unitType.upkeepAutoPaused = true
+		AutoPauseSelection(unitType.upkeepUnits, spendType)
+	end
+end
+
+function EndAutoPause(unitType, spendType)
+	local units
+	if spendType == spendTypes.PRODUCTION then
+		units = unitType.productionUnits
+		unitType.productionAutoPaused = false
+	elseif spendType == spendTypes.UPKEEP then
+		units = unitType.upkeepUnits
+		unitType.upkeepAutoPaused = false
+	end
+
+	EndAutoPauseSelection(units)
+end
+
+function EndAutoPauseSelection(units)
+	LOG("EndAutoPauseSelection")
 	from(units).foreach(function (k, unit)
 		SetPaused({ unit }, false)
 
@@ -352,9 +375,9 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 				UpdateStatusIcon(typeUi, spendType, "")
 			elseif event.Modifiers.Right then
 				if spendType == spendTypes.PRODUCTION then
-					unitType.productionWorkersDisabled = true
+					unitType.productionPaused = true
 				elseif spendType == spendTypes.UPKEEP then
-					unitType.upkeepWorkersDisabled = true
+					unitType.upkeepPaused = true
 				end
 				DisableWorkers(unitType, spendType)
 				SetBarColor(typeUi, spendType, false)
@@ -374,22 +397,12 @@ function UsageContainerEvents(self, event, typeUi, unitType, spendType, resource
 		elseif event.Modifiers.Ctrl then
 			if event.Modifiers.Left then
 				LOG("END AUTOPAUSE")
-				if spendType == spendTypes.PRODUCTION then
-					EndAutoPause(unitType.productionUnits)
-					UpdateStatusIcon(typeUi, spendType, "")
-				elseif spendType == spendTypes.UPKEEP then
-					EndAutoPause(unitType.upkeepUnits)
-					UpdateStatusIcon(typeUi, spendType, "")
-				end
+				EndAutoPause(unitType, spendType)
+				UpdateStatusIcon(typeUi, spendType, "")
 			elseif event.Modifiers.Right then
 				LOG("AUTOPAUSE")
-				if spendType == spendTypes.PRODUCTION then
-					ActivateAutoPause(unitType.productionUnits)
-					UpdateStatusIcon(typeUi, spendType, "autopaused")
-				elseif spendType == spendTypes.UPKEEP then
-					ActivateAutoPause(unitType.upkeepUnits)
-					UpdateStatusIcon(typeUi, spendType, "autopaused")
-				end
+				ActivateAutoPause(unitType, spendType)
+				UpdateStatusIcon(typeUi, spendType, "autopaused")
 			end
 		else
 			SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
@@ -480,11 +493,18 @@ function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
 	unitTypes.foreach(function(k, unitType)
-		if unitType.productionWorkersDisabled then
+		if unitType.productionPaused then
 			DisableWorkers(unitType, spendTypes.PRODUCTION)
-		elseif unitType.upkeepWorkersDisabled then
+		elseif unitType.upkeepPaused then
 			DisableWorkers(unitType, spendTypes.UPKEEP)
 		end
+
+		if unitType.productionAutoPaused then
+			ActivateAutoPause(unitType, spendTypes.PRODUCTION)
+		elseif unitType.upkeepAutoPaused then
+			ActivateAutoPause(unitType, spendTypes.UPKEEP)
+		end
+
 		unitType.productionUnits = {}
 		unitType.upkeepUnits = {}
 	end)
@@ -910,6 +930,8 @@ function buildUi()
 			unitType.usage = {}
 			unitType.productionPaused = false
 			unitType.upkeepPaused = false
+			unitType.productionAutoPaused = false
+			unitType.upkeepAutoPaused = false
 			unitType.pausedProductionUnits = {}
 			unitType.pausedUpkeepUnits = {}
 		end)
