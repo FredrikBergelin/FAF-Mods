@@ -156,12 +156,12 @@ function MultiPauser(abilities)
                     from(abilities).foreach(function(i, a)
                         local ruleNumber = unitToggleRules[a]
 
-                        if ruleNumber then
-                            LOG(GetScriptBit(currUnit, ruleNumber))
-                        end
+                        -- if ruleNumber then
+                        --     LOG(GetScriptBit(currUnit, ruleNumber))
+                        -- end
 
                         if ruleNumber and not GetScriptBit(currUnit, ruleNumber) then
-                            LOG("TRUE")
+                            -- LOG("TRUE")
                             setActive = true
                         end
                     end)

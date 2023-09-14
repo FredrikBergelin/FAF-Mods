@@ -217,22 +217,21 @@ function AutoPauseSelection(totalSel)
 	end
 end
 
+function ActivatePause(unitType, spendType)
+	unitType.AutoUpdateThread = ForkThread(function()
+		while unitType[spendType] == "paused" do
+			DisableWorkers(unitType, spendType)
+			WaitSeconds(0.5)
+		end
+		unitType.AutoUpdateThread = nil
+	end)
+end
+
 function ActivateAutoPause(unitType, spendType)
 	unitType.AutoUpdateThread = ForkThread(function()
-		-- TODO: update everywhere
 		while unitType[spendType] == "autopaused" do
-			-- Check if still working on same construction type, otherwise end autopause
-			-- Also, should reactivate autopause automatically for new units just like pause
-			-- Do this by ForkThread each unit just like above, also for pause
-
-			-- if currUnit:GetWorkProgress() < prevProgress then
-			-- 	EndAutoPause(currUnit)
-			-- 	KillThread(CurrentThread())
-			-- end
-
 			UpdateEconTotals()
 			if energyPercent < 70 then
-				LOG("CALL DisableWorkers from autopause thread")
 				DisableWorkers(unitType, spendType)
 			elseif energyPercent > 90 then
 				EnablePaused(unitType, spendType)
@@ -241,7 +240,6 @@ function ActivateAutoPause(unitType, spendType)
 		end
 		unitType.AutoUpdateThread = nil
 	end)
-	-- End update thread.
 end
 
 function EndAutoPause(unitType, spendType)
@@ -256,8 +254,6 @@ function EndAutoPause(unitType, spendType)
 
 	KillThread(unitType.AutoUpdateThread)
 	unitType.AutoUpdateThread = nil
-
-	EnablePaused(unitType, spendType)
 end
 
 function EndAutoPauseSelection(units)
@@ -277,27 +273,6 @@ function RootEvents(self, event, unitType)
 end
 
 function StatusIconEvents(self, event, unitType, spendType)
-	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Ctrl and event.Modifiers.Alt then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Ctrl then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Alt then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		else
-			LOG("Click Status ICON")
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-				LOG("Deactivate AUTOPAUSE")
-			end
-		end
-	end
 	return true
 end
 
@@ -351,7 +326,12 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 					SelectUnits(unitType.upkeepUnits)
 				end
 			elseif event.Modifiers.Right then
-				SelectWorkers(unitType, spendType)
+				-- SelectWorkers(unitType, spendType)
+				if spendType == spendTypes.PRODUCTION then
+					SelectUnits(unitType.pausedProductionUnits)
+				elseif spendType == spendTypes.UPKEEP then
+					SelectUnits(unitType.pausedUpkeepUnits)
+				end
 			end
 		else
 			if event.Modifiers.Left then
@@ -362,7 +342,7 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 				UpdateStatusIcon(typeUi, spendType, "")
 			elseif event.Modifiers.Right then
 				unitType[spendType] = "paused"
-				DisableWorkers(unitType, spendType)
+				ActivatePause(unitType, spendType)
 				SetBarColor(typeUi, spendType, false)
 				UpdateStatusIcon(typeUi, spendType, "paused")
 			end
@@ -460,18 +440,6 @@ function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
 	unitTypes.foreach(function(k, unitType)
-		-- if unitType.productionPaused then
-		-- 	DisableWorkers(unitType, spendTypes.PRODUCTION)
-		-- elseif unitType.upkeepPaused then
-		-- 	DisableWorkers(unitType, spendTypes.UPKEEP)
-		-- end
-
-		-- if unitType[spendTypes.PRODUCTION].autoPaused then
-		-- 	ActivateAutoPause(unitType, spendTypes.PRODUCTION)
-		-- elseif unitType[spendTypes.UPKEEP].autoPaused then
-		-- 	ActivateAutoPause(unitType, spendTypes.UPKEEP)
-		-- end
-
 		unitType.productionUnits = {}
 		unitType.upkeepUnits = {}
 	end)
