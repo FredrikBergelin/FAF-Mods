@@ -142,14 +142,11 @@ end
 function EnablePaused(unitType, spendType)
 	LOG("EnablePaused, upkeep: "..tostring(table.getn(unitType.pausedUpkeepUnits)))
 
-	-- local pauseUnits = GetPaused(unitType, spendType)
 	local unitType = unitType
 	if spendType == spendTypes.PRODUCTION then
-		unitType.productionPaused = false
 		SetPaused(unitType.pausedProductionUnits, false)
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
-		unitType.upkeepPaused = false
 		EnableUnitsAbility(unitType.pausedUpkeepUnits)
 		unitType.pausedUpkeepUnits = {}
 	end
@@ -221,11 +218,9 @@ function AutoPauseSelection(totalSel)
 end
 
 function ActivateAutoPause(unitType, spendType)
-	unitType[spendType].autoPaused = true
-
 	unitType.AutoUpdateThread = ForkThread(function()
 		-- TODO: update everywhere
-		while unitType[spendType].autoPaused do
+		while unitType[spendType] == "autopaused" do
 			-- Check if still working on same construction type, otherwise end autopause
 			-- Also, should reactivate autopause automatically for new units just like pause
 			-- Do this by ForkThread each unit just like above, also for pause
@@ -250,7 +245,6 @@ function ActivateAutoPause(unitType, spendType)
 end
 
 function EndAutoPause(unitType, spendType)
-	unitType[spendType].autoPaused = false
 	local units
 	if spendType == spendTypes.PRODUCTION then
 		units = unitType.productionUnits
@@ -277,9 +271,6 @@ function EndAutoPauseSelection(units)
 		end
 	end)
 end
-
-local hoverUnitType = nil
-local selectedUnitType = nil
 
 function RootEvents(self, event, unitType)
 	return true
@@ -346,32 +337,31 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 		elseif event.Modifiers.Ctrl then
 			if event.Modifiers.Left then
 			elseif event.Modifiers.Right then
+				LOG("AUTOPAUSE")
+				unitType[spendType] = "autopaused"
+				EnablePaused(unitType, spendType)
+				ActivateAutoPause(unitType, spendType)
+				UpdateStatusIcon(typeUi, spendType, "autopaused")
 			end
 		elseif event.Modifiers.Alt then
 			if event.Modifiers.Left then
 				if spendType == spendTypes.PRODUCTION then
 					SelectUnits(unitType.productionUnits)
-				elseif spendType == spendTypes.PRODUCTION then
+				elseif spendType == spendTypes.UPKEEP then
 					SelectUnits(unitType.upkeepUnits)
 				end
 			elseif event.Modifiers.Right then
-				if spendType == spendTypes.PRODUCTION then
-					SelectWorkers(unitType, spendType)
-				elseif spendType == spendTypes.PRODUCTION then
-					SelectWorkers(unitType, spendType)
-				end
+				SelectWorkers(unitType, spendType)
 			end
 		else
 			if event.Modifiers.Left then
+				unitType[spendType] = "default"
+				EndAutoPause(unitType, spendType)
 				EnablePaused(unitType, spendType)
 				SetBarColor(typeUi, spendType, true)
 				UpdateStatusIcon(typeUi, spendType, "")
 			elseif event.Modifiers.Right then
-				if spendType == spendTypes.PRODUCTION then
-					unitType.productionPaused = true
-				elseif spendType == spendTypes.UPKEEP then
-					unitType.upkeepPaused = true
-				end
+				unitType[spendType] = "paused"
 				DisableWorkers(unitType, spendType)
 				SetBarColor(typeUi, spendType, false)
 				UpdateStatusIcon(typeUi, spendType, "paused")
@@ -383,23 +373,7 @@ end
 
 function UsageContainerEvents(self, event, typeUi, unitType, spendType, resourceType)
 	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Ctrl and event.Modifiers.Alt then
-			if event.Modifiers.Left then
-			elseif event.Modifiers.Right then
-			end
-		elseif event.Modifiers.Ctrl then
-			if event.Modifiers.Left then
-				LOG("END AUTOPAUSE")
-				EndAutoPause(unitType, spendType)
-				UpdateStatusIcon(typeUi, spendType, "")
-			elseif event.Modifiers.Right then
-				LOG("AUTOPAUSE")
-				ActivateAutoPause(unitType, spendType)
-				UpdateStatusIcon(typeUi, spendType, "autopaused")
-			end
-		else
-			SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
-		end
+		SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 	end
 	return true
 end
@@ -919,12 +893,8 @@ function buildUi()
 
 		unitTypes.foreach(function(k, unitType)
 			unitType.usage = {}
-			unitType.productionPaused = false
-			unitType.upkeepPaused = false
-			unitType[spendTypes.PRODUCTION] = {}
-			unitType[spendTypes.PRODUCTION].autoPaused = false
-			unitType[spendTypes.UPKEEP] = {}
-			unitType[spendTypes.UPKEEP].autoPaused = false
+			unitType[spendTypes.PRODUCTION] = "default"
+			unitType[spendTypes.UPKEEP] = "default"
 			unitType.pausedProductionUnits = {}
 			unitType.pausedUpkeepUnits = {}
 		end)
