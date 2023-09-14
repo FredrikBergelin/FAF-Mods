@@ -67,17 +67,17 @@ function PauseProduction(unitType, spendType)
 end
 
 function DisableUpkeep(unitType, spendType)
-	local workers = GetWorkers(unitType, spendType)
-	for k, v in pairs(workers) do
-		local econData = GetEconData(v)
-		if econData["massConsumed"] > 0 then
-			if v.econtrol == nil then v.econtrol = {} end
-			v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
-			v.econtrol.pausedMassConsumed = econData["massConsumed"]
-			table.insert(unitType.pausedProductionUnits, v)
-			SetPaused(workers, true)
-		end
-	end
+	-- local workers = GetWorkers(unitType, spendType)
+	-- for k, v in pairs(workers) do
+	-- 	local econData = GetEconData(v)
+	-- 	if econData["massConsumed"] > 0 then
+	-- 		if v.econtrol == nil then v.econtrol = {} end
+	-- 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+	-- 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
+	-- 		table.insert(unitType.pausedProductionUnits, v)
+	-- 		SetPaused(workers, true)
+	-- 	end
+	-- end
 
 	for k, v in unitType.upkeepUnits do
 		local econData = GetEconData(v)
@@ -140,20 +140,19 @@ function GetIsPausedBySpendType(units, spendType)
 end
 
 function EnablePaused(unitType, spendType)
-	LOG("Enable "..tostring(unitType).." "..tostring(spendType))
+	LOG("EnablePaused, upkeep: "..tostring(table.getn(unitType.pausedUpkeepUnits)))
 
-	local pauseUnits = GetPaused(unitType, spendType)
+	-- local pauseUnits = GetPaused(unitType, spendType)
 	local unitType = unitType
 	if spendType == spendTypes.PRODUCTION then
 		unitType.productionPaused = false
-		SetPaused(pauseUnits, false)
+		SetPaused(unitType.pausedProductionUnits, false)
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
 		unitType.upkeepPaused = false
-		EnableUnitsAbility(pauseUnits)
+		EnableUnitsAbility(unitType.pausedUpkeepUnits)
 		unitType.pausedUpkeepUnits = {}
 	end
-	-- unitBox.SetOn(false)
 end
 
 function SelectPaused(unitType)
@@ -168,12 +167,14 @@ function GetOnValueForScriptBit(i)
 end
 
 function DisableUnitsAbility(units)
+	LOG("DisableUnitsAbility: " .. tostring(table.getn(units)))
 	for i = 0, 8 do
 		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
 	end
 end
 
 function EnableUnitsAbility(units)
+	LOG("EnableUnitsAbility: " .. tostring(table.getn(units)))
 	for i = 0, 8 do
 		ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
 	end
@@ -236,6 +237,7 @@ function ActivateAutoPause(unitType, spendType)
 
 			UpdateEconTotals()
 			if energyPercent < 70 then
+				LOG("CALL DisableWorkers from autopause thread")
 				DisableWorkers(unitType, spendType)
 			elseif energyPercent > 90 then
 				EnablePaused(unitType, spendType)
@@ -484,11 +486,11 @@ function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
 	unitTypes.foreach(function(k, unitType)
-		if unitType.productionPaused then
-			DisableWorkers(unitType, spendTypes.PRODUCTION)
-		elseif unitType.upkeepPaused then
-			DisableWorkers(unitType, spendTypes.UPKEEP)
-		end
+		-- if unitType.productionPaused then
+		-- 	DisableWorkers(unitType, spendTypes.PRODUCTION)
+		-- elseif unitType.upkeepPaused then
+		-- 	DisableWorkers(unitType, spendTypes.UPKEEP)
+		-- end
 
 		-- if unitType[spendTypes.PRODUCTION].autoPaused then
 		-- 	ActivateAutoPause(unitType, spendTypes.PRODUCTION)
@@ -604,8 +606,6 @@ function UpdateResourcesUi()
 				local shouldShow = productionValue + upkeepValue > 0
 				if (shouldShow and unitType.typeUi.uiRoot:IsHidden()) then
 					unitType.typeUi.uiRoot:Show()
-					-- unitType.typeUi.productionPausedStatusIcon.Hide()
-					-- unitType.typeUi.upkeepPausedStatusIcon.Hide()
 					unitType.typeUi.Clear()
 					relayoutRequired = true
 				end
