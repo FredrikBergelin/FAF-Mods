@@ -180,8 +180,8 @@ end
 function CreateIdleFactoryList(parent, units)
     local bg = Bitmap(parent, UIUtil.SkinnableFile('/game/avatar-factory-panel/factory-panel_bmp.dds'))
 
-    LayoutHelpers.AnchorToLeft(bg, parent, 9)
-    bg.Top:Set(function() return math.max(controls.avatarGroup.Top()+10, (parent.Top() + (parent.Height() / 2)) - (bg.Height() / 2)) end)
+    LayoutHelpers.AnchorToLeft(bg, parent, 86)
+    bg.Top:Set(controls.avatarGroup.Top())
 
     local connector = Bitmap(bg, UIUtil.SkinnableFile('/game/avatar-factory-panel/bracket_bmp.dds'))
     LayoutHelpers.AtVerticalCenterIn(connector, parent)
