@@ -1,6 +1,5 @@
 local UIP = import('/mods/UI-Party/modules/UI-Party.lua')
 
-
 local oldCreateIdleTab = CreateIdleTab
 function CreateIdleTab(unitData, id, expandFunc)
     local bg = oldCreateIdleTab(unitData, id, expandFunc)
@@ -272,54 +271,3 @@ function CreateIdleFactoryList(parent, units)
 
     return bg
 end
-
--- local preContractState = false
--- function Contract()
---     preContractState = controls.avatarGroup:IsHidden()
---     -- controls.avatarGroup:Hide()
---     -- controls.collapseArrow:Hide()
--- end
-
---local bigRed;
-
---function CreateBigRedScreen()
-
---	if (UIP.GetSetting("immersionAcuDamage")) then
-
---		bigRed = Bitmap(GetFrame(0))
---		LayoutHelpers.AtLeftTopIn(bigRed, GetFrame(0), 7, 8)
---		bigRed.Left:Set(0)
---		bigRed.Top:Set(0)
---		bigRed:SetSolidColor('33FF0000')
---		bigRed.Width:Set(90)
---		bigRed.Height:Set(34)
---		bigRed.Width:Set(1920)
---		bigRed.Height:Set(1080)
---		bigRed:DisableHitTest()
---		bigRed:SetAlpha(0)
---		bigRed:SetNeedsFrameUpdate(false)
-
---	end
---end
-
---function ShowBigRedScreen()
-
---	if (UIP.GetSetting("immersionAcuDamage")) then
-
---		bigRed:SetAlpha(1)
---		bigRed:SetNeedsFrameUpdate(true)
-
---		bigRed.OnFrame = function(self, delta)
---			local newAlpha = self:GetAlpha() - 0.005
---			if newAlpha >= 0 then -- some rare bug here
---				self:SetAlpha(newAlpha)
-
---				if newAlpha == 0 then
---					bigRed:SetNeedsFrameUpdate(false)
---				end
---			end
---		end
---	end
---end
-
---CreateBigRedScreen()
