@@ -273,6 +273,13 @@ function CreateIdleFactoryList(parent, units)
     return bg
 end
 
+-- local preContractState = false
+-- function Contract()
+--     preContractState = controls.avatarGroup:IsHidden()
+--     -- controls.avatarGroup:Hide()
+--     -- controls.collapseArrow:Hide()
+-- end
+
 --local bigRed;
 
 --function CreateBigRedScreen()
