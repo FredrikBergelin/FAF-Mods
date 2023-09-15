@@ -8,6 +8,24 @@ local UIUtil = import('/lua/ui/uiutil.lua')
 local GameMain = import('/lua/ui/game/gamemain.lua')
 local LayoutHelpers = import('/lua/maui/layouthelpers.lua')
 
+outerPadding = 3
+usageContainerWidth = 100
+barSeparationY = 1
+iconSize = 25
+
+rootWidth = (iconSize * 2) + usageContainerWidth * 2 + (outerPadding * 6) + iconSize
+iconLeftIn = iconSize + usageContainerWidth + (outerPadding * 3)
+typeHeight = iconSize + (outerPadding * 2)
+leftBarsLeftIn = (outerPadding * 2) + iconSize
+rightBarsLeftIn = (outerPadding * 4) + (iconSize * 2) + usageContainerWidth
+usageContainerHeight = (iconSize / 2) - barSeparationY
+
+topBarTopIn = outerPadding
+bottomBarTopIn = usageContainerHeight + barSeparationY
+
+upkeepStatusIconLeftIn = outerPadding
+productionStatusIconLeftIn = rootWidth - iconSize - outerPadding
+
 colors = {
 	energy = {
 		active = "ffa500",
@@ -29,8 +47,35 @@ local resourceTypes = from({
 	{ name = "Energy", econDataKey = "energyConsumed" },
 })
 
-local unitTypes
+function UpdateStatusIcon(typeUi, spendType, type)
+	if spendType == spendTypes.PRODUCTION then
+		typeUi.productionPausedStatusIcon:Hide()
+		typeUi.productionAutoPausedStatusIcon:Hide()
+		typeUi.productionPrioritizedStatusIcon:Hide()
 
+		if type == "paused" then
+			typeUi.productionPausedStatusIcon:Show()
+		elseif type == "autopaused" then
+			typeUi.productionAutoPausedStatusIcon:Show()
+		elseif type == "prioritized" then
+			typeUi.productionPrioritizedStatusIcon:Show()
+		end
+	elseif spendType == spendTypes.UPKEEP then
+		typeUi.upkeepPausedStatusIcon:Hide()
+		typeUi.upkeepAutoPausedStatusIcon:Hide()
+		typeUi.upkeepPrioritizedStatusIcon:Hide()
+
+		if type == "paused" then
+			typeUi.upkeepPausedStatusIcon:Show()
+		elseif type == "autopaused" then
+			typeUi.upkeepAutoPausedStatusIcon:Show()
+		elseif type == "prioritized" then
+			typeUi.upkeepPrioritizedStatusIcon:Show()
+		end
+	end
+end
+
+local unitTypes
 function GetUnitType(unit)
 	local unitType = unitTypes.first(function(k, unitType)
 		return EntityCategoryContains(unitType.category, unit)
@@ -41,6 +86,42 @@ function GetUnitType(unit)
 	end
 
 	return unitType
+end
+
+
+function GetOnValueForScriptBit(i)
+	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
+	return true
+end
+function DisableUnitsAbility(units)
+	for i = 0, 8 do
+		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
+	end
+end
+function EnableUnitsAbility(units)
+	for i = 0, 8 do
+		ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
+	end
+end
+function GetIsUnitAbilityEnabled(units)
+	for i = 0, 8 do
+		if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
+			return true
+		end
+	end
+	return false
+end
+
+
+local energyPercent = 0
+function UpdateEconTotals()
+	local econTotals = GetEconomyTotals()
+
+	local globalEnergyMax = econTotals["maxStorage"]["ENERGY"]
+	local globalEnergyCurrent = econTotals["stored"]["ENERGY"]
+
+	energyPercent = 100 * (globalEnergyCurrent / globalEnergyMax)
+	return energyPercent
 end
 
 function GetWorkers(unitType, spendType)
@@ -55,13 +136,14 @@ function GetWorkers(unitType, spendType)
 end
 
 function PauseProduction(unitType, spendType)
+	LOG("PauseProduction(unitType="..tostring(unitType) .. ", spendType="..tostring(unitType))
 	local workers = GetWorkers(unitType, spendType)
 	for k, v in unitType.productionUnits do
 		local econData = GetEconData(v)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
-		table.insert(unitType.pausedProductionUnits, v)
+		-- table.insert(unitType.pausedProductionUnits, v)
 	end
 	SetPaused(workers, true)
 end
@@ -84,7 +166,7 @@ function DisableUpkeep(unitType, spendType)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
-		table.insert(unitType.pausedUpkeepUnits, v)
+		-- table.insert(unitType.pausedUpkeepUnits, v)
 	end
 
 	DisableUnitsAbility(unitType.upkeepUnits)
@@ -105,43 +187,41 @@ function DisableWorkers(unitType, spendType)
 	end
 end
 
-function SelectWorkers(unitType, spendType)
-	local unitType = unitType
-	local workers = GetWorkers(unitType, spendType)
-	SelectUnits(workers)
-end
+-- function SelectWorkers(unitType, spendType)
+-- 	local unitType = unitType
+-- 	local workers = GetWorkers(unitType, spendType)
+-- 	SelectUnits(workers)
+-- end
 
-function GetPaused(unitType, spendType)
-	local unitType = unitType
-	local workers = nil
+-- function GetPaused(unitType, spendType)
+-- 	local unitType = unitType
+-- 	local workers = nil
 
-	if spendType == spendTypes.PRODUCTION then
-		workers = unitType.pausedProductionUnits
-	elseif spendType == spendTypes.UPKEEP then
-		workers = unitType.pausedUpkeepUnits
-	end
+-- 	if spendType == spendTypes.PRODUCTION then
+-- 		workers = unitType.pausedProductionUnits
+-- 	elseif spendType == spendTypes.UPKEEP then
+-- 		workers = unitType.pausedUpkeepUnits
+-- 	end
 
-	local stillPaused = {}
-	for k, v in ValidateUnitsList(workers) do
-		if GetIsPausedBySpendType({ v }, spendType) then
-			table.insert(stillPaused, v)
-		end
-	end
-	-- could check still working on same project here
-	return stillPaused
-end
+-- 	local stillPaused = {}
+-- 	for k, v in ValidateUnitsList(workers) do
+-- 		if GetIsPausedBySpendType({ v }, spendType) then
+-- 			table.insert(stillPaused, v)
+-- 		end
+-- 	end
+-- 	-- could check still working on same project here
+-- 	return stillPaused
+-- end
 
-function GetIsPausedBySpendType(units, spendType)
-	if spendType == spendTypes.PRODUCTION then
-		return GetIsPaused(units)
-	elseif spendType == spendTypes.UPKEEP then
-		return GetIsUnitAbilityEnabled(units)
-	end
-end
+-- function GetIsPausedBySpendType(units, spendType)
+-- 	if spendType == spendTypes.PRODUCTION then
+-- 		return GetIsPaused(units)
+-- 	elseif spendType == spendTypes.UPKEEP then
+-- 		return GetIsUnitAbilityEnabled(units)
+-- 	end
+-- end
 
 function EnablePaused(unitType, spendType)
-	LOG("EnablePaused, upkeep: "..tostring(table.getn(unitType.pausedUpkeepUnits)))
-
 	local unitType = unitType
 	if spendType == spendTypes.PRODUCTION then
 		SetPaused(unitType.pausedProductionUnits, false)
@@ -150,52 +230,6 @@ function EnablePaused(unitType, spendType)
 		EnableUnitsAbility(unitType.pausedUpkeepUnits)
 		unitType.pausedUpkeepUnits = {}
 	end
-end
-
-function SelectPaused(unitType)
-	local pauseUnits = GetPaused(unitBox)
-	local unitType = unitType
-	SelectUnits(pauseUnits)
-end
-
-function GetOnValueForScriptBit(i)
-	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
-	return true
-end
-
-function DisableUnitsAbility(units)
-	LOG("DisableUnitsAbility: " .. tostring(table.getn(units)))
-	for i = 0, 8 do
-		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
-	end
-end
-
-function EnableUnitsAbility(units)
-	LOG("EnableUnitsAbility: " .. tostring(table.getn(units)))
-	for i = 0, 8 do
-		ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
-	end
-end
-
-function GetIsUnitAbilityEnabled(units)
-	for i = 0, 8 do
-		if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
-			return true
-		end
-	end
-	return false
-end
-
-local energyPercent = 0
-
-function UpdateEconTotals()
-	local econTotals = GetEconomyTotals()
-
-	local globalEnergyMax = econTotals["maxStorage"]["ENERGY"]
-	local globalEnergyCurrent = econTotals["stored"]["ENERGY"]
-
-	energyPercent = 100 * (globalEnergyCurrent / globalEnergyMax)
-	return energyPercent
 end
 
 function AutoPauseSelection(totalSel)
@@ -257,7 +291,6 @@ function EndAutoPause(unitType, spendType)
 end
 
 function EndAutoPauseSelection(units)
-	LOG("EndAutoPauseSelection")
 	from(units).foreach(function (k, unit)
 		if unit.originalName then
 			unit:SetCustomName(unit.originalName)
@@ -275,7 +308,6 @@ end
 function StatusIconEvents(self, event, unitType, spendType)
 	return true
 end
-
 function IconEvents(self, event, unitType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl and event.Modifiers.Alt then
@@ -291,7 +323,6 @@ function IconEvents(self, event, unitType)
 			elseif event.Modifiers.Right then
 			end
 		else
-			LOG("Click ICON")
 			if event.Modifiers.Left then
 				local allUnits = from(unitType.productionUnits).concat(from(unitType.upkeepUnits)).toArray()
 				SelectUnits(allUnits)
@@ -312,7 +343,6 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 		elseif event.Modifiers.Ctrl then
 			if event.Modifiers.Left then
 			elseif event.Modifiers.Right then
-				LOG("AUTOPAUSE")
 				unitType[spendType] = "autopaused"
 				EnablePaused(unitType, spendType)
 				ActivateAutoPause(unitType, spendType)
@@ -326,7 +356,6 @@ function SpendTypeContainerEvents(self, event, typeUi, unitType, spendType)
 					SelectUnits(unitType.upkeepUnits)
 				end
 			elseif event.Modifiers.Right then
-				-- SelectWorkers(unitType, spendType)
 				if spendType == spendTypes.PRODUCTION then
 					SelectUnits(unitType.pausedProductionUnits)
 				elseif spendType == spendTypes.UPKEEP then
@@ -368,33 +397,6 @@ function SetBarColor(typeUi, spendType, active)
 	end
 end
 
-function UpdateStatusIcon(typeUi, spendType, type)
-	if spendType == spendTypes.PRODUCTION then
-		typeUi.productionPausedStatusIcon:Hide()
-		typeUi.productionAutoPausedStatusIcon:Hide()
-		typeUi.productionPrioritizedStatusIcon:Hide()
-
-		if type == "paused" then
-			typeUi.productionPausedStatusIcon:Show()
-		elseif type == "autopaused" then
-			typeUi.productionAutoPausedStatusIcon:Show()
-		elseif type == "prioritized" then
-			typeUi.productionPrioritizedStatusIcon:Show()
-		end
-	elseif spendType == spendTypes.UPKEEP then
-		typeUi.upkeepPausedStatusIcon:Hide()
-		typeUi.upkeepAutoPausedStatusIcon:Hide()
-		typeUi.upkeepPrioritizedStatusIcon:Hide()
-
-		if type == "paused" then
-			typeUi.upkeepPausedStatusIcon:Show()
-		elseif type == "autopaused" then
-			typeUi.upkeepAutoPausedStatusIcon:Show()
-		elseif type == "prioritized" then
-			typeUi.upkeepPrioritizedStatusIcon:Show()
-		end
-	end
-end
 
 function GetEconData(unit)
 	local mi = unit:GetMissileInfo()
@@ -412,29 +414,7 @@ function GetEconData(unit)
 	end
 end
 
-outerPadding = 3
-usageContainerWidth = 100
-barSeparationY = 1
-iconSize = 25
 
-rootWidth = (iconSize * 2) + usageContainerWidth * 2 + (outerPadding * 6) + iconSize
-iconLeftIn = iconSize + usageContainerWidth + (outerPadding * 3)
-typeHeight = iconSize + (outerPadding * 2)
-leftBarsLeftIn = (outerPadding * 2) + iconSize
-rightBarsLeftIn = (outerPadding * 4) + (iconSize * 2) + usageContainerWidth
-usageContainerHeight = (iconSize / 2) - barSeparationY
-
-topBarTopIn = outerPadding
-bottomBarTopIn = usageContainerHeight + barSeparationY
-
-upkeepStatusIconLeftIn = outerPadding
-productionStatusIconLeftIn = rootWidth - iconSize - outerPadding
-
-function DoUpdate()
-	if UIP.GetSetting("showEcontrolResources") then
-		UpdateResourcesUi()
-	end
-end
 
 function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
@@ -480,24 +460,30 @@ function UpdateResourcesUi()
 		local unitType = GetUnitType(unitToGetDataFrom)
 
 		local unitHasUsage = false
+		local unitHasPausedUsage = false
 		resourceTypes.foreach(function(k, resourceType)
 			local usage = econData[resourceType.econDataKey]
+			local pausedUsage = usage + (pausedEconData[resourceType.econDataKey] or 0)
+			local combinedUsage = usage + pausedUsage
 
-			usage = usage + (pausedEconData[resourceType.econDataKey] or 0)
-
-			if (usage > 0) then
+			if (combinedUsage > 0) then
 				local unitTypeUsage = unitType.usage[resourceType.name]
 				if (isUpkeep) then
-					resourceType.upkeepUsage = resourceType.upkeepUsage + usage
-					unitTypeUsage.upkeepUsage = unitTypeUsage.upkeepUsage + usage
+					resourceType.upkeepUsage = resourceType.upkeepUsage + combinedUsage
+					unitTypeUsage.upkeepUsage = unitTypeUsage.upkeepUsage + combinedUsage
 				else
-					resourceType.productionUsage = resourceType.productionUsage + usage
-					unitTypeUsage.productionUsage = unitTypeUsage.productionUsage + usage
+					resourceType.productionUsage = resourceType.productionUsage + combinedUsage
+					unitTypeUsage.productionUsage = unitTypeUsage.productionUsage + combinedUsage
 				end
 				unitHasUsage = true
+
+				if combinedUsage > 0 then
+					unitHasPausedUsage = true
+				end
 			end
 		end)
 
+		-- TODO
 		if unitHasUsage then
 			if (isUpkeep) then
 				table.insert(unitType.upkeepUnits, unit)
@@ -506,11 +492,18 @@ function UpdateResourcesUi()
 			end
 		end
 
+		if unitHasPausedUsage then
+			if (isUpkeep) then
+				table.insert(unitType.pausedUpkeepUnits, unit)
+			else
+				table.insert(unitType.pausedProductionUnits, unit)
+			end
+		end
+
 		-- TODO:
 		-- if unitHasUsage then
 		-- 	if (isUpkeep) then
 		-- 		if unit:IsInCategory 'COMMAND' then
-		-- 			LOG("COMMAND")
 		-- 			table.insert(unitType.productionUnits, unit)
 		-- 		else
 		-- 			table.insert(unitType.upkeepUnits, unit)
@@ -581,95 +574,8 @@ function UpdateResourcesUi()
 	end
 end
 
-function GetUpgradingUnits(category)
-	local units = from(category.units).where(function(k, u) return u:GetWorkProgress() < 1 and u:GetWorkProgress() > 0 end)
-		.toArray()
-	local sorted = dosort(units, function(u) return u:GetWorkProgress() end)
-	return sorted
-end
 
-function dosort(t, func)
-	local keys = {}
-	for k, v in t do keys[table.getn(keys) + 1] = k end
-	table.sort(keys, function(a, b) return func(t[a]) > func(t[b]) end)
-	local sorted = {}
-	local i = 1
-	while keys[i] do
-		sorted[i] = t[keys[i]]
-		i = i + 1
-	end
-	return sorted
-end
 
-function IsMexCategoryMatch(mexCategory, unit)
-	if unit.isUpgradee then
-		return false
-	end
-
-	if not EntityCategoryContains(mexCategory.categories, unit) then
-		return false
-	end
-
-	if unit.isUpgrader ~= mexCategory.isUpgrading then
-		return false
-	end
-
-	if mexCategory.isPaused ~= nil then
-		if GetIsPaused({ unit }) ~= mexCategory.isPaused then
-			return false
-		end
-	end
-
-	return true
-end
-
-local hoverMexCategoryType
-function OnMexCategoryUiClick(self, event, category)
-	if event.Type == 'MouseExit' then
-		if hoverMexCategoryType ~= nil then
-			hoverMexCategoryType.ui:InternalSetSolidColor('aa000000')
-		end
-		hoverMexCategoryType = nil
-	end
-	if event.Type == 'MouseEnter' then
-		hoverMexCategoryType = category
-	end
-	if event.Type == 'ButtonPress' then
-		if event.Modifiers.Right then
-			if category.isPaused ~= nil then
-				if event.Modifiers.Ctrl then
-					local sorted = GetUpgradingUnits(category)
-					local best = sorted[1]
-
-					if category.isPaused then
-						-- unpause the best
-						SetPaused({ best }, false)
-					else
-						-- pause all except the best
-						local worst = sorted[table.getn(sorted)]
-						SetPaused({ worst }, true)
-					end
-				else
-					SetPaused(category.units, not category.isPaused)
-				end
-			end
-		else
-			if event.Modifiers.Ctrl then
-				local sorted = GetUpgradingUnits(category)
-				local best = sorted[1]
-				SelectUnits({ best })
-			else
-				SelectUnits(category.units)
-			end
-		end
-	end
-
-	if hoverMexCategoryType ~= nil then
-		hoverMexCategoryType.ui:InternalSetSolidColor('11ffffff')
-	end
-
-	return true
-end
 
 function SpendTypeContainer(root, spendType)
 	local container = Bitmap(root)
@@ -713,6 +619,12 @@ function StatusIcon(root, spendType, iconPath)
 	LayoutHelpers.AtVerticalCenterIn(container, root, 0)
 
 	return container
+end
+
+function DoUpdate()
+	if UIP.GetSetting("showEcontrolResources") then
+		UpdateResourcesUi()
+	end
 end
 
 function buildUi()
@@ -859,14 +771,6 @@ function buildUi()
 			},
 		})
 
-		unitTypes.foreach(function(k, unitType)
-			unitType.usage = {}
-			unitType[spendTypes.PRODUCTION] = "default"
-			unitType[spendTypes.UPKEEP] = "default"
-			unitType.pausedProductionUnits = {}
-			unitType.pausedUpkeepUnits = {}
-		end)
-
 		local dragger = import('/mods/UI-Party/modules/ui.lua').buttons.dragButton
 		local uiRoot = Bitmap(dragger)
 		UIP.econtrol.ui = uiRoot
@@ -890,10 +794,17 @@ function buildUi()
 
 		-- Loop
 		unitTypes.foreach(function(k, unitType)
+
+			unitType.usage = {}
+			unitType[spendTypes.PRODUCTION] = "default"
+			unitType[spendTypes.UPKEEP] = "default"
+			unitType.pausedProductionUnits = {}
+			unitType.pausedUpkeepUnits = {}
+
 			local typeUi = {}
 			unitType.typeUi = typeUi
 
-			-- Root
+			-- unitType
 			typeUi.uiRoot = Bitmap(uiRoot)
 			typeUi.uiRoot.Width:Set(rootWidth)
 			typeUi.uiRoot.Height:Set(typeHeight)
