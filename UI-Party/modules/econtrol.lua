@@ -213,13 +213,24 @@ function EnablePaused(unitType, spendType)
 		SetPaused(unitType.pausedProductionUnits, false)
 
 		LOG("unitType.pausedProductionUnits = {}")
+
+		for k, v in unitType.pausedProductionUnits do
+			v.econtrol = {}
+		end
+
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
 		LOG("CALL EnableUnitsAbility("..tostring(unitType.pausedUpkeepUnits).."), getn(unitType.pausedUpkeepUnits) == "..tostring(table.getn(unitType.pausedUpkeepUnits)))
 
 		EnableUnitsAbility(unitType.pausedUpkeepUnits)
 
+
+		for k, v in unitType.pausedUpkeepUnits do
+			v.econtrol = {}
+		end
+
 		LOG("unitType.pausedUpkeepUnits = {}")
+
 		unitType.pausedUpkeepUnits = {}
 	end
 end
