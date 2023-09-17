@@ -30,6 +30,9 @@ local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
 local expandedCheck = true
 local currentIndex = 1
 
+local engineersExpanded = true
+local factoriesExpanded = true
+
 function GetEngineerGeneric()
     local idleEngineers = GetIdleEngineers()
     if idleEngineers then
@@ -263,6 +266,12 @@ function CreateIdleTab(unitData, id, expandFunc)
     LayoutHelpers.AnchorToLeft(bg.expandCheck, bg, -4)
     LayoutHelpers.AtVerticalCenterIn(bg.expandCheck, bg)
     bg.expandCheck.OnCheck = function(self, checked)
+        if id == 'engineer' then
+            engineersExpanded = checked
+        elseif id == 'factory' then
+            factoriesExpanded = checked
+        end
+
         if checked then
             if expandedCheck and expandedCheck ~= bg.id and GetCheck(expandedCheck) then
                 GetCheck(expandedCheck):SetCheck(false)
@@ -810,9 +819,9 @@ function AvatarUpdate()
             controls.idleEngineers:Update(engineers)
         else
             controls.idleEngineers = CreateIdleTab(engineers, 'engineer', CreateIdleEngineerList)
-            if expandedCheck == 'engineer' then
-                controls.idleEngineers.expandCheck:SetCheck(true)
-            end
+            -- if expandedCheck == 'engineer' then
+            -- end
+            controls.idleEngineers.expandCheck:SetCheck(engineersExpanded)
             needsAvatarLayout = true
         end
     else
@@ -828,9 +837,9 @@ function AvatarUpdate()
             controls.idleFactories:Update(EntityCategoryFilterDown(categories.ALLUNITS - categories.GATE, factories))
         else
             controls.idleFactories = CreateIdleTab(EntityCategoryFilterDown(categories.ALLUNITS - categories.GATE, factories), 'factory', CreateIdleFactoryList)
-            if expandedCheck == 'factory' then
-                controls.idleFactories.expandCheck:SetCheck(true)
-            end
+            -- if expandedCheck == 'factory' then
+            -- end
+            controls.idleFactories.expandCheck:SetCheck(factoriesExpanded)
             needsAvatarLayout = true
         end
     else
