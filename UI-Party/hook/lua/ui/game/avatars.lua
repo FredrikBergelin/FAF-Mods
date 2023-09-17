@@ -354,6 +354,39 @@ function CreateIdleTab(unitData, id, expandFunc)
                end
            end
         end
+
+        if bg.units[1]:IsIdle() and not bg.idle then
+            if not bg.idle then
+                bg.idle = Bitmap(bg.icon, UIUtil.SkinnableFile('/game/idle_mini_icon/idle_icon.dds'))
+                LayoutHelpers.AtLeftTopIn(bg.idle, bg.icon, -2, -2)
+                bg.idle:DisableHitTest()
+                bg.idle.cycles = 0
+                bg.idle.dir = 1
+                bg.idle:SetNeedsFrameUpdate(true)
+                bg.idle:SetAlpha(0)
+                bg.idle.OnFrame = function(self, delta)
+                    local newAlpha = self:GetAlpha() + (delta * 3 * self.dir)
+                    if newAlpha > 1 then
+                        newAlpha = 1
+                        self.dir = -1
+                        self.cycles = self.cycles + 1
+                        if self.cycles >= 5 then
+                            self:SetNeedsFrameUpdate(false)
+                        end
+                    elseif newAlpha < 0 then
+                        newAlpha = 0
+                        self.dir = 1
+                    end
+                    self:SetAlpha(newAlpha)
+                end
+            end
+        elseif not bg.units[1]:IsIdle() then
+            if bg.idle then
+                bg.idle:Destroy()
+                bg.idle = false
+            end
+        end
+
         self.count:SetText(table.getsize(self.allunits))
 
         if self.expandCheck.expandList then
