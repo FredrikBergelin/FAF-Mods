@@ -93,8 +93,11 @@ function GetOnValueForScriptBit(i)
 	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
 	return true
 end
+
 function DisableUnitsAbility(units)
+	LOG("DisableUnitsAbility(units)")
 	for i = 0, 8 do
+		LOG("ToggleScriptBit")
 		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
 	end
 end
@@ -149,6 +152,7 @@ function PauseProduction(unitType, spendType)
 end
 
 function DisableUpkeep(unitType, spendType)
+	LOG("DisableUpkeep("..tostring(unitType)..", "..tostring(spendType)..")")
 	-- local workers = GetWorkers(unitType, spendType)
 	-- for k, v in pairs(workers) do
 	-- 	local econData = GetEconData(v)
@@ -166,13 +170,21 @@ function DisableUpkeep(unitType, spendType)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
+		LOG("table.getn(unitType.pausedUpkeepUnits) == "..tostring(table.getn(unitType.pausedUpkeepUnits)))
+		LOG("table.insert(unitType.pausedUpkeepUnits, v)")
 		table.insert(unitType.pausedUpkeepUnits, v)
 	end
 
+	LOG("END LOOP, table.getn(unitType.pausedUpkeepUnits) == "..tostring(table.getn(unitType.pausedUpkeepUnits)))
+	LOG("table.getn(unitType.upkeepUnits) == "..tostring(table.getn(unitType.upkeepUnits)))
+	LOG("DisableUnitsAbility(unitType.upkeepUnits)")
 	DisableUnitsAbility(unitType.upkeepUnits)
+
+	unitType.upkeepUnits = {}
 end
 
 function DisableWorkers(unitType, spendType)
+	LOG("DisableWorkers("..tostring(unitType)..", "..tostring(spendType)..")")
 	local unitType = unitType
 
 	local workers = GetWorkers(unitType, spendType)
@@ -180,8 +192,10 @@ function DisableWorkers(unitType, spendType)
 	if table.getn(workers) == 0 then
 	else
 		if spendType == spendTypes.PRODUCTION then
+			LOG("CALL PauseProduction("..tostring(unitType)..", "..tostring(spendType)..")")
 			PauseProduction(unitType, spendType)
 		elseif spendType == spendTypes.UPKEEP then
+			LOG("CALL DisableUpkeep("..tostring(unitType)..", "..tostring(spendType)..")")
 			DisableUpkeep(unitType, spendType)
 		end
 	end
@@ -222,12 +236,22 @@ end
 -- end
 
 function EnablePaused(unitType, spendType)
+	LOG("EnablePaused("..tostring(unitType)..", "..tostring(spendType)..")")
+
 	local unitType = unitType
 	if spendType == spendTypes.PRODUCTION then
+		LOG("CALL DisableWorkers("..tostring(unitType)..", "..tostring(spendType)..")")
+
 		SetPaused(unitType.pausedProductionUnits, false)
+
+		LOG("unitType.pausedProductionUnits = {}")
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
+		LOG("CALL EnableUnitsAbility("..tostring(unitType.pausedUpkeepUnits).."), getn(unitType.pausedUpkeepUnits) == "..tostring(table.getn(unitType.pausedUpkeepUnits)))
+
 		EnableUnitsAbility(unitType.pausedUpkeepUnits)
+
+		LOG("unitType.pausedUpkeepUnits = {}")
 		unitType.pausedUpkeepUnits = {}
 	end
 end
@@ -252,10 +276,12 @@ function AutoPauseSelection(totalSel)
 end
 
 function ActivatePause(unitType, spendType)
+	LOG("ActivatePause("..tostring(unitType)..", "..tostring(spendType)..")")
 	unitType.AutoUpdateThread = ForkThread(function()
 		while unitType[spendType] == "paused" do
+			LOG("CALL DisableWorkers("..tostring(unitType)..", "..tostring(spendType)..")")
 			DisableWorkers(unitType, spendType)
-			WaitSeconds(0.5)
+			WaitSeconds(5)
 		end
 		unitType.AutoUpdateThread = nil
 	end)
@@ -270,7 +296,7 @@ function ActivateAutoPause(unitType, spendType)
 			elseif energyPercent > 90 then
 				EnablePaused(unitType, spendType)
 			end
-			WaitSeconds(0.5)
+			WaitSeconds(5)
 		end
 		unitType.AutoUpdateThread = nil
 	end)
@@ -490,13 +516,13 @@ function UpdateResourcesUi()
 			end
 		end
 
-		if unitHasPausedUsage then
-			if (isUpkeep) then
-				table.insert(unitType.pausedUpkeepUnits, unit)
-			else
-				table.insert(unitType.pausedProductionUnits, unit)
-			end
-		end
+		-- if unitHasPausedUsage then
+		-- 	if (isUpkeep) then
+		-- 		table.insert(unitType.pausedUpkeepUnits, unit)
+		-- 	else
+		-- 		table.insert(unitType.pausedProductionUnits, unit)
+		-- 	end
+		-- end
 
 		-- TODO:
 		-- if unitHasUsage then
