@@ -141,19 +141,20 @@ end
 function PauseProduction(unitType, spendType)
 	LOG("PauseProduction(unitType="..tostring(unitType) .. ", spendType="..tostring(unitType))
 	local workers = GetWorkers(unitType, spendType)
-	for k, v in unitType.productionUnits do
+	for k, v in workers do
 		local econData = GetEconData(v)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
-		-- table.insert(unitType.pausedProductionUnits, v)
+		table.insert(unitType.pausedProductionUnits, v)
 	end
 	SetPaused(workers, true)
+	unitType.productionUnits = {}
 end
 
 function DisableUpkeep(unitType, spendType)
 	LOG("DisableUpkeep("..tostring(unitType)..", "..tostring(spendType)..")")
-	-- local workers = GetWorkers(unitType, spendType)
+	local workers = GetWorkers(unitType, spendType)
 	-- for k, v in pairs(workers) do
 	-- 	local econData = GetEconData(v)
 	-- 	if econData["massConsumed"] > 0 then
@@ -165,7 +166,7 @@ function DisableUpkeep(unitType, spendType)
 	-- 	end
 	-- end
 
-	for k, v in unitType.upkeepUnits do
+	for k, v in workers do
 		local econData = GetEconData(v)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
@@ -178,7 +179,8 @@ function DisableUpkeep(unitType, spendType)
 	LOG("END LOOP, table.getn(unitType.pausedUpkeepUnits) == "..tostring(table.getn(unitType.pausedUpkeepUnits)))
 	LOG("table.getn(unitType.upkeepUnits) == "..tostring(table.getn(unitType.upkeepUnits)))
 	LOG("DisableUnitsAbility(unitType.upkeepUnits)")
-	DisableUnitsAbility(unitType.upkeepUnits)
+
+	DisableUnitsAbility(workers)
 
 	unitType.upkeepUnits = {}
 end
@@ -200,40 +202,6 @@ function DisableWorkers(unitType, spendType)
 		end
 	end
 end
-
--- function SelectWorkers(unitType, spendType)
--- 	local unitType = unitType
--- 	local workers = GetWorkers(unitType, spendType)
--- 	SelectUnits(workers)
--- end
-
--- function GetPaused(unitType, spendType)
--- 	local unitType = unitType
--- 	local workers = nil
-
--- 	if spendType == spendTypes.PRODUCTION then
--- 		workers = unitType.pausedProductionUnits
--- 	elseif spendType == spendTypes.UPKEEP then
--- 		workers = unitType.pausedUpkeepUnits
--- 	end
-
--- 	local stillPaused = {}
--- 	for k, v in ValidateUnitsList(workers) do
--- 		if GetIsPausedBySpendType({ v }, spendType) then
--- 			table.insert(stillPaused, v)
--- 		end
--- 	end
--- 	-- could check still working on same project here
--- 	return stillPaused
--- end
-
--- function GetIsPausedBySpendType(units, spendType)
--- 	if spendType == spendTypes.PRODUCTION then
--- 		return GetIsPaused(units)
--- 	elseif spendType == spendTypes.UPKEEP then
--- 		return GetIsUnitAbilityEnabled(units)
--- 	end
--- end
 
 function EnablePaused(unitType, spendType)
 	LOG("EnablePaused("..tostring(unitType)..", "..tostring(spendType)..")")
@@ -281,7 +249,7 @@ function ActivatePause(unitType, spendType)
 		while unitType[spendType] == "paused" do
 			LOG("CALL DisableWorkers("..tostring(unitType)..", "..tostring(spendType)..")")
 			DisableWorkers(unitType, spendType)
-			WaitSeconds(5)
+			WaitSeconds(0.5)
 		end
 		unitType.AutoUpdateThread = nil
 	end)
@@ -296,7 +264,7 @@ function ActivateAutoPause(unitType, spendType)
 			elseif energyPercent > 90 then
 				EnablePaused(unitType, spendType)
 			end
-			WaitSeconds(5)
+			WaitSeconds(0.5)
 		end
 		unitType.AutoUpdateThread = nil
 	end)
@@ -439,7 +407,6 @@ function GetEconData(unit)
 	end
 end
 
-
 function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
@@ -469,7 +436,7 @@ function UpdateResourcesUi()
 		local unitToGetDataFrom = nil
 		local isUpkeep = false
 
-		if econData == nil then
+		if econData == nil and pausedEconData.energyConsumed == 0 and pausedEconData.massConsumed == 0 then
 			return
 		end
 
@@ -484,7 +451,6 @@ function UpdateResourcesUi()
 		local unitType = GetUnitType(unitToGetDataFrom)
 
 		local unitHasUsage = false
-		local unitHasPausedUsage = false
 		resourceTypes.foreach(function(k, resourceType)
 			local usage = econData[resourceType.econDataKey]
 			local pausedUsage = usage + (pausedEconData[resourceType.econDataKey] or 0)
@@ -499,11 +465,9 @@ function UpdateResourcesUi()
 					resourceType.productionUsage = resourceType.productionUsage + combinedUsage
 					unitTypeUsage.productionUsage = unitTypeUsage.productionUsage + combinedUsage
 				end
+			end
+			if usage > 0 then
 				unitHasUsage = true
-
-				if combinedUsage > 0 then
-					unitHasPausedUsage = true
-				end
 			end
 		end)
 
@@ -515,14 +479,6 @@ function UpdateResourcesUi()
 				table.insert(unitType.productionUnits, unit)
 			end
 		end
-
-		-- if unitHasPausedUsage then
-		-- 	if (isUpkeep) then
-		-- 		table.insert(unitType.pausedUpkeepUnits, unit)
-		-- 	else
-		-- 		table.insert(unitType.pausedProductionUnits, unit)
-		-- 	end
-		-- end
 
 		-- TODO:
 		-- if unitHasUsage then
@@ -552,13 +508,15 @@ function UpdateResourcesUi()
 				local productionValue = unitTypeUsage.productionUsage
 				local upkeepValue = unitTypeUsage.upkeepUsage
 
+				-- LOG("--- ".. tostring(productionValue) .." ---" .. tostring(upkeepValue) .." ---" .. tostring(resourceTypeUsageTotal) .." ---" )
+
+				-- Percentify
 				productionValue = productionValue / resourceTypeUsageTotal * usageContainerWidth
 				upkeepValue = upkeepValue / resourceTypeUsageTotal * usageContainerWidth
 
 				productionValue = math.ceil(productionValue)
 				upkeepValue = math.ceil(upkeepValue)
 
-				-- Percentify
 				if (productionValue > 0 and productionValue < 1) then productionValue = 1 end
 				if (upkeepValue > 0 and upkeepValue < 1) then upkeepValue = 1 end
 
@@ -597,7 +555,6 @@ function UpdateResourcesUi()
 		UIP.econtrol.ui.Height:Set(y)
 	end
 end
-
 
 function SpendTypeContainer(root, spendType)
 	local container = Bitmap(root)
