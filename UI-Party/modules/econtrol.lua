@@ -166,7 +166,7 @@ function DisableUpkeep(unitType, spendType)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
-		-- table.insert(unitType.pausedUpkeepUnits, v)
+		table.insert(unitType.pausedUpkeepUnits, v)
 	end
 
 	DisableUnitsAbility(unitType.upkeepUnits)
@@ -397,7 +397,6 @@ function SetBarColor(typeUi, spendType, active)
 	end
 end
 
-
 function GetEconData(unit)
 	local mi = unit:GetMissileInfo()
 	if (mi.nukeSiloBuildCount > 0 or mi.tacticalSiloBuildCount > 0) then
@@ -415,7 +414,6 @@ function GetEconData(unit)
 end
 
 
-
 function UpdateResourcesUi()
 	local units = from(CommonUnits.Get())
 
@@ -424,7 +422,7 @@ function UpdateResourcesUi()
 		unitType.upkeepUnits = {}
 	end)
 
-	-- set unittype resource usages to 0
+	-- Set unittype resource usages to 0
 	resourceTypes.foreach(function(k, resourceType)
 		resourceType.productionUsage = 0
 		resourceType.upkeepUsage = 0
@@ -573,8 +571,6 @@ function UpdateResourcesUi()
 		UIP.econtrol.ui.Height:Set(y)
 	end
 end
-
-
 
 
 function SpendTypeContainer(root, spendType)
