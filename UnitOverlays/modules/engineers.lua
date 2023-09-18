@@ -76,8 +76,16 @@ local FactoryOverlay = Class(Overlay)
         local tempOverlays = {}
 
         if unit:IsInCategory("LAND") then
-            table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory_land.dds")
-            table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory_land.dds")
+            if unit:IsInCategory("TECH1") then
+                table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory1_land.dds")
+                table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory1_land.dds")
+            elseif unit:IsInCategory("TECH2") then
+                table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory2_land.dds")
+                table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory2_land.dds")
+            elseif unit:IsInCategory("TECH3") then
+                table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory3_land.dds")
+                table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory3_land.dds")
+            end
         elseif unit:IsInCategory("NAVAL") then
             table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory_naval.dds")
             table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory_naval.dds")
