@@ -1,24 +1,56 @@
 local Prefs = import("/lua/user/prefs.lua")
 
 local storedUniqueIdentifier
+local clickCount = 1
 local lastClickTime = -9999
 
 function SingleOrDoubleClick(uniqueIdentifier, singleClickFunction, doubleClickFunction, distinct)
 	ForkThread(function()
         storedUniqueIdentifier = uniqueIdentifier
-        local curTime = GetSystemTimeSeconds()
-        local diffTime = curTime - lastClickTime
+        local currentTime = GetSystemTimeSeconds()
+        local diffTime = currentTime - lastClickTime
         local decay = 0.001 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
-        lastClickTime = curTime
+        lastClickTime = currentTime
 
         WaitSeconds(decay)
 
         if uniqueIdentifier == storedUniqueIdentifier and diffTime < decay then
             storedUniqueIdentifier = nil
             doubleClickFunction()
-        elseif lastClickTime == curTime then
+        elseif lastClickTime == currentTime then
             -- Only run the single click if we dont register a double click during the decay time 
             singleClickFunction()
         end
     end)
+end
+
+function ClickCount(uniqueIdentifier)
+    local currentTime = GetSystemTimeSeconds()
+
+    if storedUniqueIdentifier == uniqueIdentifier then
+        local diffTime = currentTime - lastClickTime
+        local decay = 0.001 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
+
+        if diffTime < decay then
+            clickCount = clickCount + 1
+        else
+            clickCount = 1
+        end
+    else
+        clickCount = 1
+    end
+
+    lastClickTime = currentTime
+    storedUniqueIdentifier = uniqueIdentifier
+
+    return clickCount
+end
+
+function AnyUnitSelected()
+    local units = GetSelectedUnits()
+    if (units ~= nil) then
+        return true
+    else
+        return false
+    end
 end
