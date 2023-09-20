@@ -11,6 +11,10 @@ function Reset()
     ConExecute 'StartCommandMode order RULEUCC_Move'
 end
 
+function Test()
+    
+end
+
 function Toggle()
     locked = not locked
     Reset()
@@ -24,7 +28,12 @@ end
 ---@param commandMode CommandMode
 ---@param commandModeData CommandModeData
 function OnCommandStarted(commandMode, commandModeData)
-
+    if locked and (commandModeData and commandModeData.name ~= "RULEUCC_Move") then
+        locked = false
+        ForkThread(function ()
+            ConExecute ('StartCommandMode order '..commandModeData.name)
+        end)
+    end
 end
 
 ---comment
