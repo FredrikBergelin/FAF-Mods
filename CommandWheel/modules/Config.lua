@@ -6,7 +6,7 @@ Wheels = {
         Ui = {
             Radius = 0.15,
             Middle = {
-                Type = 'SIMPLE',
+                Type = 'EMPTY',
                 Texture = 'DEFAULT',
                 Radius = 0.107,
                 Alpha = 0.3,
@@ -36,10 +36,10 @@ Wheels = {
             }
         },
         Items = {
-            {Action = 'alert', Text = {{Value = '[A]', Color = 'ffd300'}}},
-            {Action = 'move', Text = {{Value = '[M]', Color = '10e7ff'}}},
-            {Action = 'attack', Text = {{Value = '[A]', Color = 'c50000'}}},
-            {Action = 'marker', Text = {{Value = '[M]', Color = 'ffffff'}}}
+            {Action = 'alert', Text = {{Value = 'Alert', Color = 'ffd300', Size = 0.08}}},
+            {Action = 'move', Text = {{Value = 'Move', Color = '10e7ff', Size = 0.08}}},
+            {Action = 'attack', Text = {{Value = 'Attack', Color = 'c50000', Size = 0.08}}},
+            {Action = 'marker', Text = {{Value = 'Marker', Color = 'ffffff', Size = 0.08}}}
         }
     },
     AlertExtended = {
@@ -47,7 +47,7 @@ Wheels = {
         Ui = {
             Radius = 0.2,
             Middle = {
-                Type = 'SIMPLE',
+                Type = 'EMPTY',
                 Texture = 'DEFAULT',
                 Radius = 0.095,
                 Alpha = 0.3,
@@ -77,26 +77,26 @@ Wheels = {
             }
         },
         Items = {
-            {Action = 'alert', Text = {{Value = '[A]', Color = 'ffd300'}}},
-            {Action = 'marker', MarkerNickname = true, MarkerText = 'T1 Eng', Text = {{Value = '[E1]', Color = '4db366'}}},
-            {Action = 'marker', MarkerNickname = true, MarkerText = 'T2 Eng',  Text = {{Value = '[E2]', Color = '4db366'}}},
-            {Action = 'marker', MarkerNickname = true, MarkerText = 'T3 Eng',  Text = {{Value = '[E3]', Color = '4db366'}}},
-            {Action = 'marker', MarkerTimestamp = true, MarkerText = '', Text = {{Value = '[T]', Color = '4db366'}}},
-            {Action = 'marker', Text = {{Value = '[M]', Color = 'ffffff'}}},
-            {Action = 'move', Text = {{Value = '[M]', Color = '10e7ff'}}},
-            {Action = 'attack', Text = {{Value = '[A]', Color = 'c50000'}}},
+            {Action = 'alert', Text = {{Value = 'Alert', Color = 'ffd300'}}},
+            {Action = 'marker', MarkerNickname = true, MarkerText = 'T1 Eng', Text = {{Value = 'E1', Color = '4db366'}}},
+            {Action = 'marker', MarkerNickname = true, MarkerText = 'T2 Eng',  Text = {{Value = 'E2', Color = '4db366'}}},
+            {Action = 'marker', MarkerNickname = true, MarkerText = 'T3 Eng',  Text = {{Value = 'E3', Color = '4db366'}}},
+            {Action = 'marker', MarkerTimestamp = true, MarkerText = '', Text = {{Value = 'Time', Color = '4db366'}}},
+            {Action = 'marker', Text = {{Value = 'Marker', Color = 'ffffff'}}},
+            {Action = 'move', Text = {{Value = 'Move', Color = '10e7ff'}}},
+            {Action = 'attack', Text = {{Value = 'Attack', Color = 'c50000'}}},
         }
     },
     TargetPriority = {
         Mods = {{
-            Name = 'Advanced target priorities 1.1',
+            Name = 'Advanced Target Priorities',
             Location = '/mods/advanced target priorities'
         }},
         Position = 'MOUSE',
         Ui = {
             Radius = 0.25,
             Middle = {
-                Type = 'SIMPLE',
+                Type = 'EMPTY',
                 Texture = 'DEFAULT',
                 Radius = 0.095,
                 Alpha = 0.3,
@@ -126,7 +126,7 @@ Wheels = {
             }
         },
         Items = {
-            {Action = 'Engies', Text = {{Value = '[E] ', Color = '4a8a0a', Size = 0.04}, {Value = 'Engi'}}},
+            {Action = 'Engies', Text = {{Value = 'Eng', Color = '4a8a0a', Size = 0.04}, {Value = 'Engi'}}},
             {Action = 'Mex', Text = {{Value = '[M] ', Color = '4a8a0a', Size = 0.04}, {Value = 'Mex'}}},
             {Action = 'Power', Text = {{Value = '[P] ', Color = '4a8a0a', Size = 0.04}, {Value = 'Power'}}},
             {Action = 'PD', Text = {{Value = '[P] ', Color = 'e3cd09', Size = 0.04}, {Value = 'PD'}}},
@@ -142,7 +142,7 @@ Wheels = {
     },
     TargetPriorityExtended = {
         Mods = {{
-            Name = 'Advanced target priorities 1.1',
+            Name = 'Advanced Target Priorities',
             Location = '/mods/advanced target priorities'
         }},
         Position = 'MOUSE',
@@ -185,7 +185,7 @@ Wheels = {
             {Action = 'Factory', Text = {{Value = '[F] ', Color = 'e3cd09', Size = 0.03}, {Value = 'Fact'}}},
             {Action = 'Shields', Text = {{Value = '[S] ', Color = 'e3cd09', Size = 0.03}, {Value = 'Shield'}}},
             {Action = 'Arty', Text = {{Value = '[A] ', Color = '804db3', Size = 0.03}, {Value = 'Arty'}}},
-            {Action = 'Fighters', Text = {{Value = '[F] ', Color = '804db3', Size = 0.03}, {Value = 'Fighter'}}},
+            {Action = 'AA', Text = {{Value = '[F] ', Color = '804db3', Size = 0.03}, {Value = 'AA'}}},
             {Action = 'Gunship', Text = {{Value = '[G] ', Color = '804db3', Size = 0.03}, {Value = 'Gunship'}}},
             {Action = 'Naval', Text = {{Value = '[N] ', Color = '7dd1ca', Size = 0.03}, {Value = 'Naval'}}},
             {Action = 'Destros', Text = {{Value = '[D] ', Color = '7dd1ca', Size = 0.03}, {Value = 'Destr'}}},
@@ -197,7 +197,6 @@ Wheels = {
             {Action = 'ACU', Text = {{Value = '[A] ', Color = 'ffffff', Size = 0.03}, {Value = 'ACU'}}},
             {Action = 'Units', Text = {{Value = '[U] ', Color = 'ffffff', Size = 0.03}, {Value = 'Unit'}}},
             {Action = 'Engies', Text = {{Value = '[E] ', Color = '4db366', Size = 0.03}, {Value = 'Engi'}}},
-
         }
     },
     Util = {
@@ -205,7 +204,7 @@ Wheels = {
         Ui = {
             Radius = 0.25,
             Middle = {
-                Type = 'SIMPLE',
+                Type = 'EMPTY',
                 Texture = 'DEFAULT',
                 Radius = 0.095,
                 Alpha = 0.3,

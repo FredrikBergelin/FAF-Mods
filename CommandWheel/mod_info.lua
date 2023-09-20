@@ -1,6 +1,6 @@
 name = "Command Wheel"
-uid = "094b053b-4c52-4db9-8024-aea7becdd24c"
-version = 6
+uid = "Command-Wheel-FF"
+version = 1
 copyright = ""
 description = [[Provides 'Wheel' interface to reduce amount of key bindings and simplify several ingame actions
 
