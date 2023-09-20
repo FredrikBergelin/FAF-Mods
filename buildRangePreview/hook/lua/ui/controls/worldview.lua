@@ -9,8 +9,9 @@ local ringGroups = {
 }
 
 local function isAcceptablePreviewMode()
-    local mode = CM.GetCommandMode()
-    return not mode[2] or (mode[1] == "order" and mode[2].name == "RULEUCC_Move")
+    return true -- Stop ring from freezing when placing a structure
+    -- local mode = CM.GetCommandMode()
+    -- return not mode[2] or (mode[1] == "order" and mode[2].name == "RULEUCC_Move")
 end
 
 local function createBuildRangeRingIfNecessary(radius)
