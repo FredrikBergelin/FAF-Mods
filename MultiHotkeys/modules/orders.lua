@@ -113,64 +113,27 @@ function GetOnValueForScriptBit(i)
     return true
 end
 
-function MultiPause(setActive, selection, abilities)
+function MultiPause(setActive, abilities)
+    local units = GetSelectedUnits()
+
+    abilities = abilities or
+    { "Pause", "Shield", "Weapon", "Jamming", "Intel", "Stealth", "Generic", "Special" } -- "Production" left out
+
     if setActive then
         PlaySound(Sound { Cue = "UI_Tab_Click_02", Bank = "Interface" })
     else
         PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
     end
 
-    SetPaused(selection, not setActive)
+    if abilities[1] == "Pause" then
+        SetPaused(units, not setActive)
+    end
 
     from(abilities).foreach(function(i, a)
         local ruleNumber = unitToggleRules[a]
         if ruleNumber then
-            local onValue = GetOnValueForScriptBit(i)
-            ToggleScriptBit(selection, i, setActive and onValue or not onValue)
+            local onValue = GetOnValueForScriptBit(ruleNumber)
+            ToggleScriptBit(units, ruleNumber, setActive and onValue or not onValue)
         end
     end)
-    -- local currentBit = GetScriptBit(selection, i)
-    -- ToggleScriptBit(selection, i, currentBit)
-
-end
-
-local SingleOrDoubleClick = import("/mods/common/modules/misc.lua").SingleOrDoubleClick
-function MultiPauser(abilities)
-    local selection = GetSelectedUnits()
-    if not selection or table.getn(selection) == 0 then return end
-
-    abilities = abilities or
-    { "Pause", "Shield", "Weapon", "Jamming", "Intel", "Stealth", "Generic", "Special" } -- "Production" left out
-
-    local uniqueId = "MultiPauser:" .. selection[1]:GetBlueprint().BlueprintId
-
-    SingleOrDoubleClick(uniqueId,
-        function() -- Single
-            local setActive = false
-            from(selection).foreach(function(i, currUnit)
-                if not setActive then
-                    if GetIsPaused({ currUnit }) then
-                        setActive = true
-                    end
-
-                    from(abilities).foreach(function(i, a)
-                        local ruleNumber = unitToggleRules[a]
-
-                        -- if ruleNumber then
-                        --     LOG(GetScriptBit(currUnit, ruleNumber))
-                        -- end
-
-                        if ruleNumber and not GetScriptBit(currUnit, ruleNumber) then
-                            -- LOG("TRUE")
-                            setActive = true
-                        end
-                    end)
-                end
-            end)
-            MultiPause(setActive, selection, abilities)
-        end,
-        function() -- Double
-            MultiPause(false, selection, abilities)
-        end
-    )
 end

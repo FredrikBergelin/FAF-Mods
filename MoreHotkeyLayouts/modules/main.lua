@@ -119,6 +119,33 @@ local function AnyUnitCanUpgrade()
 	return false
 end
 
+function ToggleRepeatBuildOrSetTo(setTo)
+    local selection = GetSelectedUnits()
+    if selection then
+		local verifiedSetTo
+
+		if setTo ~= nil then
+			verifiedSetTo = setTo
+		else
+			for _, v in selection do
+				if v:IsInCategory('FACTORY') then
+					if v:IsRepeatQueue() then
+						verifiedSetTo = true
+					end
+				end
+			end
+		end
+
+		for _, v in selection do
+			if verifiedSetTo then
+				v:ProcessInfo('SetRepeatQueue', 'true')
+			else
+				v:ProcessInfo('SetRepeatQueue', 'false')
+			end
+		end
+    end
+end
+
 local customKeyMap = {
 
 	F1 = function() Hotkey('F1', function(hotkey)
@@ -214,7 +241,19 @@ local customKeyMap = {
 	end) end,
 
 	CapsLock = function() Hotkey('CapsLock', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").MultiPauser()'
+		import("/mods/MultiHotkeys/modules/orders.lua").MultiPause(true)
+	end) end,
+
+	['Ctrl-CapsLock'] = function() Hotkey('Ctrl-CapsLock', function(hotkey)
+		import("/mods/MultiHotkeys/modules/orders.lua").MultiPause(false)
+	end) end,
+
+	['Shift-CapsLock'] = function() Hotkey('Shift-CapsLock', function(hotkey)
+		ToggleRepeatBuildOrSetTo(true)
+	end) end,
+
+	['Alt-CapsLock'] = function() Hotkey('Alt-CapsLock', function(hotkey)
+		ToggleRepeatBuildOrSetTo(false)
 	end) end,
 
 	-- 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").UpgradeStructuresEngineersCycleTemplates()'

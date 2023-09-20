@@ -170,11 +170,6 @@ KeyMapper.SetUserKeyAction("Shift Undo all except current queue order", {
     category = ordersCategory,
     order = getDisplayOrder()
 })
-KeyMapper.SetUserKeyAction("Toggle all resource draining functions", {
-    action = "UI_Lua import('/mods/MultiHotkeys/modules/orders.lua').MultiPauser()",
-    category = "Economy",
-    order = getDisplayOrder()
-})
 
 local enhancementsCategory = "Enhancements"
 
