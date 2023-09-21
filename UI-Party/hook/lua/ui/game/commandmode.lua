@@ -14,6 +14,8 @@ function OnCommandIssued(command)
 				end)
 			end
 		end
+	end
+	if UIP.GetSetting("factoriesRepeatOnStop") then
 		if command.CommandType == "Stop" then
 			local units = command.Units
 			local factories = EntityCategoryFilterDown(categories.FACTORY, units)

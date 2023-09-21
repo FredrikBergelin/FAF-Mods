@@ -343,7 +343,6 @@ function RemoveAllAdornments(u)
 
 end
 
-
 function UnitFound(u)
 	if UIP.GetSetting("setGroundFireOnAttack") then
 		ToggleFireState({ u }, 1)
