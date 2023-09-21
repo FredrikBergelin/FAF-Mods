@@ -28,10 +28,12 @@ function OpenMenu(menuName)
 end
 
 function OpenWheel(wheelName)
-    if not StrategicRings.IsCommandWheelAvailable() then
-        print('\'Command Wheel\' mod not installed')
-        return
-    end
+    -- TODO: It opens now but stops working after adding a few rings??
+
+    -- if not StrategicRings.IsCommandWheelAvailable() then
+    --     print('\'Command Wheel\' mod not installed')
+    --     return
+    -- end
 
     InitCommandWheel()
     import("/mods/CommandWheel/modules/CommandWheel.lua").OpenWheel(Config.Wheels[wheelName])
