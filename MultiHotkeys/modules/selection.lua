@@ -125,23 +125,42 @@ function SelectNearestIdleTransportOrTransport()
 end
 
 function SelectTmlFireMissile()
-    LOG("SelectTmlFireMissile")
     local selection = GetSelectedUnits()
 
-    local tml = {}
+    local launchers = {}
     if selection and not table.empty(selection) then
         from(selection).foreach(function(i, unit)
             if unit:IsInCategory("TACTICALMISSILEPLATFORM") and unit:IsInCategory("STRUCTURE") then
-                table.insert(tml, unit)
+                table.insert(launchers, unit)
             end
         end)
     end
 
-    if table.empty(tml) then
+    if table.empty(launchers) then
         ConExecute "UI_SelectByCategory STRUCTURE TACTICALMISSILEPLATFORM"
     end
 
     ConExecute "StartCommandMode order RULEUCC_Tactical"
+end
+
+function SelectSmlFireMissile()
+    local selection = GetSelectedUnits()
+
+    local launchers = {}
+    if selection and not table.empty(selection) then
+        from(selection).foreach(function(i, unit)
+            if unit:IsInCategory("NUKE") then
+                -- TODO: or in category naval + strategic, and has missiles loaded (do same for tml?)
+                table.insert(launchers, unit)
+            end
+        end)
+    end
+
+    if table.empty(launchers) then
+        ConExecute "UI_SelectByCategory NUKE"
+    else
+        ConExecute "StartCommandMode order RULEUCC_Nuke"
+    end
 end
 
 -- -- Select nearest idle engineer/Reclaim mode
