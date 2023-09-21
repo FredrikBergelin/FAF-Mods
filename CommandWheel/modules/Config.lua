@@ -78,9 +78,9 @@ Wheels = {
         },
         Items = {
             {Action = 'alert', Text = {{Value = 'Alert', Color = 'ffd300'}}},
-            {Action = 'marker', MarkerNickname = true, MarkerText = 'T1 Eng', Text = {{Value = 'E1', Color = '4db366'}}},
-            {Action = 'marker', MarkerNickname = true, MarkerText = 'T2 Eng',  Text = {{Value = 'E2', Color = '4db366'}}},
-            {Action = 'marker', MarkerNickname = true, MarkerText = 'T3 Eng',  Text = {{Value = 'E3', Color = '4db366'}}},
+            {Action = 'marker', MarkerTimestamp = true, MarkerText = 'COM', Text = {{Value = 'COM', Color = '4db366'}}},
+            {Action = 'marker', MarkerTimestamp = true, MarkerText = 'EXP', Text = {{Value = 'EXP', Color = '4db366'}}},
+            {Action = 'marker', MarkerTimestamp = true, MarkerText = 'STRAT', Text = {{Value = 'STRAT', Color = '4db366'}}},
             {Action = 'marker', MarkerTimestamp = true, MarkerText = '', Text = {{Value = 'Time', Color = '4db366'}}},
             {Action = 'marker', Text = {{Value = 'Marker', Color = 'ffffff'}}},
             {Action = 'move', Text = {{Value = 'Move', Color = '10e7ff'}}},
