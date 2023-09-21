@@ -113,7 +113,7 @@ function GetOnValueForScriptBit(i)
     return true
 end
 
-function MultiPause(setActive, abilities)
+function SetProductionAndAbilities(setActive, abilities)
     local units = GetSelectedUnits()
 
     abilities = abilities or

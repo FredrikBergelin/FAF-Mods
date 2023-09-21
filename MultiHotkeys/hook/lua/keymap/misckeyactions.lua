@@ -74,11 +74,6 @@ KeyMapper.SetUserKeyAction("Nearest Idle Transport / Transport Order", {
     category = "selection",
     order = getDisplayOrder()
 })
-KeyMapper.SetUserKeyAction("Shift Nearest Idle Transport / Transport Order", {
-    action = 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectNearestIdleTransportOrTransport()',
-    category = "selection",
-    order = getDisplayOrder()
-})
 KeyMapper.SetUserKeyAction("Select All IDLE engineers on screen not ACU", {
     action = "UI_SelectByCategory +inview +idle ENGINEER TECH1,ENGINEER TECH2,ENGINEER TECH3",
     category = "selection",
@@ -209,27 +204,3 @@ KeyMapper.SetUserKeyAction("Order Tele upgrade", {
     category = enhancementsCategory,
     order = getDisplayOrder()
 })
-
--- KeyMapper.SetUserKeyAction("Select Nearest IDLE T1 engineer / enter reclaim mode", {
---     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").ReclaimSelectIDLENearestT1()',
---     category = "selection",
---     order = getDisplayOrder()
--- })
--- KeyMapper.SetUserKeyAction("Shift Select Nearest IDLE T1 engineer / enter reclaim mode", {
---     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").ReclaimSelectIDLENearestT1()',
---     category = "selection",
---     order = getDisplayOrder()
--- })
--- KeyMapper.SetUserKeyAction("Select nearest air scout / build sensors", {
---     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SelectAirScoutBuildIntel()',
---     category = "selection",
---     order = getDisplayOrder()
--- })
--- KeyMapper.SetUserKeyAction("Shift Select nearest air scout / build sensors", {
---     action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SelectAirScoutBuildIntel()',
---     category = "selection",
---     order = getDisplayOrder()
--- })
-
-
--- SetUserKeyAction("Remove from control group", {action = "UI_Lua import('/mods/"..modFolder.."/modules/util/Util.lua').RemoveFromGroups()", category = mod_category, order = order})

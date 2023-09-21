@@ -21,11 +21,16 @@ local clickCount = 1
 
 local function Hotkey(hotkey, func)
 	subHotkey = subHotkeys[hotkey]
+	local currentTime = GetSystemTimeSeconds()
+	local diffTime = currentTime - lastClickTime
+	local decay = 0.004 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
+	local inTime = diffTime < decay
+	lastClickTime = currentTime
 
-	if subHotkey ~= nil then
-		-- subHotkeys = nil
+	if subHotkey ~= nil and inTime then
 		ForkThread(subHotkey)
 	else
+		subHotkeys = nil
 		func(hotkey)
 	end
 end
@@ -161,11 +166,15 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/ChatWheel/modules/CWMain.lua").call()'
 	end) end,
 	F5 = function() Hotkey('F5', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 	end) end,
 	F6 = function() Hotkey('F6', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
 	end) end,
 	F7 = function() Hotkey('F7', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenMenu("Default")'
+		-- Stops working after adding / removing a few rings, no error message
+		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenMenu("Default")'
+		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenWheel("Default")'
 	end) end,
 	F8 = function() Hotkey('F8', function(hotkey)
 	end) end,
@@ -194,7 +203,29 @@ local customKeyMap = {
 	['0'] = function() Hotkey('0', function(hotkey) end) end,
 
 	Tab = function() Hotkey('Tab', function(hotkey)
-		-- 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()'
+	end) end,
+	['Ctrl-Tab'] = function() Hotkey('Ctrl-Tab', function(hotkey)
+		SubHotkeys({
+			['1'] = function() Repeater('1', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+			end) end,
+			['2'] = function() Repeater('2', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
+			end) end,
+			['3'] = function() Repeater('3', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")'
+			end) end,
+			['4'] = function() Repeater('4', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage")'
+			end) end,
+			['A'] = function() Repeater('A', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			end) end,
+			['Q'] = function() Repeater('Q', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
+			end) end,
+		})
 	end) end,
 
 	Q = function() Hotkey('Q', function(hotkey)
@@ -227,7 +258,7 @@ local customKeyMap = {
 
 	E = function() Hotkey('E', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_E_Factory")'
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_2")'
 		elseif AnyUnitSelected() then
 			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
 		else
@@ -262,27 +293,41 @@ local customKeyMap = {
 
 	R = function() Hotkey('R', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_R_Factory")'
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
 		else
 			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 		end
 	end) end,
 
 	T = function() Hotkey('T', function(hotkey)
-		if AllHasCategory(categories.TRANSPORTATION) then
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
+		elseif AllHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Transport'
 		else
 			ConExecute "UI_SelectByCategory +nearest +idle AIR TRANSPORTATION"
 		end
 	end) end,
 
-	CapsLock = function() Hotkey('CapsLock', function(hotkey)
-		import("/mods/MultiHotkeys/modules/orders.lua").MultiPause(true)
+	Y = function() Hotkey('Y', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
+		end
 	end) end,
-	['Ctrl-CapsLock'] = function() Hotkey('Ctrl-CapsLock', function(hotkey)
-		import("/mods/MultiHotkeys/modules/orders.lua").MultiPause(false)
+
+	U = function() Hotkey('U', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_6")'
+		end
+	end) end,
+
+	CapsLock = function() Hotkey('CapsLock', function(hotkey)
+		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(true)
 	end) end,
 	['Shift-CapsLock'] = function() Hotkey('Shift-CapsLock', function(hotkey)
+		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(false)
+	end) end,
+	['Ctrl-CapsLock'] = function() Hotkey('Ctrl-CapsLock', function(hotkey)
 		ToggleRepeatBuildOrSetTo(true)
 	end) end,
 	['Alt-CapsLock'] = function() Hotkey('Alt-CapsLock', function(hotkey)
