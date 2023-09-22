@@ -2,10 +2,11 @@ local originalSetWeaponPriorities = SetWeaponPriorities
 local updatePrioState
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 local PrioritySettings
+local SetWeaponPrioritiesToUnitType = import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesToUnitType
 
 function SetWeaponPriorities(prioritiesString, name, exclusive)
     originalSetWeaponPriorities(prioritiesString, name, exclusive)
-    
+
     if updatePrioState then
         ForkThread(function() WaitSeconds(0.1) updatePrioState() WaitSeconds(0.1) updatePrioState() WaitSeconds(0.2) updatePrioState() end)
     else
@@ -17,21 +18,14 @@ end
 function SetWeaponPrioritiesHotkey(name)
     if not PrioritySettings then
         PrioritySettings = import('/lua/ui/game/orders.lua').GetPrioritySettings()
-    end    
-    SetWeaponPriorities(PrioritySettings.priorityTables[name], name, PrioritySettings.exclusive[name]) 
+    end
+    SetWeaponPriorities(PrioritySettings.priorityTables[name], name, PrioritySettings.exclusive[name])
 end
 
 function SetToMouseTargetOrDefault()
     local info = GetRolloverInfo()
     if info and info.blueprintId ~= "unknown" then
-
-        local bpId = info.blueprintId
-        local text = LOC(__blueprints[bpId].General.UnitName)
-        if not text then
-            text = LOC(__blueprints[bpId].Interface.HelpText)
-        end
-
-        SetWeaponPriorities(findPriority(bpId), text, false)
+        SetWeaponPrioritiesToUnitType()
     else
         SetWeaponPriorities(0, "Default", false)
     end
