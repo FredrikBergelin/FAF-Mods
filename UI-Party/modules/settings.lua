@@ -47,7 +47,7 @@ function init()
 		{ name = "Split Screen", settings = {
 			{ key="smallerContructionTabWhenSplitScreen", type="bool", default=true, name="Construction to left", description="Construction menu just spans left screen (not both)" },
 			{ key="moveAvatarsToLeftSplitScreen", type="bool", default=true, name="Avatars to left", description="Move the avatars (idle engies pane) to the left screen." },
-			{ key="moveMainMenuToRight", type="bool", default=true, name="Main menu to right", description="Move the tabs (main menu) to the right screen." },
+			{ key="moveMainMenuToRight", type="bool", default=false, name="Main menu to right", description="Move the tabs (main menu) to the right screen." },
 		}},
 
 		{ name = "Hidden", settings = {
