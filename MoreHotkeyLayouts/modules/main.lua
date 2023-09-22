@@ -234,6 +234,12 @@ local customKeyMap = {
 		else
 		end
 	end) end,
+	['Alt-Q'] = function() Hotkey('Alt-Q', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").SelectPatrolUnits()'
+	end) end,
+	['Ctrl-Shift-Q'] = function() Hotkey('Ctrl-Shift-Q', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").ConvertToMove()'
+	end) end,
 
 	W = function() Hotkey('W', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
