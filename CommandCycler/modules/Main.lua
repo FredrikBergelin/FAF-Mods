@@ -88,16 +88,24 @@ function SelectNext()
         selectionWithOrder = {}
         return
     end
-
+ 
     local mousePos = GetMouseWorldPos()
     local nextOrderValue = 99999999
     local nextUnit = nil
     local nextUnitIndex = nil
+    local onlyWithMissile = false
+    local missilesCount = false
 
     if cycleMode == "closest" then
         nextOrderValue = 99999999
+    elseif cycleMode == "closest_missile" then
+        nextOrderValue = 99999999
+        onlyWithMissile = true
     elseif cycleMode == "furthest" then
         nextOrderValue = 0
+    elseif cycleMode == "furthest_missile" then
+        nextOrderValue = 0
+        onlyWithMissile = true
     elseif cycleMode == "damage" then
         nextOrderValue = 99999999
     elseif cycleMode == "health" then
@@ -106,43 +114,51 @@ function SelectNext()
 
     for key,unit in pairs(selectionWithoutOrder) do
 
+        if onlyWithMissile then
+            local missile_info = self.unit:GetMissileInfo()
+            missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
+        end
+
         if unit:IsDead() then
             table.remove(selectionWithoutOrder, key)
         else
-            local distanceToCursor
-            local unitHealthPercent
-            local bp
-            if cycleMode == "closest" then
-                distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
-                if distanceToCursor < nextOrderValue then
-                    nextOrderValue = distanceToCursor
-                    nextUnit = unit
-                    nextUnitIndex = key
-                end
-            elseif cycleMode == "furthest" then
-                distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
-                if distanceToCursor > nextOrderValue then
-                    nextOrderValue = distanceToCursor
-                    nextUnit = unit
-                    nextUnitIndex = key
-                end
-            elseif cycleMode == "damage" then
-                bp = unit:GetBlueprint()
-                unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
+            if onlyWithMissile and missilesCount == 0 then
+            else
+                local distanceToCursor
+                local unitHealthPercent
+                local bp
+                if cycleMode == "closest" then
+                    distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                    if distanceToCursor < nextOrderValue then
+                        nextOrderValue = distanceToCursor
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif cycleMode == "furthest" then
+                    distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                    if distanceToCursor > nextOrderValue then
+                        nextOrderValue = distanceToCursor
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif cycleMode == "damage" then
+                    bp = unit:GetBlueprint()
+                    unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-                if unitHealthPercent < nextOrderValue then
-                    nextOrderValue = unitHealthPercent
-                    nextUnit = unit
-                    nextUnitIndex = key
-                end
-            elseif cycleMode == "health" then
-                bp = unit:GetBlueprint()
-                unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
+                    if unitHealthPercent < nextOrderValue then
+                        nextOrderValue = unitHealthPercent
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif cycleMode == "health" then
+                    bp = unit:GetBlueprint()
+                    unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-                if unitHealthPercent > nextOrderValue then
-                    nextOrderValue = unitHealthPercent
-                    nextUnit = unit
-                    nextUnitIndex = key
+                    if unitHealthPercent > nextOrderValue then
+                        nextOrderValue = unitHealthPercent
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
                 end
             end
         end

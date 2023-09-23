@@ -162,23 +162,3 @@ function SelectSmlFireMissile()
         ConExecute "StartCommandMode order RULEUCC_Nuke"
     end
 end
-
--- -- Select nearest idle engineer/Reclaim mode
--- function ReclaimSelectIDLENearestT1()
---     local selection = GetSelectedUnits()
---     if table.empty(selection) then
---         ConExecute "UI_SelectByCategory +inview +nearest +idle ENGINEER TECH1"
---     else
---         ConExecute "StartCommandMode order RULEUCC_Reclaim"
---     end
--- end
-
--- -- Select nearest air scout/build sensors
--- function SelectAirScoutBuildIntel()
---     local selectedUnits = GetSelectedUnits()
---     if selectedUnits then
---         import("/lua/keymap/hotbuild.lua").buildAction "Sensors"
---     else
---         ConExecute "UI_SelectByCategory +nearest AIR INTELLIGENCE"
---     end
--- end

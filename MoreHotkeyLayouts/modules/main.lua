@@ -88,22 +88,6 @@ local function AllHasCategory(category)
 	return true
 end
 
-local function AllHasCategory(category)
-    local units = GetSelectedUnits()
-
-	if units == nil then
-		return false
-	end
-
-    for id, unit in units do
-		if not EntityCategoryContains(category, unit) then
-			return false
-		end
-	end
-
-	return true
-end
-
 local GetUpgradesOfUnit = import("/lua/ui/game/hotkeys/upgrade-structure.lua").GetUpgradesOfUnit
 local TablEmpty = table.empty
 
@@ -166,25 +150,30 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/ChatWheel/modules/CWMain.lua").call()'
 	end) end,
 	F5 = function() Hotkey('F5', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
-	end) end,
-	F6 = function() Hotkey('F6', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
-	end) end,
-	F7 = function() Hotkey('F7', function(hotkey)
 		-- Stops working after adding / removing a few rings, no error message
 		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenMenu("Default")'
 		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenWheel("Default")'
 	end) end,
+	F6 = function() Hotkey('F6', function(hotkey)
+		-- Diplomacy
+	end) end,
+	F7 = function() Hotkey('F7', function(hotkey)
+		-- 
+	end) end,
 	F8 = function() Hotkey('F8', function(hotkey)
+		-- 
 	end) end,
 	F9 = function() Hotkey('F9', function(hotkey)
+		-- 
 	end) end,
 	F10 = function() Hotkey('F10', function(hotkey)
+		-- 
 	end) end,
 	F11 = function() Hotkey('F11', function(hotkey)
+		-- 
 	end) end,
 	F12 = function() Hotkey('F12', function(hotkey)
+		-- 
 	end) end,
 
 	Backslash = function() Hotkey('Backslash', function(hotkey)
@@ -308,6 +297,19 @@ local customKeyMap = {
 		end
 	end) end,
 
+	R = function() Hotkey('R', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
+		else
+			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
+		end
+	end) end,
+
+	['Ctrl-Alt-R'] = function() Hotkey('T', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
+		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
+	end) end,
+
 	T = function() Hotkey('T', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
@@ -316,8 +318,10 @@ local customKeyMap = {
 		else
 			ConExecute "UI_SelectByCategory +nearest +idle AIR TRANSPORTATION"
 		end
-
 	end) end,
+
+	-- 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(true)'
+	-- 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(false)'
 
 	Y = function() Hotkey('Y', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -338,16 +342,16 @@ local customKeyMap = {
 	end) end,
 
 	CapsLock = function() Hotkey('CapsLock', function(hotkey)
-		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(true)
-	end) end,
-	['Shift-CapsLock'] = function() Hotkey('Shift-CapsLock', function(hotkey)
 		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(false)
 	end) end,
+	['Shift-CapsLock'] = function() Hotkey('Shift-CapsLock', function(hotkey)
+		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(true)
+	end) end,
 	['Ctrl-CapsLock'] = function() Hotkey('Ctrl-CapsLock', function(hotkey)
-		ToggleRepeatBuildOrSetTo(false)
+		-- Cancel all but one order
 	end) end,
 	['Alt-CapsLock'] = function() Hotkey('Alt-CapsLock', function(hotkey)
-		ToggleRepeatBuildOrSetTo(true)
+		-- Filter paused
 	end) end,
 
 	-- 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").UpgradeStructuresEngineersCycleTemplates()'
@@ -493,16 +497,22 @@ local customKeyMap = {
 	end) end,
 
 	Chevron = function() Hotkey('Chevron', function(hotkey)
-		if AnyHasCategory(categories.ENGINEER) or AnyHasCategory(categories.FACTORY) then
+		if AllHasCategory(categories.FACTORY) then
+			ToggleRepeatBuildOrSetTo(false)
+		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5)'
+			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").CycleTemplates()'
+		end
+	end) end,
+	['Shift-Chevron'] = function() Hotkey('Shift-Chevron', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ToggleRepeatBuildOrSetTo(true)
 		end
 	end) end,
 
 	Z = function() Hotkey('Z', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
-		elseif AllHasCategory(categories.FACTORY) then
-			ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").OCOrRepeatBuild()'
 		end
 	end) end,
 	['Shift-Z'] = function() Hotkey('Shift-Z', function(hotkey)
@@ -547,9 +557,11 @@ local customKeyMap = {
 	end) end,
 	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")'
 	end) end,
 	['Ctrl-Alt-X'] = function() Hotkey('Ctrl-Alt-X', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectSmlFireMissile()'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest_missile")'
 	end) end,
 
 	C = function() Hotkey('C', function(hotkey)
@@ -615,11 +627,51 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_6")'
 		end
 	end) end,
-
 	Space = function() Hotkey('Space', function(hotkey)
-		-- 	if AnyUnitSelected() then
-			-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
-		-- 	end
+		-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_2")'
+		elseif AnyUnitSelected() then
+			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
+		else
+			local repeatSelf = RepeatSelf('Space', function(hotkey)
+				-- Sub-select or select all tech 3 units on screen
+			end)
+			SubHotkeys({
+				Space = repeatSelf,
+				['1'] = function() Repeater('1', function(hotkey)
+					-- Sub-select or select all tech 1 units on screen
+				end) end,
+				['2'] = function() Repeater('2', function(hotkey)
+				end) end,
+				['3'] = function() Repeater('3', function(hotkey)
+				end) end,
+				['4'] = function() Repeater('4', function(hotkey)
+				end) end,
+				A = function() Repeater('A', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+				end) end,
+				Q = function() Repeater('Q', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
+				end) end,
+				Z = function() Repeater('Z', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+				end) end,
+				X = function() Repeater('X', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
+				end) end,
+				C = function() Repeater('C', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")'
+				end) end,
+				V = function() Repeater('V', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage")'
+				end) end,
+				B = function() Repeater('B', function(hotkey)
+				end) end
+
+			})
+		end
+
 	end) end,
 	['Shift-Space'] = function() Hotkey('Shift-Space', function(hotkey)
 	end) end,
