@@ -12,28 +12,48 @@ local selectionWithoutOrder
 local selectionWithOrder
 local commandMode
 local commandModeData
+local automaticallyCycle = true
 
 KeyMapper.SetUserKeyAction('Cycle next, defaults to closest', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()',
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, true)',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('(Shift) Cycle next, defaults to closest', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, false)',
     category = 'Command Cycler'
 })
 KeyMapper.SetUserKeyAction('Cycle from closest', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")',
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest", true)',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('(Shift) Cycle from closest', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest", false)',
     category = 'Command Cycler'
 })
 KeyMapper.SetUserKeyAction('Cycle from furthest', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")',
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest", true)',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('(Shift) Cycle from furthest', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest", false)',
     category = 'Command Cycler'
 })
 KeyMapper.SetUserKeyAction('Cycle from most damaged', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage")',
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage", true)',
+    category = 'Command Cycler'
+})
+KeyMapper.SetUserKeyAction('(Shift) Cycle from most damaged', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage", false)',
     category = 'Command Cycler'
 })
 KeyMapper.SetUserKeyAction('Cycle from most health', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")',
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health", true)',
     category = 'Command Cycler'
 })
-
+KeyMapper.SetUserKeyAction('(Shift) Cycle from most health', {
+    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health", false)',
+    category = 'Command Cycler'
+})
 KeyMapper.SetUserKeyAction('Select all and reset selection', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()',
     category = 'Command Cycler'
@@ -197,7 +217,20 @@ function MoveCurrentToWithOrder()
     table.remove(selectionWithoutOrder, currentUnitWithoutOrderIndex)
 end
 
-function CreateOrContinueSelection(mode)
+function PrintAutoCycle(autoCycle)
+    if autoCycle then
+        print("Automatic Cycling")
+    else
+        print("Manual cycling")
+    end
+end
+
+function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
+    if autoCycle == true or autoCycle == false then
+        automaticallyCycle = autoCycle
+        PrintAutoCycle(automaticallyCycle)
+    end
+
     local selectedUnits = GetSelectedUnits()
 
     if selectedUnits then
@@ -207,14 +240,20 @@ function CreateOrContinueSelection(mode)
             else
                 cycleMode = mode
             end
-
+            if toggleAutoCycle == true then
+                automaticallyCycle = false
+                PrintAutoCycle(automaticallyCycle)
+            end
             CreateSelection()
             return
-        end
-
-        if SelectionIsCurrent(selectedUnits) then
-            MoveCurrentToWithOrder()
-            SelectNext()
+        elseif SelectionIsCurrent(selectedUnits) then
+            if toggleAutoCycle == true then
+                automaticallyCycle = not automaticallyCycle
+                PrintAutoCycle(automaticallyCycle)
+            else
+                MoveCurrentToWithOrder()
+                SelectNext()
+            end
             return
         end
     end
@@ -275,7 +314,7 @@ end
 ---@param cmdModeData CommandModeData
 ---@param command any
 function OnCommandIssued(cmdMode, cmdModeData, command)
-    if selectionChangedSinceLastCycle then return end
+    if not automaticallyCycle or selectionChangedSinceLastCycle then return end
     if command.CommandType == 'Guard' and not command.Target.EntityId then return end
     if command.CommandType == 'None' then return end
 

@@ -196,7 +196,10 @@ local customKeyMap = {
 	['0'] = function() Hotkey('0', function(hotkey) end) end,
 
 	Tab = function() Hotkey('Tab', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil)'
+	end) end,
+	['Shift-Tab'] = function() Hotkey('Shift-Tab', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, nil, true)'
 	end) end,
 	['Ctrl-Tab'] = function() Hotkey('Ctrl-Tab', function(hotkey)
 		SubHotkeys({
@@ -425,7 +428,7 @@ local customKeyMap = {
 					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectTransports()
 				end) end,
 				S = function() Repeater('S', function(hotkey)
-					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectIntel()
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectIntelPlanes()
 				end) end,
 				D = function() Repeater('D', function(hotkey)
 					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectGunships()
@@ -490,6 +493,11 @@ local customKeyMap = {
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Power")'
 		else
+			SubHotkeys({
+				D = function() Repeater('D', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectLandIntel()
+				end) end,
+			})
 		end
 	end) end,
 	['Shift-D'] = function() Hotkey('Shift-D', function(hotkey)
@@ -706,42 +714,72 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_6")'
 		end
 	end) end,
+	-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
 	Space = function() Hotkey('Space', function(hotkey)
-		-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
-			SubHotkeys({
-			-- Space = repeatSelf,
-				['1'] = function() Repeater('1', function(hotkey)
-					-- Sub-select or select all tech 1 units on screen
-				end) end,
-				['2'] = function() Repeater('2', function(hotkey)
-				end) end,
-				['3'] = function() Repeater('3', function(hotkey)
-				end) end,
-				['4'] = function() Repeater('4', function(hotkey)
-				end) end,
-				A = function() Repeater('A', function(hotkey)
-					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
-				end) end,
-				Q = function() Repeater('Q', function(hotkey)
-					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
-				end) end,
-				Z = function() Repeater('Z', function(hotkey)
-					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
-				end) end,
-				X = function() Repeater('X', function(hotkey)
-					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
-				end) end,
-				C = function() Repeater('C', function(hotkey)
-					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")'
-				end) end,
-				V = function() Repeater('V', function(hotkey)
-					ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage")'
-				end) end,
-				B = function() Repeater('B', function(hotkey)
-				end) end
-			})
+		SubHotkeys({
+			['1'] = function() Repeater('1', function(hotkey)
+				-- Sub-select or select all tech 1 units on screen
+			end) end,
+			['2'] = function() Repeater('2', function(hotkey)
+			end) end,
+			['3'] = function() Repeater('3', function(hotkey)
+			end) end,
+			['4'] = function() Repeater('4', function(hotkey)
+			end) end,
+			A = function() Repeater('A', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			end) end,
+			Q = function() Repeater('Q', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
+			end) end,
+			Z = function() Repeater('Z', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest", true)'
+			end) end,
+			X = function() Repeater('X', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest", true)'
+			end) end,
+			C = function() Repeater('C', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health", true)'
+			end) end,
+			V = function() Repeater('V', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage", true)'
+			end) end,
+			B = function() Repeater('B', function(hotkey)
+			end) end
+		})
 	end) end,
 	['Shift-Space'] = function() Hotkey('Shift-Space', function(hotkey)
+		SubHotkeys({
+			['1'] = function() Repeater('1', function(hotkey)
+				-- Sub-select or select all tech 1 units on screen
+			end) end,
+			['2'] = function() Repeater('2', function(hotkey)
+			end) end,
+			['3'] = function() Repeater('3', function(hotkey)
+			end) end,
+			['4'] = function() Repeater('4', function(hotkey)
+			end) end,
+			A = function() Repeater('A', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			end) end,
+			Q = function() Repeater('Q', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
+			end) end,
+			Z = function() Repeater('Z', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest", false)'
+			end) end,
+			X = function() Repeater('X', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest", false)'
+			end) end,
+			C = function() Repeater('C', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health", false)'
+			end) end,
+			V = function() Repeater('V', function(hotkey)
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage", false)'
+			end) end,
+			B = function() Repeater('B', function(hotkey)
+			end) end
+		})
 	end) end,
 }
 

@@ -28,6 +28,25 @@ local function SetClickData(uniqueString, currentTick)
 	lastClickMultiSelect = currentTick
 end
 
+-- Select nearest / onscreen / all land intel units
+function MultiSelectLandIntel()
+    local uniqueString = "MultiSelectTorpedoBombers"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute 'UI_SelectByCategory +inview LAND INTELLIGENCE'
+        else
+            ConExecute 'UI_SelectByCategory LAND INTELLIGENCE'
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute 'UI_SelectByCategory +nearest LAND INTELLIGENCE'
+    end
+
+    SetClickData(uniqueString, currentTick)
+end
+
 -- Select nearest / onscreen / all land bombers, not torpedo
 function MultiSelectTorpedoBombers()
     local uniqueString = "MultiSelectTorpedoBombers"
