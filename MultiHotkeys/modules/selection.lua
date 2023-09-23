@@ -28,6 +28,125 @@ local function SetClickData(uniqueString, currentTick)
 	lastClickMultiSelect = currentTick
 end
 
+-- Select nearest / onscreen / all land bombers, not torpedo
+function MultiSelectTorpedoBombers()
+    local uniqueString = "MultiSelectTorpedoBombers"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute 'UI_SelectByCategory +inview AIR ANTINAVY'
+        else
+            ConExecute 'UI_SelectByCategory AIR ANTINAVY'
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute 'UI_SelectByCategory +nearest AIR ANTINAVY'
+    end
+
+    SetClickData(uniqueString, currentTick)
+end
+
+-- Select nearest / onscreen / all land bombers, not torpedo
+function MultiSelectIntelPlanes()
+    local uniqueString = "MultiSelectDedicatedFighters"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute 'UI_SelectByCategory +inview AIR INTELLIGENCE'
+        else
+            ConExecute 'UI_SelectByCategory AIR INTELLIGENCE'
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute 'UI_SelectByCategory +nearest AIR INTELLIGENCE'
+    end
+
+    SetClickData(uniqueString, currentTick)
+end
+
+-- Select nearest / onscreen / all land bombers, not torpedo
+function MultiSelectDedicatedFighters()
+    local uniqueString = "MultiSelectDedicatedFighters"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute 'UI_SelectByCategory +inview AIR HIGHALTAIR ANTIAIR'
+        else
+            ConExecute 'UI_SelectByCategory AIR HIGHALTAIR ANTIAIR'
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute 'UI_SelectByCategory +nearest AIR HIGHALTAIR ANTIAIR'
+    end
+
+    SelectUnits(EntityCategoryFilterDown(categories.ANTIAIR - categories.BOMBER, GetSelectedUnits()))
+
+    SetClickData(uniqueString, currentTick)
+end
+
+-- Select nearest / onscreen / all land bombers, not torpedo
+function MultiSelectGunships()
+    local uniqueString = "MultiSelectGunships"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute 'UI_SelectByCategory +inview AIR GROUNDATTACK'
+        else
+            ConExecute 'UI_SelectByCategory AIR GROUNDATTACK'
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute 'UI_SelectByCategory +nearest AIR GROUNDATTACK'
+    end
+
+    SetClickData(uniqueString, currentTick)
+end
+
+-- Select nearest / onscreen / all land bombers, not torpedo
+function MultiSelectLandBombers()
+    local uniqueString = "MultiSelectLandBombers"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute("UI_SelectByCategory +inview AIR BOMBER")
+        else
+            ConExecute("UI_SelectByCategory AIR BOMBER")
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute("UI_SelectByCategory +nearest AIR BOMBER")
+    end
+
+    SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits()))
+
+    SetClickData(uniqueString, currentTick)
+end
+
+-- Select nearest / onscreen / all transports.
+function MultiSelectTransports()
+    local uniqueString = "MultiSelectTransports"
+    local currentTick = GameTick()
+
+    if IsDoubleClick(uniqueString, currentTick, lastClickMultiSelect) then
+        if totalClicksMultiSelect == 1 then
+            ConExecute("UI_SelectByCategory +inview AIR TRANSPORTATION")
+        else
+            ConExecute("UI_SelectByCategory AIR TRANSPORTATION")
+        end
+    else
+        totalClicksMultiSelect = 0
+        ConExecute("UI_SelectByCategory +nearest AIR TRANSPORTATION")
+    end
+
+    SetClickData(uniqueString, currentTick)
+end
+
+
 -- Select nearest / onscreen / all engineers
 function MultiSelectEngineers(techlevel, onlyIdle)
     local idleText = " "

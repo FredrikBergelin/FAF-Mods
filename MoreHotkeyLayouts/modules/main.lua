@@ -137,6 +137,10 @@ end
 
 local customKeyMap = {
 
+	-- ['Esc'] = function() Hotkey('Esc', function(hotkey)
+	-- 	ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("Util")'
+	-- end) end,
+
 	F1 = function() Hotkey('F1', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("Util")'
 	end) end,
@@ -218,16 +222,22 @@ local customKeyMap = {
 	end) end,
 
 	Q = function() Hotkey('Q', function(hotkey)
-		if AnyUnitSelected() then
-			ConExecute 'StartCommandMode order RULEUCC_Patrol'
-		else
+		ConExecute 'StartCommandMode order RULEUCC_Patrol'
+	end) end,
+	['Ctrl-Q'] = function() Hotkey('Ctrl-Q', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
 		end
 	end) end,
 	['Alt-Q'] = function() Hotkey('Alt-Q', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").SelectPatrolUnits()'
 	end) end,
 	['Ctrl-Shift-Q'] = function() Hotkey('Ctrl-Shift-Q', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").ConvertToMove()'
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
+		else
+			ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").ConvertToMove()'
+		end
 	end) end,
 
 	W = function() Hotkey('W', function(hotkey)
@@ -245,7 +255,11 @@ local customKeyMap = {
 		end
 	end) end,
 	['Ctrl-W'] = function() Hotkey('Ctrl-W', function(hotkey)
-		ConExecute 'StartCommandMode order RULEUCC_Attack'
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
+		else
+			ConExecute 'StartCommandMode order RULEUCC_Attack'
+		end
 	end) end,
 	['Alt-W'] = function() Hotkey('Alt-W', function(hotkey)
 		ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetToMouseTargetOrDefault(false)' -- Target unit type
@@ -288,26 +302,53 @@ local customKeyMap = {
 			})
 		end
 	end) end,
-
-	R = function() Hotkey('R', function(hotkey)
+	['Ctrl-E'] = function() Hotkey('Ctrl-E', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
-		else
-			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_6")'
 		end
 	end) end,
 
 	R = function() Hotkey('R', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
+		elseif AllHasCategory(categories.TRANSPORTATION) then
+			ConExecute 'StartCommandMode order RULEUCC_Transport'
+		else
+			ConExecute "UI_SelectByCategory +nearest +idle AIR TRANSPORTATION"
+			SubHotkeys({
+				R = function() Repeater('R', function(hotkey)
+					ConExecute "UI_SelectByCategory +inview +idle AIR TRANSPORTATION"
+					SubHotkeys({
+						R = function() Repeater('R', function(hotkey)
+							ConExecute "UI_SelectByCategory +idle AIR TRANSPORTATION"
+						end) end,
+					})
+				end) end,
+			})
+		end
+	end) end,
+	['Shift-R'] = function() Hotkey('Shift-R', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
+		end
+	end) end,
+	['Ctrl-R'] = function() Hotkey('Ctrl-R', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_7")'
+		elseif AllHasCategory(categories.TRANSPORTATION) then
+			ConExecute 'StartCommandMode order RULEUCC_Ferry'
 		else
 			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 		end
 	end) end,
-
+	['Ctrl-Shift-R'] = function() Hotkey('Ctrl-Shift-R', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_7")'
+		else
+			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
+		end
+	end) end,
 	['Ctrl-Alt-R'] = function() Hotkey('T', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
-		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
 	end) end,
 
 	T = function() Hotkey('T', function(hotkey)
@@ -315,8 +356,14 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
 		elseif AllHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Transport'
-		else
-			ConExecute "UI_SelectByCategory +nearest +idle AIR TRANSPORTATION"
+		end
+	end) end,
+
+	['Ctrl-T'] = function() Hotkey('T', function(hotkey)
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
+		elseif AllHasCategory(categories.TRANSPORTATION) then
+			ConExecute 'StartCommandMode order RULEUCC_Transport'
 		end
 	end) end,
 
@@ -366,8 +413,28 @@ local customKeyMap = {
 			end
 		elseif AnyUnitCanUpgrade() then
 			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
+		else
+			SubHotkeys({
+				W = function() Repeater('W', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectDedicatedFighters()
+				end) end,
+				E = function() Repeater('E', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectLandBombers()
+				end) end,
+				R = function() Repeater('R', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectTransports()
+				end) end,
+				S = function() Repeater('S', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectIntel()
+				end) end,
+				D = function() Repeater('D', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectGunships()
+				end) end,
+				F = function() Repeater('F', function(hotkey)
+					import('/mods/MultiHotkeys/modules/selection.lua').MultiSelectTorpedoBombers()
+				end) end,
+			})
 		end
-
 	end) end,
 	['Shift-A'] = function() Hotkey('Shift-A', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
@@ -398,12 +465,11 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_1")'
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Mex")'
+		else
 		end
 	end) end,
 	['Shift-S'] = function() Hotkey('Shift-S', function(hotkey)
-		if AllHasCategory(categories.FACTORY) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_1")'
-		elseif AllHasCategory(categories.ENGINEER) then
+		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Mex")'
 		end
 	end) end,
@@ -423,6 +489,7 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_2")'
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Power")'
+		else
 		end
 	end) end,
 	['Shift-D'] = function() Hotkey('Shift-D', function(hotkey)
@@ -440,6 +507,12 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_LandFact")'
 		end
 	end) end,
+	['Alt-D'] = function() Hotkey('Alt-D', function(hotkey)
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
+	end) end,
+	['Alt-Shift-D'] = function() Hotkey('Alt-Shift-D', function(hotkey)
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
+	end) end,
 
 	F = function() Hotkey('F', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -448,10 +521,14 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Radar")'
 		elseif AllHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Ferry'
+		else
+			ConExecute 'UI_SelectByCategory AIR BOMBER'
 		end
 	end) end,
 	['Shift-F'] = function() Hotkey('Shift-F', function(hotkey)
-		if AllHasCategory(categories.ENGINEER) then
+		if AllHasCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_3")'
+		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Radar")'
 		end
 	end) end,
@@ -469,6 +546,8 @@ local customKeyMap = {
 	G = function() Hotkey('G', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")'
+		else
+			ConExecute 'UI_SelectByCategory AIR TRANSPORT'
 		end
 	end) end,
 
@@ -629,16 +708,8 @@ local customKeyMap = {
 	end) end,
 	Space = function() Hotkey('Space', function(hotkey)
 		-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
-		if AllHasCategory(categories.FACTORY) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_2")'
-		elseif AnyUnitSelected() then
-			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
-		else
-			local repeatSelf = RepeatSelf('Space', function(hotkey)
-				-- Sub-select or select all tech 3 units on screen
-			end)
 			SubHotkeys({
-				Space = repeatSelf,
+			-- Space = repeatSelf,
 				['1'] = function() Repeater('1', function(hotkey)
 					-- Sub-select or select all tech 1 units on screen
 				end) end,
@@ -668,10 +739,7 @@ local customKeyMap = {
 				end) end,
 				B = function() Repeater('B', function(hotkey)
 				end) end
-
 			})
-		end
-
 	end) end,
 	['Shift-Space'] = function() Hotkey('Shift-Space', function(hotkey)
 	end) end,
