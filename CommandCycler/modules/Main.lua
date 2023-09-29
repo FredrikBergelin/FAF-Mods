@@ -4,7 +4,7 @@ local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
-local cycleMode = ""
+local cycleMode = "closest"
 
 local currentUnit
 local currentUnitWithoutOrderIndex
@@ -121,11 +121,13 @@ function SelectNext()
     elseif cycleMode == "closest_missile" then
         nextOrderValue = 99999999
         onlyWithMissile = true
+        cycleMode = "closest"
     elseif cycleMode == "furthest" then
         nextOrderValue = 0
     elseif cycleMode == "furthest_missile" then
         nextOrderValue = 0
         onlyWithMissile = true
+        cycleMode = "furthest"
     elseif cycleMode == "damage" then
         nextOrderValue = 99999999
     elseif cycleMode == "health" then
@@ -236,7 +238,7 @@ function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
     if selectedUnits then
         if table.getn(selectedUnits) > 1 then
             if mode == nil then
-                cycleMode = "closest"
+                -- cycleMode = "closest"
             else
                 cycleMode = mode
             end
