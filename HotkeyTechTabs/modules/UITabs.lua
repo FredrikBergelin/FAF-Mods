@@ -3,18 +3,24 @@ local LUGConstr = import('/lua/ui/game/construction.lua')
 local lastTab = 0
 local currTab = 0
 
-function SelectTab(tab)
+function SelectTab(tab, toggle)
+	if toggle == nil then
+		toggle = true
+	end
+
 	if LUGConstr.controls.constructionGroup:IsHidden() then return end
 	currTab = LUGConstr.GetCurrentTechTab()
 
-	if tab == currTab then
-		tab = lastTab
-	else
-		lastTab = currTab
+	if toggle then
+		if tab == currTab then
+			tab = lastTab
+		else
+			lastTab = currTab
+		end
 	end
 
 	local ret = LUGConstr.SetCurrentTechTab(tab)
-	if ret then
+	if toggle and ret then
 		PlaySound(Sound({ Bank = 'Interface', Cue = 'UI_Tab_Click_02' }))
 		currTab = LUGConstr.GetCurrentTechTab()
 	end

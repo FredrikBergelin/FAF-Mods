@@ -586,7 +586,7 @@ local customKeyMap = {
 		if AllHasCategory(categories.FACTORY) then
 			ToggleRepeatBuildOrSetTo(false)
 		elseif AllHasCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5)'
+			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
 			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").CycleTemplates()'
 		end
 	end) end,
