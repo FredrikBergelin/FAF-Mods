@@ -422,7 +422,6 @@ AirDefenseLand = {
     },
 }
 
-
 ---@type ContextBasedTemplate
 AirDefenseWater = {
     Name = "Anti-air defense",
@@ -439,7 +438,6 @@ AirDefenseWater = {
         },
     },
 }
-
 
 ---@type ContextBasedTemplate
 TorpedoDefense = {
