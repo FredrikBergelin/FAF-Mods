@@ -9,7 +9,7 @@ local Prefs = import("/lua/user/prefs.lua")
 -- used to re-use memory where possible
 local cache = {}
 local cacheHead = 1
- 
+
 -- needs to be global in order to be saved
 selectionSets = {}
 selectionSetCallbacks = {}
@@ -458,7 +458,9 @@ local function SetupDynamicSplits(oldSelection, func)
 end
 
 local function SelectAllMilitary()
-    ConExecute "UI_SelectByCategory +inview BUILTBYTIER3FACTORY DIRECTFIRE, BUILTBYTIER3FACTORY INDIRECTFIRE, BUILTBYTIER3FACTORY ANTIAIR, BUILTBYTIER3FACTORY BOMBER, BUILTBYTIER3FACTORY GUNSHIP, BUILTBYTIER3FACTORY ANTISUB, BUILTBYTIER3FACTORY INTELLIGENCE, BUILTBYTIER3FACTORY COUNTERINTELLIGENCE, BUILTBYTIER3FACTORY SHIELD, EXPERIMENTAL MOBILE DIRECTFIRE, EXPERIMENTAL MOBILE GUNSHIP"
+    ConExecute "UI_SelectByCategory +inview MOBILE"
+
+    SelectUnits(EntityCategoryFilterDown(categories.MOBILE - categories.ENGINEER, GetSelectedUnits()))
 end
 
 local layerSplit = false
