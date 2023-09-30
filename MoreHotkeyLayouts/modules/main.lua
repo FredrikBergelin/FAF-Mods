@@ -23,7 +23,7 @@ local function Hotkey(hotkey, func)
 	subHotkey = subHotkeys[hotkey]
 	local currentTime = GetSystemTimeSeconds()
 	local diffTime = currentTime - lastClickTime
-	local decay = 0.004 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
+	local decay = 0.002 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
 	local inTime = diffTime < decay
 	lastClickTime = currentTime
 
