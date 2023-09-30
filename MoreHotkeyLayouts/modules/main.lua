@@ -721,7 +721,6 @@ local customKeyMap = {
 		end
 	end) end,
 	Space = function() Hotkey('Space', function(hotkey)
-		LOG("SplitLayer")
 		ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").MultiSplit()'
 
 		-- SubHotkeys({
