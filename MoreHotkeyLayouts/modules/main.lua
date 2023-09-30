@@ -311,6 +311,10 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_6")'
 		end
 	end) end,
+	['Ctrl-Shift-E'] = function() Hotkey('Ctrl-Shift-E', function(hotkey)
+		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders()'
+	end) end,
+
 
 	R = function() Hotkey('R', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -643,11 +647,11 @@ local customKeyMap = {
 	end) end,
 	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")' -- Manual cycle, tab, doesnt work properly
 	end) end,
 	['Ctrl-Alt-X'] = function() Hotkey('Ctrl-Alt-X', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectSmlFireMissile()'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest_missile")'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest_missile")' -- TODO
 	end) end,
 
 	C = function() Hotkey('C', function(hotkey)

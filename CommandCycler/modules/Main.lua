@@ -13,6 +13,7 @@ local selectionWithOrder
 local commandMode
 local commandModeData
 local automaticallyCycle = true
+local onlyWithMissile = false
 
 KeyMapper.SetUserKeyAction('Cycle next, defaults to closest', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, true)',
@@ -108,12 +109,11 @@ function SelectNext()
         selectionWithOrder = {}
         return
     end
- 
+
     local mousePos = GetMouseWorldPos()
     local nextOrderValue = 99999999
     local nextUnit = nil
     local nextUnitIndex = nil
-    local onlyWithMissile = false
     local missilesCount = false
 
     if cycleMode == "closest" then
@@ -137,7 +137,7 @@ function SelectNext()
     for key,unit in pairs(selectionWithoutOrder) do
 
         if onlyWithMissile then
-            local missile_info = self.unit:GetMissileInfo()
+            local missile_info = unit:GetMissileInfo()
             missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
         end
 
@@ -145,6 +145,8 @@ function SelectNext()
             table.remove(selectionWithoutOrder, key)
         else
             if onlyWithMissile and missilesCount == 0 then
+                table.insert(selectionWithOrder, selectionWithoutOrder[key])
+                table.remove(selectionWithoutOrder, key)
             else
                 local distanceToCursor
                 local unitHealthPercent
@@ -206,10 +208,10 @@ end
 
 function CreateSelection(units)
     local selectedUnits = GetSelectedUnits()
-
     Reset()
     selectionWithoutOrder = selectedUnits
     selectionWithOrder = {}
+    onlyWithMissile = false
 
     SelectNext()
 end

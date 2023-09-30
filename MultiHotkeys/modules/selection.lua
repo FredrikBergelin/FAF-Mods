@@ -296,7 +296,7 @@ function SelectSmlFireMissile()
 
     if table.empty(launchers) then
         ConExecute "UI_SelectByCategory NUKE"
-    else
-        ConExecute "StartCommandMode order RULEUCC_Nuke"
     end
+
+    ConExecute "StartCommandMode order RULEUCC_Nuke"
 end
