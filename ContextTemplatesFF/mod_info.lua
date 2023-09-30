@@ -1,0 +1,15 @@
+name = "ContextTemplatesFF"
+uid = "Context-Templats-FF-v01"
+version = 1
+description = "My templates"
+author = "FreadyFish"
+icon = "/mods/ContextTemplatesFF/icon.png"
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
+requires = {}
+requiresNames = {}
+conflicts = {}
+before = {}
+after = {}
