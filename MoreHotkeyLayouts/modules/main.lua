@@ -713,10 +713,9 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_6")'
 		end
 	end) end,
-	-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
 	Space = function() Hotkey('Space', function(hotkey)
 		LOG("SplitLayer")
-		ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitNext()'
+		ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").MultiSplit()'
 
 		-- SubHotkeys({
 		-- 	A = function() Repeater('A', function(hotkey)
@@ -742,6 +741,12 @@ local customKeyMap = {
 		-- })
 	end) end,
 	['Shift-Space'] = function() Hotkey('Shift-Space', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitMouseOrthogonalAxis()'
+	end) end,
+	['Ctrl-Space'] = function() Hotkey('Ctrl-Space', function(hotkey)
+		-- TODO: Group bsed on blueprint and split equally 
+		-- ConExecute 'UI_Lua import("/mods/UI-Party/modules/unitsplit.lua").SplitGroups(2)'
+		-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitIntoGroups(2)'
 	end) end,
 }
 

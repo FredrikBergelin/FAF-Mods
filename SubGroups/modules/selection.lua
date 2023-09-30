@@ -475,7 +475,7 @@ function SetLayerSplit(shouldSplit)
 end
 
 --- Divides a selection into up to three sets of land units, naval units and air units
-function SplitNext()
+function MultiSplit()
     ---@type UserUnit[]
     local units = GetSelectedUnits()
 
@@ -508,6 +508,30 @@ function SplitNext()
 
             SelectSplit(StaticSplits[StaticSplitCurrent])
         end
+    end
+end
+
+--- Select the next split, or return to the old selection if there are no next splits. Preserves the command mode
+function SplitNext()
+    if SplitType == 'Dynamic' then
+        ---@type UserUnit[]
+        local split = DynamicSplit()
+        if not table.empty(split) then
+            SelectSplit(split)
+        else
+            SplitType = 'None'
+            SelectOldSelection()
+            return
+        end
+    elseif SplitType == 'Static' then
+        StaticSplitCurrent = StaticSplitCurrent + 1
+        if StaticSplitCurrent > table.getn(StaticSplits) then
+            SplitType = 'None'
+            SelectOldSelection()
+            return
+        end
+
+        SelectSplit(StaticSplits[StaticSplitCurrent])
     end
 end
 
