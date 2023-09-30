@@ -409,6 +409,8 @@ function CombineSelectionAndSet(name)
     end
 end
 
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
+
 ---@type 'None' | 'Static' | 'Dynamic'
 local SplitType = 'None'
 
@@ -424,7 +426,10 @@ local StaticSplitCurrent = 0
 ---@param units UserUnit[]
 local function SelectSplit(units)
     import("/lua/ui/game/commandmode.lua").CacheCommandMode()
+    SetHiddenSelect(true)
     SelectUnits(units)
+    SetHiddenSelect(false)
+
     import("/lua/ui/game/commandmode.lua").RestoreCommandMode()
 end
 

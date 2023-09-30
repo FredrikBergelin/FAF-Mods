@@ -1,17 +1,18 @@
 local oldOnSelectionChanged = OnSelectionChanged
 
--- local SetLayerSplit = import('/mods/SubGroups/modules/selection.lua').SetLayerSplit
+local isHiddenSelect = import("/lua/ui/game/selection.lua").IsHidden
+local GetHiddenSelect = import("/mods/UMT/modules/select.lua").GetHiddenSelect
 
--- function OnSelectionChanged(oldSelection, newSelection, added, removed)
---     if table.getn(newSelection) == 0 then
---         LOG("True")
---         SetLayerSplit(true)
---     else
---         LOG("False")
---         SetLayerSplit(false)
---     end
---     oldOnSelectionChanged(oldSelection, newSelection, added, removed)
--- end
+local SetLayerSplit = import('/mods/SubGroups/modules/selection.lua').SetLayerSplit
+
+function OnSelectionChanged(oldSelection, newSelection, added, removed)
+    if not isHiddenSelect() and not GetHiddenSelect() then
+        if newSelection and table.getn(newSelection) > 0 then
+            SetLayerSplit(true)
+        end
+    end
+    oldOnSelectionChanged(oldSelection, newSelection, added, removed)
+end
 
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 
