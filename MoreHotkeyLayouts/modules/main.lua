@@ -519,7 +519,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-D'] = function() Hotkey('Alt-D', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
+		ConExecute 'UI_SelectByCategory AIR GROUNDATTACK'
 	end) end,
 	['Alt-Shift-D'] = function() Hotkey('Alt-Shift-D', function(hotkey)
 		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
