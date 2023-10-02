@@ -205,18 +205,6 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, nil, true)'
 	end) end,
 	['Ctrl-Tab'] = function() Hotkey('Ctrl-Tab', function(hotkey)
-		SubHotkeys({
-			['1'] = function() Repeater('1', function(hotkey)
-				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
-			end) end,
-			['2'] = function() Repeater('2', function(hotkey)
-			end) end,
-			['3'] = function() Repeater('3', function(hotkey)
-				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health")'
-			end) end,
-			['4'] = function() Repeater('4', function(hotkey)
-			end) end,
-		})
 	end) end,
 
 	Q = function() Hotkey('Q', function(hotkey)
@@ -235,6 +223,10 @@ local customKeyMap = {
 					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH3")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
+				['4'] = function() Repeater('4', function(hotkey)
+					ConExecute("UI_SelectByCategory +inview SUBCOMMANDER")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+				end) end,
 			})
 		end
 	end) end,
@@ -250,8 +242,24 @@ local customKeyMap = {
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
+				['Shift-2'] = function() Repeater('Shift-2', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+				end) end,
 				['3'] = function() Repeater('3', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+				end) end,
+				['Shift-3'] = function() Repeater('Shift-3', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+				end) end,
+				['4'] = function() Repeater('4', function(hotkey)
+					ConExecute("UI_SelectByCategory SUBCOMMANDER")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+				end) end,
+				['Shift-4'] = function() Repeater('Shift-4', function(hotkey)
+					ConExecute("UI_SelectByCategory SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
 			})
