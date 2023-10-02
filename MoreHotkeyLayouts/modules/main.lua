@@ -1,17 +1,10 @@
 local Prefs = import('/lua/user/prefs.lua')
-local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions')
-	-- ['Cycle next, defaults to closest'] = {
-	-- 	action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()',
-	-- 	category = 'Command Cycler'
-	-- },
-local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap')
-	-- Tab = 'Cycle next, defaults to closest',
+local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions') -- Eg: ['Cycle next, defaults to closest'] = { action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()', ... },
+local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap') -- Eg: Tab = 'Cycle next, defaults to closest',
 
-local SingleOrDoubleClick = import('/mods/common/modules/misc.lua').SingleOrDoubleClick -- (uniqueIdentifier, singleClickFunction, doubleClickFunction)
-local ClickCount = import('/mods/common/modules/misc.lua').ClickCount -- (uniqueIdentifier)
-local AnyUnitSelected = import('/mods/common/modules/misc.lua').AnyUnitSelected -- ()
+local Functions = import("/mods/MoreHotkeyLayouts/modules/functions.lua")
+local AnyUnitSelected = import('/mods/common/modules/misc.lua').AnyUnitSelected
 
-local current = nil
 local subHotkeys = nil
 local subHotkey = nil
 
@@ -35,7 +28,11 @@ local function Hotkey(hotkey, func)
 	end
 end
 
-local function Repeater(hotkey, func)
+local function SubHotkeys(obj)
+	subHotkeys = obj
+end
+
+local function SubHotkey(hotkey, func)
     local currentTime = GetSystemTimeSeconds()
 	local diffTime = currentTime - lastClickTime
 	local decay = 0.001 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
@@ -50,10 +47,6 @@ local function Repeater(hotkey, func)
 	storedUniqueIdentifier = hotkey
 
 	func(hotkey)
-end
-
-local function SubHotkeys(obj)
-	subHotkeys = obj
 end
 
 local function AnyHasCategory(category)
@@ -135,8 +128,6 @@ function ToggleRepeatBuildOrSetTo(setTo)
     end
 end
 
-local Functions = import("/mods/MoreHotkeyLayouts/modules/functions.lua")
-
 local customKeyMap = {
 
 	-- ['Esc'] = function() Hotkey('Esc', function(hotkey)
@@ -187,16 +178,26 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
 	end) end,
 
-	['1'] = function() Hotkey('1', function(hotkey) end) end,
-	['2'] = function() Hotkey('2', function(hotkey) end) end,
-	['3'] = function() Hotkey('3', function(hotkey) end) end,
-	['4'] = function() Hotkey('4', function(hotkey) end) end,
-	['5'] = function() Hotkey('5', function(hotkey) end) end,
-	['6'] = function() Hotkey('6', function(hotkey) end) end,
-	['7'] = function() Hotkey('7', function(hotkey) end) end,
-	['8'] = function() Hotkey('8', function(hotkey) end) end,
-	['9'] = function() Hotkey('9', function(hotkey) end) end,
-	['0'] = function() Hotkey('0', function(hotkey) end) end,
+	['1'] = function() Hotkey('1', function(hotkey) 
+	end) end,
+	['2'] = function() Hotkey('2', function(hotkey) 
+	end) end,
+	['3'] = function() Hotkey('3', function(hotkey) 
+	end) end,
+	['4'] = function() Hotkey('4', function(hotkey) 
+	end) end,
+	['5'] = function() Hotkey('5', function(hotkey) 
+	end) end,
+	['6'] = function() Hotkey('6', function(hotkey) 
+	end) end,
+	['7'] = function() Hotkey('7', function(hotkey) 
+	end) end,
+	['8'] = function() Hotkey('8', function(hotkey) 
+	end) end,
+	['9'] = function() Hotkey('9', function(hotkey) 
+	end) end,
+	['0'] = function() Hotkey('0', function(hotkey) 
+	end) end,
 
 	Tab = function() Hotkey('Tab', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil)'
@@ -215,15 +216,15 @@ local customKeyMap = {
 			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 
 			SubHotkeys({
-				['2'] = function() Repeater('2', function(hotkey)
+				['2'] = function() SubHotkey('2', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['3'] = function() Repeater('3', function(hotkey)
+				['3'] = function() SubHotkey('3', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH3")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['4'] = function() Repeater('4', function(hotkey)
+				['4'] = function() SubHotkey('4', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
@@ -238,27 +239,27 @@ local customKeyMap = {
 			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 
 			SubHotkeys({
-				['2'] = function() Repeater('2', function(hotkey)
+				['2'] = function() SubHotkey('2', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['Shift-2'] = function() Repeater('Shift-2', function(hotkey)
+				['Shift-2'] = function() SubHotkey('Shift-2', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['3'] = function() Repeater('3', function(hotkey)
+				['3'] = function() SubHotkey('3', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['Shift-3'] = function() Repeater('Shift-3', function(hotkey)
+				['Shift-3'] = function() SubHotkey('Shift-3', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['4'] = function() Repeater('4', function(hotkey)
+				['4'] = function() SubHotkey('4', function(hotkey)
 					ConExecute("UI_SelectByCategory SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
-				['Shift-4'] = function() Repeater('Shift-4', function(hotkey)
+				['Shift-4'] = function() SubHotkey('Shift-4', function(hotkey)
 					ConExecute("UI_SelectByCategory SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
 				end) end,
@@ -268,19 +269,23 @@ local customKeyMap = {
 	['Ctrl-Q'] = function() Hotkey('Ctrl-Q', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
+		else
+			ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").SelectPatrolUnits()'
 		end
 	end) end,
 	['Ctrl-Shift-Q'] = function() Hotkey('Ctrl-Shift-Q', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
+		else
+			ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").ConvertToMove()'
 		end
 	end) end,
 	['Alt-Q'] = function() Hotkey('Alt-Q', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").SelectPatrolUnits()'
 	end) end,
 	['Alt-Shift-Q'] = function() Hotkey('Alt-Shift-Q', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").ConvertToMove()'
 	end) end,
+
+	-- ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders()'
 
 	W = function() Hotkey('W', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -298,7 +303,7 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()'
 		else
 			ConExecute 'UI_SelectByCategory AIR HIGHALTAIR ANTIAIR'
-		end 
+		end
 	end) end,
 	['Ctrl-W'] = function() Hotkey('Ctrl-W', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -354,10 +359,10 @@ local customKeyMap = {
 			-- Functions.NoLoadedUnits -- TODO
 			ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
 			SubHotkeys({
-				R = function() Repeater('R', function(hotkey)
+				R = function() SubHotkey('R', function(hotkey)
 					ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
 					SubHotkeys({
-						R = function() Repeater('R', function(hotkey)
+						R = function() SubHotkey('R', function(hotkey)
 							ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
 						end) end,
 					})
@@ -374,10 +379,10 @@ local customKeyMap = {
 			-- Functions.NoLoadedUnits -- TODO
 			ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
 			SubHotkeys({
-				R = function() Repeater('R', function(hotkey)
+				R = function() SubHotkey('R', function(hotkey)
 					ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
 					SubHotkeys({
-						R = function() Repeater('R', function(hotkey)
+						R = function() SubHotkey('R', function(hotkey)
 							ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
 						end) end,
 					})
@@ -411,49 +416,49 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetToMouseTargetOrDefault()'
 			SubHotkeys({
 				-- TODO: Make queueable targeting, by holding shift, it puts it after order finishes? 
-				['2'] = function() Repeater('2', function(hotkey)
+				['2'] = function() SubHotkey('2', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("TorpBomber")'
 				end) end,
-				['3'] = function() Repeater('3', function(hotkey)
+				['3'] = function() SubHotkey('3', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Gunship")'
 				end) end,
-				['4'] = function() Repeater('4', function(hotkey)
+				['4'] = function() SubHotkey('4', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Bomber")'
 				end) end,
-				Q = function() Repeater('Q', function(hotkey)
+				Q = function() SubHotkey('Q', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Arty")'
 				end) end,
-				W = function() Repeater('W', function(hotkey)
+				W = function() SubHotkey('W', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Units")'
 				end) end,
-				E = function() Repeater('E', function(hotkey)
+				E = function() SubHotkey('E', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Engies")'
 				end) end,
-				R = function() Repeater('R', function(hotkey)
+				R = function() SubHotkey('R', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Snipe")'
 				end) end,
-				A = function() Repeater('A', function(hotkey)
+				A = function() SubHotkey('A', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("ACU")'
 				end) end,
-				S = function() Repeater('S', function(hotkey)
+				S = function() SubHotkey('S', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Mex")'
 				end) end,
-				D = function() Repeater('D', function(hotkey)
+				D = function() SubHotkey('D', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Power")'
 				end) end,
-				F = function() Repeater('F', function(hotkey)
+				F = function() SubHotkey('F', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Factory")'
 				end) end,
-				Z = function() Repeater('Z', function(hotkey)
+				Z = function() SubHotkey('Z', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("Shields")'
 				end) end,
-				X = function() Repeater('X', function(hotkey)
+				X = function() SubHotkey('X', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("PD")'
 				end) end,
-				C = function() Repeater('C', function(hotkey)
+				C = function() SubHotkey('C', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("AA")'
 				end) end,
-				V = function() Repeater('V', function(hotkey)
+				V = function() SubHotkey('V', function(hotkey)
 					ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesHotkey("EXP")'
 				end) end,
 			})
@@ -476,13 +481,13 @@ local customKeyMap = {
 			-- Select Enhancements tab
 			SubHotkeys({
 				-- TODO: Make queueable targeting, by holding shift, it puts it after order finishes? 
-				T = function() Repeater('T', function(hotkey)
+				T = function() SubHotkey('T', function(hotkey)
 					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderTechUpgrade()'
 				end) end,
-				U = function() Repeater('U', function(hotkey)
+				U = function() SubHotkey('U', function(hotkey)
 					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderGunUpgrade()'
 				end) end,
-				H = function() Repeater('H', function(hotkey)
+				H = function() SubHotkey('H', function(hotkey)
 					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderNanoUpgrade()'
 				end) end,
 			})
@@ -500,10 +505,14 @@ local customKeyMap = {
 	end) end,
 
 	CapsLock = function() Hotkey('CapsLock', function(hotkey)
-		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(false)
+		if AnyUnitSelected() then
+			import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(false)
+		end
 	end) end,
 	['Shift-CapsLock'] = function() Hotkey('Shift-CapsLock', function(hotkey)
-		import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(true)
+		if AnyUnitSelected() then
+			import("/mods/MultiHotkeys/modules/orders.lua").SetProductionAndAbilities(true)
+		end
 	end) end,
 	['Ctrl-CapsLock'] = function() Hotkey('Ctrl-CapsLock', function(hotkey)
 		-- Cancel all but one order
@@ -561,7 +570,7 @@ local customKeyMap = {
 		Functions.SelectSimilarUnits("+inview")
 
 		SubHotkeys({
-			['Alt-S'] = function() Repeater('Alt-S', function(hotkey)
+			['Alt-S'] = function() SubHotkey('Alt-S', function(hotkey)
 				print("All Similar units")
 				Functions.SelectSimilarUnits()
 			end) end,
@@ -755,11 +764,11 @@ local customKeyMap = {
 	end) end,
 	['Alt-Z'] = function() Hotkey('Alt-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
-		ConExecute 'StartCommandMode order RULEUCC_Attack'
+		-- ConExecute 'StartCommandMode order RULEUCC_Attack'
 	end) end,
 	['Alt-Shift-Z'] = function() Hotkey('Alt-Shift-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
-		ConExecute 'StartCommandMode order RULEUCC_Attack'
+		-- ConExecute 'StartCommandMode order RULEUCC_Attack'
 	end) end,
 
 	X = function() Hotkey('X', function(hotkey)
@@ -814,7 +823,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-C'] = function() Hotkey('Alt-C', function(hotkey)
-		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders()'
+		-- TODO
 	end) end,
 
 	V = function() Hotkey('V', function(hotkey)
@@ -868,7 +877,7 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitMouseOrthogonalAxis()'
 	end) end,
 	['Ctrl-Space'] = function() Hotkey('Ctrl-Space', function(hotkey)
-		-- TODO: Group bsed on blueprint and split equally 
+		-- TODO: Group based on blueprint and split equally 
 		-- ConExecute 'UI_Lua import("/mods/UI-Party/modules/unitsplit.lua").SplitGroups(2)'
 		-- ConExecute 'UI_Lua import("/mods/SubGroups/modules/selection.lua").SplitIntoGroups(2)'
 	end) end,
