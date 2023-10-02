@@ -23,18 +23,24 @@ local PrioritySettings = {
         Arty = "{categories.ARTILLERY}",
         AA = "{categories.AIR * categories.ANTIAIR - categories.EXPERIMENTAL}",
         SMD = "{categories.TECH3 * categories.STRUCTURE * categories.ANTIMISSILE}",
-        Gunship = "{categories.AIR * categories.GROUNDATTACK}",
+        TorpBomber = "{categories.AIR * categories.ANTINAVY, categories.AIR * categories.BOMBER, categories.AIR * categories.GROUNDATTACK}",
+        Bomber = "{categories.AIR * categories.BOMBER, categories.AIR * categories.GROUNDATTACK}",
+        Gunship = "{categories.AIR * categories.GROUNDATTACK, categories.AIR * categories.BOMBER}",
         Mex = "{categories.MASSEXTRACTION}",
         Snipe = "{categories.COMMAND, categories.STRATEGIC, categories.ANTIMISSILE * categories.TECH3, "..
             "categories.MASSEXTRACTION * categories.STRUCTURE * categories.TECH3, categories.MASSEXTRACTION * categories.STRUCTURE * categories.TECH2, "..
             "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH3, categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH2, ".. 
-            "categories.MASSFABRICATION * categories.STRUCTURE, categories.SHIELD,}",
+            "categories.MASSFABRICATION * categories.STRUCTURE, categories.SHIELD}",
         Naval = "{categories.MOBILE * categories.NAVAL * categories.TECH3, categories.MOBILE * categories.NAVAL * categories.TECH2, categories.MOBILE * categories.NAVAL * categories.TECH1}",
         Bships = "{categories.BATTLESHIP}",
         Destros = "{categories.DESTROYER}",
         Cruiser = "{categories.CRUISER}",
         SACU = "{categories.SUBCOMMANDER}",
-        Factory = "{categories.TECH3 * categories.STRUCTURE * categories.FACTORY, categories.TECH2 * categories.STRUCTURE * categories.FACTORY, categories.TECH1 * categories.STRUCTURE * categories.FACTORY}",
+        Factory = "{categories.TECH3 * categories.STRUCTURE * categories.RESEARCH, "..
+            "categories.TECH2 * categories.STRUCTURE * categories.RESEARCH, "..
+            "categories.TECH3 * categories.STRUCTURE * categories.FACTORY, "..
+            "categories.TECH2 * categories.STRUCTURE * categories.FACTORY, "..
+            "categories.TECH1 * categories.STRUCTURE * categories.FACTORY}",
     },
     exclusive = {ACU = false, Power = false, PD = false, Units = false, Shields = false, EXP = false, Engies = false,
                  Arty = false, AA = false, SMD = false, Gunship = false, Mex = false, Snipe = false},

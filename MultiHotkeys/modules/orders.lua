@@ -162,9 +162,13 @@ function SetProductionAndAbilities(setActive, abilities)
     end
 
     from(abilities).foreach(function(i, a)
+        LOG(i)
         local ruleNumber = unitToggleRules[a]
+        LOG(ruleNumber)
         if ruleNumber then
             local onValue = GetOnValueForScriptBit(ruleNumber)
+            LOG("onValue")
+            LOG(onValue)
             ToggleScriptBit(units, ruleNumber, setActive and onValue or not onValue)
         end
     end)
