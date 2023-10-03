@@ -178,26 +178,16 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
 	end) end,
 
-	['1'] = function() Hotkey('1', function(hotkey) 
-	end) end,
-	['2'] = function() Hotkey('2', function(hotkey) 
-	end) end,
-	['3'] = function() Hotkey('3', function(hotkey) 
-	end) end,
-	['4'] = function() Hotkey('4', function(hotkey) 
-	end) end,
-	['5'] = function() Hotkey('5', function(hotkey) 
-	end) end,
-	['6'] = function() Hotkey('6', function(hotkey) 
-	end) end,
-	['7'] = function() Hotkey('7', function(hotkey) 
-	end) end,
-	['8'] = function() Hotkey('8', function(hotkey) 
-	end) end,
-	['9'] = function() Hotkey('9', function(hotkey) 
-	end) end,
-	['0'] = function() Hotkey('0', function(hotkey) 
-	end) end,
+	['1'] = function() Hotkey('1', function(hotkey) end) end,
+	['2'] = function() Hotkey('2', function(hotkey) end) end,
+	['3'] = function() Hotkey('3', function(hotkey) end) end,
+	['4'] = function() Hotkey('4', function(hotkey) end) end,
+	['5'] = function() Hotkey('5', function(hotkey) end) end,
+	['6'] = function() Hotkey('6', function(hotkey) end) end,
+	['7'] = function() Hotkey('7', function(hotkey) end) end,
+	['8'] = function() Hotkey('8', function(hotkey) end) end,
+	['9'] = function() Hotkey('9', function(hotkey) end) end,
+	['0'] = function() Hotkey('0', function(hotkey) end) end,
 
 	Tab = function() Hotkey('Tab', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil)'
@@ -205,8 +195,7 @@ local customKeyMap = {
 	['Shift-Tab'] = function() Hotkey('Shift-Tab', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, nil, true)'
 	end) end,
-	['Ctrl-Tab'] = function() Hotkey('Ctrl-Tab', function(hotkey)
-	end) end,
+	['Ctrl-Tab'] = function() Hotkey('Ctrl-Tab', function(hotkey) end) end,
 
 	Q = function() Hotkey('Q', function(hotkey)
 		if AnyUnitSelected() then
@@ -317,10 +306,8 @@ local customKeyMap = {
 			ConExecute 'StartCommandMode order RULEUCC_Attack'
 		end
 	end) end,
-	['Alt-W'] = function() Hotkey('Alt-W', function(hotkey)
-	end) end,
-	['Alt-Shift-W'] = function() Hotkey('Alt-Shift-W', function(hotkey)
-	end) end,
+	['Alt-W'] = function() Hotkey('Alt-W', function(hotkey) end) end,
+	['Alt-Shift-W'] = function() Hotkey('Alt-Shift-W', function(hotkey) end) end,
 
 	E = function() Hotkey('E', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -404,11 +391,15 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_7")'
 		elseif AllHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Ferry'
+		else
+			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 		end
 	end) end,
 	['Ctrl-Shift-R'] = function() Hotkey('Ctrl-Shift-R', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_7")'
+		else
+			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
 		end
 	end) end,
 	['Alt-R'] = function() Hotkey('Alt-R', function(hotkey)
@@ -881,14 +872,14 @@ local customKeyMap = {
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_3")'
 		elseif AllHasCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimental")'
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimental")' -- TODO, doesn't work?
 		end
 	end) end,
 	['Shift-V'] = function() Hotkey('Shift-V', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_3")'
 		elseif AllHasCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimental")'
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimental")' -- TODO, doesn't work?
 		end
 	end) end,
 	['Ctrl-V'] = function() Hotkey('Ctrl-V', function(hotkey)
