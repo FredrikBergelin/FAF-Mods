@@ -193,29 +193,27 @@ end
 function EnablePaused(unitType, spendType)
 
 	local unitType = unitType
+	local checkedUnits = {}
 	if spendType == spendTypes.PRODUCTION then
 		for k, v in unitType.pausedProductionUnits do
-			if v:IsDead() then
-				table.remove(unitType.pausedProductionUnits, k)
-			else
+			if not v:IsDead() then
 				v.econtrol = {}
+				table.insert(checkedUnits, v)
 			end
-
 		end
 
-		SetPaused(unitType.pausedProductionUnits, false)
+		SetPaused(checkedUnits, false)
 
 		unitType.pausedProductionUnits = {}
 	elseif spendType == spendTypes.UPKEEP then
 		for k, v in unitType.pausedUpkeepUnits do
-			if v:IsDead() then
-				table.remove(unitType.pausedUpkeepUnits, k)
-			else
+			if not v:IsDead() then
 				v.econtrol = {}
+				table.insert(checkedUnits, v)
 			end
 		end
 
-		EnableUnitsAbility(unitType.pausedUpkeepUnits)
+		EnableUnitsAbility(checkedUnits)
 
 		unitType.pausedUpkeepUnits = {}
 	end
