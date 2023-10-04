@@ -205,6 +205,10 @@ local customKeyMap = {
 			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 
 			SubHotkeys({
+				['1'] = function() SubHotkey('1', function(hotkey)
+					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
+				end) end,
 				['2'] = function() SubHotkey('2', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
@@ -225,32 +229,40 @@ local customKeyMap = {
 			ConExecute 'StartCommandMode order RULEUCC_Patrol'
 		else
             ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH1")
-			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 
 			SubHotkeys({
+				['1'] = function() SubHotkey('1', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
+				end) end,
+				['Shift-1'] = function() SubHotkey('Shift-1', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
+				end) end,
 				['2'] = function() SubHotkey('2', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['Shift-2'] = function() SubHotkey('Shift-2', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['3'] = function() SubHotkey('3', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['Shift-3'] = function() SubHotkey('Shift-3', function(hotkey)
 					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['4'] = function() SubHotkey('4', function(hotkey)
 					ConExecute("UI_SelectByCategory SUBCOMMANDER")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['Shift-4'] = function() SubHotkey('Shift-4', function(hotkey)
 					ConExecute("UI_SelectByCategory SUBCOMMANDER")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 			})
 		end
@@ -816,6 +828,11 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_1")'
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_PD")'
+		elseif AllHasCategory(categories.TACTICALMISSILEPLATFORM) then
+			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+		else
+			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")' -- Manual cycle, tab, doesnt work properly
 		end
 	end) end,
 	['Shift-X'] = function() Hotkey('Shift-X', function(hotkey)
@@ -823,6 +840,8 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_1")'
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_PD")'
+		else
+			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
 		end
 	end) end,
 	['Ctrl-X'] = function() Hotkey('Ctrl-X', function(hotkey)
@@ -835,10 +854,7 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ArtyMissiles")'
 		end
 	end) end,
-	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")' -- Manual cycle, tab, doesnt work properly
-	end) end,
+	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey) end) end,
 
 	C = function() Hotkey('C', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
