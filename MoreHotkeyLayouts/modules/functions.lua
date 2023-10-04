@@ -14,24 +14,18 @@ function SelectedUnitsWithOnlyTheseCommands(commands)
 	for index, unit in units do
 		local comQ = unit:GetCommandQueue()
 
-        LOG("commands getn " .. table.getn(commands))
-        LOG("comQ getn " .. table.getn(commands))
-
         local addUnit = true
         if (table.getn(comQ) == 0 and not TableContains(commands, "Idle")) then
-            LOG("No commands / Idle")
             addUnit = false
 		end
 
 		for _, command in comQ do
 			if (not TableContains(commands, command.type)) then
-                LOG("not TableContains")
                 addUnit = false
             end
 		end
 
         if addUnit then
-            LOG("addUnit")
             table.insert(unitsToSelect, unit)
         end
 	end

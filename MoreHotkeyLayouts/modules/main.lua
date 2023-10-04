@@ -202,20 +202,20 @@ local customKeyMap = {
 			ConExecute 'StartCommandMode order RULEUCC_Patrol'
 		else
             ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH1")
-			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 
 			SubHotkeys({
 				['2'] = function() SubHotkey('2', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH2")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['3'] = function() SubHotkey('3', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH3")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['4'] = function() SubHotkey('4', function(hotkey)
 					ConExecute("UI_SelectByCategory +inview SUBCOMMANDER")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol"}))
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 			})
 		end
