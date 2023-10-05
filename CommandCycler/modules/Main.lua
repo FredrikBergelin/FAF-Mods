@@ -8,7 +8,6 @@ local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Inte
 local cycleMode = "closest"
 
 local currentUnit
-local currentUnitWithoutOrderIndex
 local selectionWithoutOrder = {}
 local selectionWithOrder = {}
 local commandMode
@@ -76,7 +75,6 @@ KeyMapper.SetUserKeyAction('Select remaining, without command', {
 
 local function Reset(deselect)
     currentUnit = nil
-    currentUnitWithoutOrderIndex = nil
     selectionWithoutOrder = {}
     selectionWithOrder = {}
     commandMode = nil
@@ -100,42 +98,38 @@ end
 local selectionChangedSinceLastCycle = true
 
 function UnitsAlive(units)
-    if table.getn(units) == 0 then return {} end
-    local unitsAlive = ArrayRemove(units, function(units, i, j)
-        LOG("j: "..j)
-        LOG(not units[i])
-        LOG(not units[i] == nil and not units[i]:IsDead())
-        return not units[i]:IsDead()
+    if table.getn(units) == 0 then return end
 
-        -- WARNING: Error running lua command: ... forged alliance\mods\commandcycler\modules\main.lua(108): attempt to call method `IsDead' (a nil value)
-        --  stack traceback:
-        --  	... forged alliance\mods\commandcycler\modules\main.lua(108): in function `fnKeep'
-        --  	...mmander forged alliance\mods\common\modules\misc.lua(65): in function <...mmander forged alliance\mods\common\modules\misc.lua:58>
-        --  	... forged alliance\mods\commandcycler\modules\main.lua(104): in function `UnitsAlive'
-        --  	... forged alliance\mods\commandcycler\modules\main.lua(118): in function `SelectNext'
-        --  	... forged alliance\mods\commandcycler\modules\main.lua(286): in function `CreateOrContinueSelection'
-        --  	[string "import("/mods/CommandCycler/modules/Main.lu..."](1): in main chunk
-
+    local t = units
+    ArrayRemove(t, function(t, i, j)
+        local v = t[i]
+        return v ~= nil and not v:IsDead()
     end)
-
-    LOG(table.getn(unitsAlive))
-    return unitsAlive
 end
 
 -- Select next unit in the saved selection
 function SelectNext()
-    selectionWithOrder = UnitsAlive(selectionWithOrder) -- added but remove if not necessary
-    selectionWithoutOrder = UnitsAlive(selectionWithoutOrder)
+    LOG("SelectNext")
+    UnitsAlive(selectionWithOrder) -- added but remove if not necessary
+    UnitsAlive(selectionWithoutOrder)
 
+    LOG("selectionWithoutOrder getn: ".. table.getn(selectionWithoutOrder))
     if table.getn(selectionWithoutOrder) == 0 then
+        LOG("Cycle complete")
         PlaySound(completeCycleSound)
         print("Cycle complete")
         SelectUnits(nil)
-        currentUnitWithoutOrderIndex = nil
-        selectionWithoutOrder = selectionWithOrder
+        currentUnit = nil
+        selectionWithoutOrder = {}
+        for _, v in ipairs(selectionWithOrder) do
+            table.insert(selectionWithoutOrder, v)
+        end
         selectionWithOrder = {}
+        LOG("selectionWithoutOrder getn: ".. table.getn(selectionWithoutOrder))
         return
     end
+
+    LOG("SelectNext Continues")
 
     local mousePos = GetMouseWorldPos()
     local nextOrderValue = 99999999
@@ -169,7 +163,7 @@ function SelectNext()
 
         if onlyWithMissile and missilesCount == 0 then
             table.insert(selectionWithOrder, selectionWithoutOrder[key])
-            table.remove(selectionWithoutOrder, key)
+            table.remove(selectionWithoutOrder, key) -- TODO
         else
             local distanceToCursor
             local unitHealthPercent
@@ -220,7 +214,6 @@ function SelectNext()
     end
 
     currentUnit = nextUnit
-    currentUnitWithoutOrderIndex = nextUnitIndex
 
     SelectUnits { nextUnit }
     CM.StartCommandMode(commandMode, commandModeData)
@@ -229,9 +222,11 @@ function SelectNext()
 end
 
 function CreateSelection(units)
+    LOG("CreateSelection")
     local selectedUnits = GetSelectedUnits()
     Reset()
     selectionWithoutOrder = selectedUnits
+
     selectionWithOrder = {}
     onlyWithMissile = false
 
@@ -239,8 +234,11 @@ function CreateSelection(units)
 end
 
 function MoveCurrentToWithOrder()
-    table.insert(selectionWithOrder, selectionWithoutOrder[currentUnitWithoutOrderIndex])
-    table.remove(selectionWithoutOrder, currentUnitWithoutOrderIndex)
+    table.insert(selectionWithOrder, currentUnit)
+    ArrayRemove(selectionWithoutOrder, function(t, i, j)
+        local v = t[i]
+        return v ~= nil and v:GetEntityId() ~= currentUnit:GetEntityId()
+    end)
 end
 
 function PrintAutoCycle(autoCycle, mode)
@@ -252,6 +250,8 @@ function PrintAutoCycle(autoCycle, mode)
 end
 
 function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
+    LOG("CreateOrContinueSelection:")
+
     if autoCycle == true or autoCycle == false then
         automaticallyCycle = autoCycle
     end
@@ -259,13 +259,14 @@ function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
         cycleMode = mode
     end
 
-    selectionWithOrder = UnitsAlive(selectionWithOrder)
-    selectionWithoutOrder = UnitsAlive(selectionWithoutOrder)
+    UnitsAlive(selectionWithOrder)
+    UnitsAlive(selectionWithoutOrder)
 
     local selectedUnits = GetSelectedUnits()
 
     if selectedUnits then
         if table.getn(selectedUnits) > 1 then
+            LOG("selectedUnits > 1")
             if toggleAutoCycle == true then
                 automaticallyCycle = false
             end
@@ -276,6 +277,7 @@ function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
             PrintAutoCycle(automaticallyCycle, cycleMode)
             return
         elseif SelectionIsCurrent(selectedUnits) then
+            LOG("SelectionIsCurrent")
             if toggleAutoCycle == true then
                 automaticallyCycle = not automaticallyCycle
                 PrintAutoCycle(automaticallyCycle, cycleMode)
@@ -285,15 +287,17 @@ function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
             end
             return
         end
+        LOG("selectedUnits END")
     else
         if table.getn(selectionWithoutOrder) > 0 then
+            LOG("selectionWithoutOrder > 0 ")
             print("Continue cycle, " .. cycleMode)
+            SelectNext()
         elseif table.getn(selectionWithOrder) == 0 then
+            LOG("selectionWithOrder == 0 ")
             print("No units to cycle")
         end
     end
-
-    SelectNext()
 end
 
 function SelectAll()

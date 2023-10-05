@@ -55,6 +55,8 @@ function AnyUnitSelected()
     end
 end
 
+-- https://stackoverflow.com/questions/12394841/safely-remove-items-from-an-array-table-while-iterating
+
 function ArrayRemove(t, fnKeep)
     local j, n = 1, table.getn(t)
 
