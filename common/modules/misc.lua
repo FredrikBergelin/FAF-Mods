@@ -56,19 +56,15 @@ function AnyUnitSelected()
 end
 
 function ArrayRemove(t, fnKeep)
-    LOG("ArrayRemove")
+    local j, n = 1, table.getn(t)
 
-    local j = 1
-    local n = table.getn(t)
-
-    for i=1, n do
+    for i=1,n do
         if (fnKeep(t, i, j)) then
-            -- Move i's kept value to j's position, if it's not already there.
             if (i ~= j) then
                 t[j] = t[i]
                 t[i] = nil
             end
-            j = j + 1 -- Increment position of where we'll place the next kept value.
+            j = j + 1
         else
             t[i] = nil
         end
@@ -76,3 +72,25 @@ function ArrayRemove(t, fnKeep)
 
     return t
 end
+
+-- function ArrayRemove(t, fnKeep)
+--     LOG("ArrayRemove")
+
+--     local j = 1
+--     local n = table.getn(t)
+
+--     for i=1, n do
+--         if (fnKeep(t, i, j)) then
+--             -- Move i's kept value to j's position, if it's not already there.
+--             if (i ~= j) then
+--                 t[j] = t[i]
+--                 t[i] = nil
+--             end
+--             j = j + 1 -- Increment position of where we'll place the next kept value.
+--         else
+--             t[i] = nil
+--         end
+--     end
+
+--     return t
+-- end

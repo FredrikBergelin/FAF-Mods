@@ -100,11 +100,22 @@ end
 local selectionChangedSinceLastCycle = true
 
 function UnitsAlive(units)
+    if table.getn(units) == 0 then return {} end
     local unitsAlive = ArrayRemove(units, function(units, i, j)
         LOG("j: "..j)
         LOG(not units[i])
         LOG(not units[i] == nil and not units[i]:IsDead())
         return not units[i]:IsDead()
+
+        -- WARNING: Error running lua command: ... forged alliance\mods\commandcycler\modules\main.lua(108): attempt to call method `IsDead' (a nil value)
+        --  stack traceback:
+        --  	... forged alliance\mods\commandcycler\modules\main.lua(108): in function `fnKeep'
+        --  	...mmander forged alliance\mods\common\modules\misc.lua(65): in function <...mmander forged alliance\mods\common\modules\misc.lua:58>
+        --  	... forged alliance\mods\commandcycler\modules\main.lua(104): in function `UnitsAlive'
+        --  	... forged alliance\mods\commandcycler\modules\main.lua(118): in function `SelectNext'
+        --  	... forged alliance\mods\commandcycler\modules\main.lua(286): in function `CreateOrContinueSelection'
+        --  	[string "import("/mods/CommandCycler/modules/Main.lu..."](1): in main chunk
+
     end)
 
     LOG(table.getn(unitsAlive))
@@ -282,7 +293,7 @@ function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
         end
     end
 
-    -- SelectNext()
+    SelectNext()
 end
 
 function SelectAll()
