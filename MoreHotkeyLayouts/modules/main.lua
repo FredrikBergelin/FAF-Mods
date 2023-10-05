@@ -797,11 +797,19 @@ local customKeyMap = {
 	Z = function() Hotkey('Z', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
+		else
+			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 		end
 	end) end,
 	['Shift-Z'] = function() Hotkey('Shift-Z', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
+		else
+			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 		end
 	end) end,
 	['Ctrl-Z'] = function() Hotkey('Ctrl-Z', function(hotkey)
@@ -815,12 +823,14 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-Z'] = function() Hotkey('Alt-Z', function(hotkey)
-        ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
-		-- ConExecute 'StartCommandMode order RULEUCC_Attack'
+        ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
 	end) end,
 	['Alt-Shift-Z'] = function() Hotkey('Alt-Shift-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
-		-- ConExecute 'StartCommandMode order RULEUCC_Attack'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+		ConExecute 'StartCommandMode order RULEUCC_Attack'
 	end) end,
 
 	X = function() Hotkey('X', function(hotkey)
