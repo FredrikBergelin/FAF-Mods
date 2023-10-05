@@ -1,5 +1,4 @@
 local Util = import('/lua/utilities.lua')
-local ArrayRemove = import('/mods/common/modules/misc.lua').ArrayRemove
 local CM = import("/lua/ui/game/commandmode.lua")
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
@@ -8,8 +7,9 @@ local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Inte
 local cycleMode = "closest"
 
 local currentUnit
-local selectionWithoutOrder = {}
-local selectionWithOrder = {}
+local currentUnitWithoutOrderIndex
+local selectionWithoutOrder
+local selectionWithOrder
 local commandMode
 local commandModeData
 local automaticallyCycle = true
@@ -75,6 +75,7 @@ KeyMapper.SetUserKeyAction('Select remaining, without command', {
 
 local function Reset(deselect)
     currentUnit = nil
+    currentUnitWithoutOrderIndex = nil
     selectionWithoutOrder = {}
     selectionWithOrder = {}
     commandMode = nil
@@ -97,39 +98,17 @@ end
 
 local selectionChangedSinceLastCycle = true
 
-function UnitsAlive(units)
-    if table.getn(units) == 0 then return end
-
-    local t = units
-    ArrayRemove(t, function(t, i, j)
-        local v = t[i]
-        return v ~= nil and not v:IsDead()
-    end)
-end
-
 -- Select next unit in the saved selection
 function SelectNext()
-    LOG("SelectNext")
-    UnitsAlive(selectionWithOrder) -- added but remove if not necessary
-    UnitsAlive(selectionWithoutOrder)
 
-    LOG("selectionWithoutOrder getn: ".. table.getn(selectionWithoutOrder))
     if table.getn(selectionWithoutOrder) == 0 then
-        LOG("Cycle complete")
         PlaySound(completeCycleSound)
-        print("Cycle complete")
         SelectUnits(nil)
-        currentUnit = nil
-        selectionWithoutOrder = {}
-        for _, v in ipairs(selectionWithOrder) do
-            table.insert(selectionWithoutOrder, v)
-        end
+        currentUnitWithoutOrderIndex = nil
+        selectionWithoutOrder = selectionWithOrder
         selectionWithOrder = {}
-        LOG("selectionWithoutOrder getn: ".. table.getn(selectionWithoutOrder))
         return
     end
-
-    LOG("SelectNext Continues")
 
     local mousePos = GetMouseWorldPos()
     local nextOrderValue = 99999999
@@ -155,50 +134,55 @@ function SelectNext()
         nextOrderValue = 0
     end
 
-    for key, unit in pairs(selectionWithoutOrder) do
+    for key,unit in pairs(selectionWithoutOrder) do
+
         if onlyWithMissile then
             local missile_info = unit:GetMissileInfo()
             missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
         end
 
-        if onlyWithMissile and missilesCount == 0 then
-            table.insert(selectionWithOrder, selectionWithoutOrder[key])
-            table.remove(selectionWithoutOrder, key) -- TODO
+        if unit:IsDead() then
+            table.remove(selectionWithoutOrder, key)
         else
-            local distanceToCursor
-            local unitHealthPercent
-            local bp
-            if cycleMode == "closest" then
-                distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
-                if distanceToCursor < nextOrderValue then
-                    nextOrderValue = distanceToCursor
-                    nextUnit = unit
-                    nextUnitIndex = key
-                end
-            elseif cycleMode == "furthest" then
-                distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
-                if distanceToCursor > nextOrderValue then
-                    nextOrderValue = distanceToCursor
-                    nextUnit = unit
-                    nextUnitIndex = key
-                end
-            elseif cycleMode == "damage" then
-                bp = unit:GetBlueprint()
-                unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
+            if onlyWithMissile and missilesCount == 0 then
+                table.insert(selectionWithOrder, selectionWithoutOrder[key])
+                table.remove(selectionWithoutOrder, key)
+            else
+                local distanceToCursor
+                local unitHealthPercent
+                local bp
+                if cycleMode == "closest" then
+                    distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                    if distanceToCursor < nextOrderValue then
+                        nextOrderValue = distanceToCursor
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif cycleMode == "furthest" then
+                    distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
+                    if distanceToCursor > nextOrderValue then
+                        nextOrderValue = distanceToCursor
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif cycleMode == "damage" then
+                    bp = unit:GetBlueprint()
+                    unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-                if unitHealthPercent < nextOrderValue then
-                    nextOrderValue = unitHealthPercent
-                    nextUnit = unit
-                    nextUnitIndex = key
-                end
-            elseif cycleMode == "health" then
-                bp = unit:GetBlueprint()
-                unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
+                    if unitHealthPercent < nextOrderValue then
+                        nextOrderValue = unitHealthPercent
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif cycleMode == "health" then
+                    bp = unit:GetBlueprint()
+                    unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-                if unitHealthPercent > nextOrderValue then
-                    nextOrderValue = unitHealthPercent
-                    nextUnit = unit
-                    nextUnitIndex = key
+                    if unitHealthPercent > nextOrderValue then
+                        nextOrderValue = unitHealthPercent
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
                 end
             end
         end
@@ -214,6 +198,7 @@ function SelectNext()
     end
 
     currentUnit = nextUnit
+    currentUnitWithoutOrderIndex = nextUnitIndex
 
     SelectUnits { nextUnit }
     CM.StartCommandMode(commandMode, commandModeData)
@@ -222,11 +207,9 @@ function SelectNext()
 end
 
 function CreateSelection(units)
-    LOG("CreateSelection")
     local selectedUnits = GetSelectedUnits()
     Reset()
     selectionWithoutOrder = selectedUnits
-
     selectionWithOrder = {}
     onlyWithMissile = false
 
@@ -234,70 +217,52 @@ function CreateSelection(units)
 end
 
 function MoveCurrentToWithOrder()
-    table.insert(selectionWithOrder, currentUnit)
-    ArrayRemove(selectionWithoutOrder, function(t, i, j)
-        local v = t[i]
-        return v ~= nil and v:GetEntityId() ~= currentUnit:GetEntityId()
-    end)
+    table.insert(selectionWithOrder, selectionWithoutOrder[currentUnitWithoutOrderIndex])
+    table.remove(selectionWithoutOrder, currentUnitWithoutOrderIndex)
 end
 
-function PrintAutoCycle(autoCycle, mode)
+function PrintAutoCycle(autoCycle)
     if autoCycle then
-        print("Automatic Cycling, " .. mode)
+        print("Automatic Cycling")
     else
-        print("Manual cycling, " .. mode)
+        print("Manual cycling")
     end
 end
 
 function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
-    LOG("CreateOrContinueSelection:")
-
     if autoCycle == true or autoCycle == false then
         automaticallyCycle = autoCycle
+        PrintAutoCycle(automaticallyCycle)
     end
-    if mode ~= nil then
-        cycleMode = mode
-    end
-
-    UnitsAlive(selectionWithOrder)
-    UnitsAlive(selectionWithoutOrder)
 
     local selectedUnits = GetSelectedUnits()
 
     if selectedUnits then
         if table.getn(selectedUnits) > 1 then
-            LOG("selectedUnits > 1")
+            if mode == nil then
+                -- cycleMode = "closest"
+            else
+                cycleMode = mode
+            end
             if toggleAutoCycle == true then
                 automaticallyCycle = false
-            end
-            if mode == nil then
-                cycleMode = "closest"
+                PrintAutoCycle(automaticallyCycle)
             end
             CreateSelection()
-            PrintAutoCycle(automaticallyCycle, cycleMode)
             return
         elseif SelectionIsCurrent(selectedUnits) then
-            LOG("SelectionIsCurrent")
             if toggleAutoCycle == true then
                 automaticallyCycle = not automaticallyCycle
-                PrintAutoCycle(automaticallyCycle, cycleMode)
+                PrintAutoCycle(automaticallyCycle)
             else
                 MoveCurrentToWithOrder()
                 SelectNext()
             end
             return
         end
-        LOG("selectedUnits END")
-    else
-        if table.getn(selectionWithoutOrder) > 0 then
-            LOG("selectionWithoutOrder > 0 ")
-            print("Continue cycle, " .. cycleMode)
-            SelectNext()
-        elseif table.getn(selectionWithOrder) == 0 then
-            LOG("selectionWithOrder == 0 ")
-            print("No units to cycle")
-        end
     end
+
+    SelectNext()
 end
 
 function SelectAll()
