@@ -142,23 +142,3 @@ function SelectTmlFireMissile()
 
     ConExecute "StartCommandMode order RULEUCC_Tactical"
 end
-
-function SelectSmlFireMissile()
-    local selection = GetSelectedUnits()
-
-    local launchers = {}
-    if selection and not table.empty(selection) then
-        from(selection).foreach(function(i, unit)
-            if unit:IsInCategory("NUKE") then
-                -- TODO: or in category naval + strategic, and has missiles loaded (do same for tml?)
-                table.insert(launchers, unit)
-            end
-        end)
-    end
-
-    if table.empty(launchers) then
-        ConExecute "UI_SelectByCategory NUKE"
-    end
-
-    ConExecute "StartCommandMode order RULEUCC_Nuke"
-end

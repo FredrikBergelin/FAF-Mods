@@ -799,8 +799,10 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
 		else
 			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
-			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
-			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH2) and AllHasCategory(categories.STRUCTURE) then
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			end
 		end
 	end) end,
 	['Shift-Z'] = function() Hotkey('Shift-Z', function(hotkey)
@@ -808,8 +810,10 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
 		else
 			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
-			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
-			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH2) and AllHasCategory(categories.STRUCTURE) then
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest")'
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			end
 		end
 	end) end,
 	['Ctrl-Z'] = function() Hotkey('Ctrl-Z', function(hotkey)
@@ -824,13 +828,17 @@ local customKeyMap = {
 	end) end,
 	['Alt-Z'] = function() Hotkey('Alt-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
+		if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH3) and AllHasCategory(categories.STRUCTURE) then
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
+		end
 	end) end,
 	['Alt-Shift-Z'] = function() Hotkey('Alt-Shift-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
-		ConExecute 'StartCommandMode order RULEUCC_Attack'
+		if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH3) and AllHasCategory(categories.STRUCTURE) then
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest")'
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+			ConExecute 'StartCommandMode order RULEUCC_Attack'
+		end
 	end) end,
 
 	X = function() Hotkey('X', function(hotkey)
@@ -840,9 +848,13 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_PD")'
 		elseif AllHasCategory(categories.TACTICALMISSILEPLATFORM) then
 			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+		elseif AllHasCategory(categories.NUKE) then
+			ConExecute 'StartCommandMode order RULEUCC_Nuke'
 		else
 			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
-			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")' -- Manual cycle, tab, doesnt work properly
+			if AllHasCategory(categories.TACTICALMISSILEPLATFORM) then
+				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest_missile")' -- Manual cycle, tab, doesnt work properly
+			end
 		end
 	end) end,
 	['Shift-X'] = function() Hotkey('Shift-X', function(hotkey)
@@ -864,7 +876,14 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ArtyMissiles")'
 		end
 	end) end,
-	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey) end) end,
+	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
+		ConExecute "UI_SelectByCategory NUKE"
+		if AllHasCategory(categories.NUKE) then
+			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest_missile")'
+		else
+			PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
+		end
+	end) end,
 
 	C = function() Hotkey('C', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
@@ -945,8 +964,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-N'] = function() Hotkey('Alt-N', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectSmlFireMissile()'
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest_missile")' -- TODO
+
 	end) end,
 
 	M = function() Hotkey('M', function(hotkey)
