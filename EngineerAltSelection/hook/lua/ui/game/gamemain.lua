@@ -4,7 +4,7 @@ function DeselectSelens(selection)
     local isShift = IsKeyDown("shift")
     local isAlt = IsKeyDown("menu")
     if isAlt and isShift then
-        local newSelection = EntityCategoryFilterDown(categories.ENGINEER, selection)
+        local newSelection = EntityCategoryFilterDown(categories.ENGINEER + categories.TRANSPORTATION, selection)
         if table.getn(newSelection) == table.getn(selection) then
             return selection, false
         end
