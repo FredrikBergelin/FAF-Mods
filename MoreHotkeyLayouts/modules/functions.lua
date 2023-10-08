@@ -33,6 +33,47 @@ function SelectedUnitsWithOnlyTheseCommands(commands)
 	return unitsToSelect
 end
 
+-- TransportUnloadSpecificUnits (only 3 search results in faf fa and didnt lead anywhere but apparently command [25])
+function FilterAvailableTransports()
+    -- local units = EntityCategoryFilterDown(categories.TRANSPORTATION, GetSelectedUnits())
+    local units = GetSelectedUnits()
+	local unitsToSelect = {}
+
+	for index, unit in units do
+        -- LOG(unit:GetBlueprint().General.UnitName)
+        -- local cargo = unit:GetCargo() -- Error, GetCargo a nil value ??
+
+        -- LOG(cargo)
+        -- LOG("Cargo: "..table.getn(cargo))
+
+        -- if cargo and table.getn(cargo) == 0 then
+
+        local comQ = unit:GetCommandQueue()
+
+        local addUnit = true
+
+        -- INFO: TransportReverseLoadUnits
+        -- INFO: TransportLoadUnits
+        -- INFO: TransportUnloadUnits
+        -- INFO: Ferry
+
+        for _, command in comQ do
+            LOG(command.type)
+            if (TableContains({"TransportLoadUnits", "TransportUnloadUnits", "TransportReverseLoadUnits", "Ferry"}, command.type)) then
+                addUnit = false
+            end
+        end
+
+        -- end
+
+        if addUnit then
+            table.insert(unitsToSelect, unit)
+        end
+	end
+
+	return unitsToSelect
+end
+
 function SelectSimilarUnits(scope)
 	local str = ''
     local similarUnitsBlueprints = from(units).select(function(k, u) return u:GetBlueprint(); end).distinct()

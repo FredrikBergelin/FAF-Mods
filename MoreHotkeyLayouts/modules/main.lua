@@ -135,34 +135,34 @@ local customKeyMap = {
 	-- end) end,
 
 	F1 = function() Hotkey('F1', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("Util")'
-	end) end,
-	F2 = function() Hotkey('F2', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("TargetPriorityExtended")'
-	end) end,
-	F3 = function() Hotkey('F3', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("AlertExtended")'
 	end) end,
+	F2 = function() Hotkey('F2', function(hotkey)
+		-- ConExecute 'UI_Lua import("/mods/ChatWheel/modules/CWMain.lua").call()'
+		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("Util")'
+	end) end,
+	F3 = function() Hotkey('F3', function(hotkey)
+		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("TargetPriorityExtended")'
+	end) end,
 	F4 = function() Hotkey('F4', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/ChatWheel/modules/CWMain.lua").call()'
+		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("diplomacy")'
 	end) end,
 	F5 = function() Hotkey('F5', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("diplomacy")'
+		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleScore()'
 		-- Stops working after adding / removing a few rings, no error message
 		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenMenu("Default")'
 		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenWheel("Default")'
 	end) end,
 	F6 = function() Hotkey('F6', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleScore()'
 	end) end,
 	F7 = function() Hotkey('F7', function(hotkey)
 		-- 
 	end) end,
 	F8 = function() Hotkey('F8', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/connectivity.lua").CreateUI()'
+		ConExecute 'UI_Lua import("/lua/ui/game/objectivedetail.lua").ToggleDisplay()'
 	end) end,
 	F9 = function() Hotkey('F9', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/objectivedetail.lua").ToggleDisplay()'
+		ConExecute 'UI_Lua import("/lua/ui/game/connectivity.lua").CreateUI()'
 	end) end,
 	F10 = function() Hotkey('F10', function(hotkey)
 		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("main")'
@@ -178,11 +178,66 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
 	end) end,
 
-	['1'] = function() Hotkey('1', function(hotkey) end) end,
-	['2'] = function() Hotkey('2', function(hotkey) end) end,
-	['3'] = function() Hotkey('3', function(hotkey) end) end,
-	['4'] = function() Hotkey('4', function(hotkey) end) end,
-	['5'] = function() Hotkey('5', function(hotkey) end) end,
+	['1'] = function() Hotkey('1', function(hotkey)
+		if AnyUnitSelected() then
+			SelectUnits(EntityCategoryFilterDown(categories.TECH1, GetSelectedUnits()))
+		else
+            ConExecute("UI_SelectByCategory +inview BUILTBYTIER1FACTORY TECH1 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits()))
+
+			SubHotkeys({
+				['1'] = function() SubHotkey('1', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER1FACTORY TECH1")
+				end) end,
+			})
+		end
+	end) end,
+	['2'] = function() Hotkey('2', function(hotkey)
+		if AnyUnitSelected() then
+			SelectUnits(EntityCategoryFilterDown(categories.TECH2, GetSelectedUnits()))
+		else
+            ConExecute("UI_SelectByCategory +inview BUILTBYTIER2FACTORY TECH2")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH2 - categories.ENGINEER, GetSelectedUnits()))
+
+			SubHotkeys({
+				['2'] = function() SubHotkey('2', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER2FACTORY TECH2")
+				end) end,
+			})
+		end
+	end) end,
+	['3'] = function() Hotkey('3', function(hotkey)
+		if AnyUnitSelected() then
+			SelectUnits(EntityCategoryFilterDown(categories.TECH3, GetSelectedUnits()))
+		else
+            ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH3")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH3 - categories.ENGINEER, GetSelectedUnits()))
+
+			SubHotkeys({
+				['3'] = function() SubHotkey('3', function(hotkey)
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH3")
+				end) end,
+			})
+		end
+	end) end,
+	['4'] = function() Hotkey('4', function(hotkey)
+		if AnyUnitSelected() then
+			SelectUnits(EntityCategoryFilterDown(categories.EXPERIMENTAL, GetSelectedUnits()))
+		else
+            ConExecute("UI_SelectByCategory +inview EXPERIMENTAL")
+
+			SubHotkeys({
+				['4'] = function() SubHotkey('3', function(hotkey)
+					ConExecute("UI_SelectByCategory EXPERIMENTAL")
+				end) end,
+			})
+		end
+	end) end,
+	-- Test
+	['5'] = function() Hotkey('5', function(hotkey)
+		-- ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
+		SelectUnits(Functions.FilterAvailableTransports())
+	end) end,
 	['6'] = function() Hotkey('6', function(hotkey) end) end,
 	['7'] = function() Hotkey('7', function(hotkey) end) end,
 	['8'] = function() Hotkey('8', function(hotkey) end) end,
@@ -329,6 +384,13 @@ local customKeyMap = {
 		else
             ConExecute("UI_SelectByCategory +inview AIR BOMBER")
 			SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits()))
+
+			SubHotkeys({
+				['E'] = function() SubHotkey('E', function(hotkey)
+					ConExecute("UI_SelectByCategory AIR BOMBER")
+					SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits()))
+				end) end,
+			})
 		end
 	end) end,
 	['Shift-E'] = function() Hotkey('Shift-E', function(hotkey)
@@ -364,14 +426,16 @@ local customKeyMap = {
 		elseif AnyHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Transport'
 		else
-			-- Functions.NoLoadedUnits -- TODO
-			ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
+			-- TODO: Functions.AvailableTransport (no loaded units and not on a pickup order)
+			ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
+			SelectUnits(Functions.FilterAvailableTransports())
+
 			SubHotkeys({
 				R = function() SubHotkey('R', function(hotkey)
-					ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
+					ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
 					SubHotkeys({
 						R = function() SubHotkey('R', function(hotkey)
-							ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
+							ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
 						end) end,
 					})
 				end) end,
@@ -384,18 +448,22 @@ local customKeyMap = {
 		elseif AnyHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Transport'
 		else
-			-- Functions.NoLoadedUnits -- TODO
-			ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
-			SubHotkeys({
-				R = function() SubHotkey('R', function(hotkey)
-					ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
-					SubHotkeys({
-						R = function() SubHotkey('R', function(hotkey)
-							ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
-						end) end,
-					})
-				end) end,
-			})
+			-- TODO: Functions.AvailableTransport (no loaded units and not on a pickup order)
+
+			ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
+			SelectUnits(Functions.FilterAvailableTransports())
+
+			-- ConExecute 'UI_SelectByCategory +nearest +idle AIR TRANSPORTATION'
+			-- SubHotkeys({
+			-- 	R = function() SubHotkey('R', function(hotkey)
+			-- 		ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
+			-- 		SubHotkeys({
+			-- 			R = function() SubHotkey('R', function(hotkey)
+			-- 				ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
+			-- 			end) end,
+			-- 		})
+			-- 	end) end,
+			-- })
 		end
 	end) end,
 	['Ctrl-R'] = function() Hotkey('Ctrl-R', function(hotkey)
