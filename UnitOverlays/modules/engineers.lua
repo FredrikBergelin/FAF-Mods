@@ -219,7 +219,6 @@ local function UpdateOverlays()
 end
 
 local function CreateUnitOverlays()
-    -- TODO
     local allunits = GetUnits()
     local worldView = import("/lua/ui/game/worldview.lua").viewLeft
     for id, unit in allunits do
@@ -228,7 +227,7 @@ local function CreateUnitOverlays()
             elseif unit:IsInCategory("COMMAND") then
             elseif engineersOverlay and unit:IsInCategory("ENGINEER") then
                 overlays[id] = EngineerOverlay(worldView, unit)
-            elseif factoriesOverlay and unit:IsInCategory("FACTORY") then
+            elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("CRABEGG") then
                 overlays[id] = FactoryOverlay(worldView, unit)
             elseif siloOverlay and unit:IsInCategory("SILO") then
                 overlays[id] = SiloOverlay(worldView, unit)
