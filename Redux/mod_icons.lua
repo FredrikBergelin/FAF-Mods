@@ -71,9 +71,8 @@ UnitIconAssignments = {
 	{BlueprintId = "URL0402", IconSet = "icon_experimental_spider"},
 	{BlueprintId = "UAS0401", IconSet = "icon_experimental_tempest"},
 	{BlueprintId = "XSB2401", IconSet = "icon_experimental_yolona"},
-	{BlueprintId = "XSL0401", IconSet = "icon_experimental_yota_gc"},
-	{BlueprintId = "UAL0401", IconSet = "icon_experimental_yota_gc"},
-
+	{BlueprintId = "XSL0401", IconSet = "icon_experimental_yota"},
+	{BlueprintId = "UAL0401", IconSet = "icon_experimental_gc"},
 }
 
 --- Entry point for scripted assignments. This function has a limited scope and any changes to the 
