@@ -159,46 +159,33 @@ function BaseButtonClick:zoomToUnit()
 end
 
 function BaseButtonClick:engineersAssistUnit()
-    LOG("BaseButtonClick:engineersAssistUnit()")
-
     local append = self.event.Modifiers.Shift
 
     if self.hasEngineers then
-        LOG("1")
         local engies = self:selectionGetEngineers(self.units)
         local units = {}
         if self.singleUnit then
-            LOG("2")
             if self.obj.row:isExpanded() then
-                LOG("3")
                 units = self:getSingleUnit()
             else
-                LOG("4")
                 units = self:getButtonNextUnit()
             end
         else
-            LOG("5")
             units = self:getAllUnits()
         end
 
         if table_getsize(units)<=0 or table_getsize(engies)<=0 then
-            LOG("6")
             return
         end
 
         for i,eng in engies do
-            LOG("7")
             local commands = {}
 
             if append then
-                LOG("8")
                 local q = eng:GetCommandQueue() or {}
                 if q then
-                    LOG("9")
                     for k,v in q do
-                        LOG("10")
                         if v and v.type and (v.position or v.entityid) then
-                            LOG("11")
                             table_insert(commands, {
                                 CommandType = v.type,
                                 Position = v.position,
@@ -210,13 +197,6 @@ function BaseButtonClick:engineersAssistUnit()
             end
 
             for _,unit in units do
-                LOG("12")
-                table_insert(commands, {
-                    CommandType = "Guard",
-                    EntityId = unit:GetEntityId(),
-                    target = unit:GetEntityId()
-                })
-
                 SimCallback({
                     Func = 'RingWithStorages',
                     Args = {
@@ -224,19 +204,6 @@ function BaseButtonClick:engineersAssistUnit()
                     }
                 }, true)
             end
-
-            LOG("13")
-            local cb = {
-                Func = 'RingWithStorages',
-                Args = {
-                    From = GetFocusArmy(),
-                    unit_id = eng:GetEntityId(), --mex:getUnit():GetEntityId(),
-                    unit_orders = commands
-                },
-            }
-
-            -- SimCallback({ Func = 'RingWithStorages', Args = { target = commands[1].EntityId } }, true)
-
         end
     end
 end
