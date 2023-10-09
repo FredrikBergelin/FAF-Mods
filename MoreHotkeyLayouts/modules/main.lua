@@ -101,33 +101,6 @@ local function AnyUnitCanUpgrade()
 	return false
 end
 
-function ToggleRepeatBuildOrSetTo(setTo)
-    local selection = GetSelectedUnits()
-    if selection then
-		local verifiedSetTo
-
-		if setTo ~= nil then
-			verifiedSetTo = setTo
-		else
-			for _, v in selection do
-				if v:IsInCategory('FACTORY') then
-					if v:IsRepeatQueue() then
-						verifiedSetTo = true
-					end
-				end
-			end
-		end
-
-		for _, v in selection do
-			if verifiedSetTo then
-				v:ProcessInfo('SetRepeatQueue', 'true')
-			else
-				v:ProcessInfo('SetRepeatQueue', 'false')
-			end
-		end
-    end
-end
-
 local customKeyMap = {
 
 	-- ['Esc'] = function() Hotkey('Esc', function(hotkey)
@@ -836,7 +809,7 @@ local customKeyMap = {
 
 	Chevron = function() Hotkey('Chevron', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
-			ToggleRepeatBuildOrSetTo(false)
+			Functions.ToggleRepeatBuildOrSetTo(false)
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
 			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").CycleTemplates()'
@@ -844,7 +817,7 @@ local customKeyMap = {
 	end) end,
 	['Shift-Chevron'] = function() Hotkey('Shift-Chevron', function(hotkey)
 		if AllHasCategory(categories.FACTORY) then
-			ToggleRepeatBuildOrSetTo(true)
+			Functions.ToggleRepeatBuildOrSetTo(true)
 		elseif AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
 			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").CycleTemplates()'

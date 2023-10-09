@@ -81,3 +81,30 @@ function SelectSimilarUnits(scope)
 
     ConExecute("Ui_SelectByCategory " .. str .. "SOMETHINGUNPOSSIBLE") -- dodgy hack at the end there to
 end
+
+function ToggleRepeatBuildOrSetTo(setTo)
+    local selection = GetSelectedUnits()
+    if selection then
+		local verifiedSetTo
+
+		if setTo ~= nil then
+			verifiedSetTo = setTo
+		else
+			for _, v in selection do
+				if v:IsInCategory('FACTORY') then
+					if v:IsRepeatQueue() then
+						verifiedSetTo = true
+					end
+				end
+			end
+		end
+
+		for _, v in selection do
+			if verifiedSetTo then
+				v:ProcessInfo('SetRepeatQueue', 'true')
+			else
+				v:ProcessInfo('SetRepeatQueue', 'false')
+			end
+		end
+    end
+end
