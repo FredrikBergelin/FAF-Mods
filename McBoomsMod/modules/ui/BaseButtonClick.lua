@@ -188,7 +188,7 @@ function BaseButtonClick:engineersAssistUnit()
 
         for i,eng in engies do
             LOG("7")
-            local nq = {}
+            local commands = {}
 
             if append then
                 LOG("8")
@@ -199,7 +199,7 @@ function BaseButtonClick:engineersAssistUnit()
                         LOG("10")
                         if v and v.type and (v.position or v.entityid) then
                             LOG("11")
-                            table_insert(nq, {
+                            table_insert(commands, {
                                 CommandType = v.type,
                                 Position = v.position,
                                 EntityId = v.entityid,
@@ -211,22 +211,32 @@ function BaseButtonClick:engineersAssistUnit()
 
             for _,unit in units do
                 LOG("12")
-                table_insert(nq, {
+                table_insert(commands, {
                     CommandType = "Guard",
-                    EntityId = unit:GetEntityId()
+                    EntityId = unit:GetEntityId(),
+                    target = unit:GetEntityId()
                 })
+
+                SimCallback({
+                    Func = 'RingWithStorages',
+                    Args = {
+                        target = unit:GetEntityId()
+                    }
+                }, true)
             end
 
             LOG("13")
             local cb = {
-                Func = 'GiveOrders',
+                Func = 'RingWithStorages',
                 Args = {
                     From = GetFocusArmy(),
                     unit_id = eng:GetEntityId(), --mex:getUnit():GetEntityId(),
-                    unit_orders = nq
+                    unit_orders = commands
                 },
             }
-            SimCallback(cb, true)
+
+            -- SimCallback({ Func = 'RingWithStorages', Args = { target = commands[1].EntityId } }, true)
+
         end
     end
 end
