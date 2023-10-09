@@ -3,7 +3,7 @@ local Bitmap = import('/lua/maui/bitmap.lua').Bitmap
 
 local LayoutFor = UMT.Layouter.ReusedLayoutFor
 
-local count = 30
+local count = 50
 
 local offset = 0
 
@@ -58,9 +58,8 @@ local fade = UMT.Animation.Factory.Alpha
     :Create()
 
 local layerAnimation = UMT.Animation.Sequential(appearAndFade, 0.05, 0.1)
-local layersAppear = UMT.Animation.Sequential(appear, 1 / 60, 0.1)
-local layersFade = UMT.Animation.Sequential(fade, 1 / 60)
-
+local layersAppear = UMT.Animation.Sequential(appear, 1 / 10, 0.1)
+local layersFade = UMT.Animation.Sequential(fade, 1 / 10)
 
 local pingColors = {
     red    = 'FFFF0000',
