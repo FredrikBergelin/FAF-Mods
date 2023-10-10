@@ -7,7 +7,8 @@ local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Inte
 -- Static for now
 local continious = true
 
-local cycleMode = "closest"
+local sortMode = "closest"
+local cycleMode = "auto"
 
 local currentUnit
 local currentUnitWithoutOrderIndex
@@ -15,8 +16,6 @@ local selectionWithoutOrder
 local selectionWithOrder
 local commandMode
 local commandModeData
-local automaticallyCycle = true
-local cameraJump = false
 -- local preJumpSelection = {}
 local onlyWithMissile = false
 
@@ -113,7 +112,7 @@ function SelectNext()
         selectionWithOrder = {}
 
         if not continious then
-            if not cameraJump then
+            if cycleMode ~= "camera" then
                 SelectUnits(nil)
             end
 
@@ -127,21 +126,21 @@ function SelectNext()
     local nextUnitIndex = nil
     local missilesCount = false
 
-    if cycleMode == "closest" then
+    if sortMode == "closest" then
         nextOrderValue = 99999999
-    elseif cycleMode == "closest_missile" then
+    elseif sortMode == "closest_missile" then
         nextOrderValue = 99999999
         onlyWithMissile = true
-        cycleMode = "closest"
-    elseif cycleMode == "furthest" then
+        sortMode = "closest"
+    elseif sortMode == "furthest" then
         nextOrderValue = 0
-    elseif cycleMode == "furthest_missile" then
+    elseif sortMode == "furthest_missile" then
         nextOrderValue = 0
         onlyWithMissile = true
-        cycleMode = "furthest"
-    elseif cycleMode == "damage" then
+        sortMode = "furthest"
+    elseif sortMode == "damage" then
         nextOrderValue = 99999999
-    elseif cycleMode == "health" then
+    elseif sortMode == "health" then
         nextOrderValue = 0
     end
 
@@ -162,21 +161,21 @@ function SelectNext()
                 local distanceToCursor
                 local unitHealthPercent
                 local bp
-                if cycleMode == "closest" then
+                if sortMode == "closest" then
                     distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
                     if distanceToCursor < nextOrderValue then
                         nextOrderValue = distanceToCursor
                         nextUnit = unit
                         nextUnitIndex = key
                     end
-                elseif cycleMode == "furthest" then
+                elseif sortMode == "furthest" then
                     distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
                     if distanceToCursor > nextOrderValue then
                         nextOrderValue = distanceToCursor
                         nextUnit = unit
                         nextUnitIndex = key
                     end
-                elseif cycleMode == "damage" then
+                elseif sortMode == "damage" then
                     bp = unit:GetBlueprint()
                     unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
@@ -185,7 +184,7 @@ function SelectNext()
                         nextUnit = unit
                         nextUnitIndex = key
                     end
-                elseif cycleMode == "health" then
+                elseif sortMode == "health" then
                     bp = unit:GetBlueprint()
                     unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
@@ -199,7 +198,8 @@ function SelectNext()
         end
     end
 
-    if cycleMode == "damage" and nextOrderValue == 1 then
+    if sortMode == "damage" and nextOrderValue == 1 then
+        print("Full health!")
         PlaySound(completePartialCycleSound)
     end
 
@@ -208,31 +208,46 @@ function SelectNext()
         return
     end
 
+    if cycleMode == "camera" then
+        local currentCamSettings = GetCamera('WorldCamera'):SaveSettings()
+        local unitPos = nextUnit:GetPosition()
+
+        if currentCamSettings.Focus == unitPos then
+            LOG("SAME position")
+
+            MoveCurrentToWithOrder()
+        else
+            LOG("DIFFERENT position")
+        end
+
+        currentCamSettings.Focus = unitPos
+        GetCamera('WorldCamera'):RestoreSettings(currentCamSettings)
+    end
+
     currentUnit = nextUnit
     currentUnitWithoutOrderIndex = nextUnitIndex
 
-    if cameraJump then
-        -- preJumpSelection = GetSelectedUnits()
-        local currentCamSettings = GetCamera('WorldCamera'):SaveSettings()
-        currentCamSettings.Focus = nextUnit:GetPosition()
-        GetCamera('WorldCamera'):RestoreSettings(currentCamSettings)
-        MoveCurrentToWithOrder()
-    else
-        SelectUnits { nextUnit }
-        CM.StartCommandMode(commandMode, commandModeData)
-    end
+    SelectUnits { nextUnit }
+    CM.StartCommandMode(commandMode, commandModeData)
 
     selectionChangedSinceLastCycle = false
 end
 
-function CreateSelection(units)
-    local selectedUnits = GetSelectedUnits()
+function CreateSelection(units, sort, cycle)
+    -- closest, furthest, damage, health, closest_missile, furthest_missile
+    if sort ~= nil then
+        sortMode = sort
+    end
+
+    -- auto, manual, toggle, camera
+    if cycle then
+        cycleMode = cycle
+    end
+
     Reset()
-    selectionWithoutOrder = selectedUnits or {}
+    selectionWithoutOrder = units or {}
     selectionWithOrder = {}
     onlyWithMissile = false
-
-    SelectNext()
 end
 
 function MoveCurrentToWithOrder()
@@ -248,41 +263,32 @@ function PrintAutoCycle(autoCycle)
     end
 end
 
-function CreateOrContinueSelection(mode, autoCycle, jump)
-    if autoCycle == true or autoCycle == false then
-        automaticallyCycle = autoCycle
-        PrintAutoCycle(automaticallyCycle)
-    end
+-- PrintAutoCycle(cycleMode)
 
-    local selectedUnits = GetSelectedUnits()
+-- TODO: Hotkey to get all of the current type of mex to assist, ie t1 upgrading first then t1, then t2 upgrading etc
 
-    if jump == true then
-        cameraJump = true
-        print("Jump to next")
-    elseif selectedUnits then
-        if table.getn(selectedUnits) > 1 then
-            if mode ~= nil then
-                cycleMode = mode
-            end
-            if jump ~= true then
-                cameraJump = false
-            end
-            if autoCycle == "toggle" then
-                automaticallyCycle = false
-                PrintAutoCycle(automaticallyCycle)
-            end
-            CreateSelection()
+function CreateOrContinueSelection(sort, cycle)
+
+    local selected = GetSelectedUnits()
+
+    if cycle == "camera_create" then
+        CreateSelection(selected, sort, "camera")
+    elseif cycle == "camera" then
+        SelectNext()
+    elseif selected and table.getn(selected) > 1 then
+        -- Whenever we have more than one unit selected we intend to create that cycle group, unless we are in camera mode
+            CreateSelection(selected, sort, cycle)
+            SelectNext()
             return
-        elseif SelectionIsCurrent(selectedUnits) then
-            if autoCycle == "toggle" then
-                automaticallyCycle = not automaticallyCycle
-                PrintAutoCycle(automaticallyCycle)
+    elseif selected and SelectionIsCurrent(selected) then
+        if cycle == "toggle" then
+            if cycleMode == "auto" then cycleMode = "manual" elseif cycleMode == "manual" then cycleMode = "manual" end
+                -- PrintAutoCycle(cycleMode)
             else
-                MoveCurrentToWithOrder()
-                SelectNext()
-            end
-            return
+            MoveCurrentToWithOrder()
+            SelectNext()
         end
+        return
     end
 
     SelectNext()
@@ -341,7 +347,7 @@ end
 ---@param cmdModeData CommandModeData
 ---@param command any
 function OnCommandIssued(cmdMode, cmdModeData, command)
-    if not automaticallyCycle or selectionChangedSinceLastCycle then return end
+    if cycleMode ~= "auto" or selectionChangedSinceLastCycle then return end
     if command.CommandType == 'Guard' and not command.Target.EntityId then return end
     if command.CommandType == 'None' then return end
 

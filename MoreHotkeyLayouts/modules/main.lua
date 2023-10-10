@@ -152,6 +152,18 @@ local customKeyMap = {
 	Backslash = function() Hotkey('Backslash', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
 	end) end,
+	['Shift-Backslash'] = function() Hotkey('Shift-Backslash', function(hotkey)
+		CreateOrContinueSelection(nil, "camera_create")
+	end) end,
+	['Ctrl-Backslash'] = function() Hotkey('Ctrl-Backslash', function(hotkey)
+		-- TODO: CreateCamera
+	end) end,
+	['Ctrl-Shift-Backslash'] = function() Hotkey('Ctrl-Shift-Backslash', function(hotkey)
+		-- TODO: DeleteCamera
+	end) end,
+	['Alt-Backslash'] = function() Hotkey('Alt-Backslash', function(hotkey)
+		-- TODO: GoToNextCamera
+	end) end,
 
 	['1'] = function() Hotkey('1', function(hotkey)
 		if AnyUnitSelected() then
@@ -220,13 +232,10 @@ local customKeyMap = {
 	['0'] = function() Hotkey('0', function(hotkey) end) end,
 
 	Tab = function() Hotkey('Tab', function(hotkey)
-		CreateOrContinueSelection("closest")
+		CreateOrContinueSelection("closest", "auto")
 	end) end,
 	['Shift-Tab'] = function() Hotkey('Shift-Tab', function(hotkey)
-		CreateOrContinueSelection("closest", false, true)
-	end) end,
-	['Ctrl-Tab'] = function() Hotkey('Ctrl-Tab', function(hotkey)
-		CreateOrContinueSelection(nil, "toggle")
+		CreateOrContinueSelection(nil, "camera")
 	end) end,
 
 	Q = function() Hotkey('Q', function(hotkey)
@@ -707,10 +716,10 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-D'] = function() Hotkey('Alt-D', function(hotkey)
-		CreateOrContinueSelection("damage")
+		CreateOrContinueSelection("damage", "auto")
 	end) end,
 	['Alt-Shift-D'] = function() Hotkey('Alt-Shift-D', function(hotkey)
-		CreateOrContinueSelection("health")
+		CreateOrContinueSelection("health", "auto")
 	end) end,
 
 	F = function() Hotkey('F', function(hotkey)
@@ -746,10 +755,10 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-F'] = function() Hotkey('Alt-F', function(hotkey)
-		CreateOrContinueSelection("furthest")
+		CreateOrContinueSelection("furthest", "auto")
 	end) end,
 	['Alt-Shift-F'] = function() Hotkey('Alt-Shift-F', function(hotkey)
-		CreateOrContinueSelection("closest")
+		CreateOrContinueSelection("closest", "auto")
 	end) end,
 
 	G = function() Hotkey('G', function(hotkey)
@@ -845,7 +854,7 @@ local customKeyMap = {
 		else
 			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
 			if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH2) and AllHasCategory(categories.STRUCTURE) then
-				CreateOrContinueSelection("closest")
+				CreateOrContinueSelection("closest", "auto")
 				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 			end
 		end
@@ -856,7 +865,7 @@ local customKeyMap = {
 		else
 			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
 			if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH2) and AllHasCategory(categories.STRUCTURE) then
-				CreateOrContinueSelection("closest")
+				CreateOrContinueSelection("closest", "auto")
 				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 			end
 		end
@@ -874,13 +883,13 @@ local customKeyMap = {
 	['Alt-Z'] = function() Hotkey('Alt-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
 		if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH3) and AllHasCategory(categories.STRUCTURE) then
-			CreateOrContinueSelection("furthest")
+			CreateOrContinueSelection("furthest", "auto")
 		end
 	end) end,
 	['Alt-Shift-Z'] = function() Hotkey('Alt-Shift-Z', function(hotkey)
         ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
 		if AllHasCategory(categories.ARTILLERY) and AllHasCategory(categories.TECH3) and AllHasCategory(categories.STRUCTURE) then
-			CreateOrContinueSelection("furthest")
+			CreateOrContinueSelection("furthest", "auto")
 			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 			ConExecute 'StartCommandMode order RULEUCC_Attack'
 		end
@@ -898,7 +907,7 @@ local customKeyMap = {
 		else
 			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
 			if AllHasCategory(categories.TACTICALMISSILEPLATFORM) then
-				CreateOrContinueSelection("furthest_missile") -- Manual cycle, tab, doesnt work properly
+				CreateOrContinueSelection("furthest_missile", "auto") -- Manual cycle, tab, doesnt work properly
 			end
 		end
 	end) end,
@@ -924,7 +933,7 @@ local customKeyMap = {
 	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
 		ConExecute "UI_SelectByCategory NUKE"
 		if AllHasCategory(categories.NUKE) then
-			CreateOrContinueSelection("closest_missile")
+			CreateOrContinueSelection("closest_missile", "auto")
 		else
 			PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
 		end
