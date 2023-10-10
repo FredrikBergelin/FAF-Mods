@@ -4,6 +4,9 @@ local KeyMapper = import('/lua/keymap/keymapper.lua')
 local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
+-- Static for now
+local continious = true
+
 local cycleMode = "closest"
 
 local currentUnit
@@ -13,6 +16,8 @@ local selectionWithOrder
 local commandMode
 local commandModeData
 local automaticallyCycle = true
+local cameraJump = false
+-- local preJumpSelection = {}
 local onlyWithMissile = false
 
 KeyMapper.SetUserKeyAction('Cycle next, defaults to closest', {
@@ -103,11 +108,17 @@ function SelectNext()
 
     if table.getn(selectionWithoutOrder) == 0 then
         PlaySound(completeCycleSound)
-        SelectUnits(nil)
         currentUnitWithoutOrderIndex = nil
         selectionWithoutOrder = selectionWithOrder
         selectionWithOrder = {}
-        return
+
+        if not continious then
+            if not cameraJump then
+                SelectUnits(nil)
+            end
+
+            return
+        end
     end
 
     local mousePos = GetMouseWorldPos()
@@ -200,8 +211,16 @@ function SelectNext()
     currentUnit = nextUnit
     currentUnitWithoutOrderIndex = nextUnitIndex
 
-    SelectUnits { nextUnit }
-    CM.StartCommandMode(commandMode, commandModeData)
+    if cameraJump then
+        -- preJumpSelection = GetSelectedUnits()
+        local currentCamSettings = GetCamera('WorldCamera'):SaveSettings()
+        currentCamSettings.Focus = nextUnit:GetPosition()
+        GetCamera('WorldCamera'):RestoreSettings(currentCamSettings)
+        MoveCurrentToWithOrder()
+    else
+        SelectUnits { nextUnit }
+        CM.StartCommandMode(commandMode, commandModeData)
+    end
 
     selectionChangedSinceLastCycle = false
 end
@@ -209,7 +228,7 @@ end
 function CreateSelection(units)
     local selectedUnits = GetSelectedUnits()
     Reset()
-    selectionWithoutOrder = selectedUnits
+    selectionWithoutOrder = selectedUnits or {}
     selectionWithOrder = {}
     onlyWithMissile = false
 
@@ -229,7 +248,7 @@ function PrintAutoCycle(autoCycle)
     end
 end
 
-function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
+function CreateOrContinueSelection(mode, autoCycle, jump)
     if autoCycle == true or autoCycle == false then
         automaticallyCycle = autoCycle
         PrintAutoCycle(automaticallyCycle)
@@ -237,21 +256,25 @@ function CreateOrContinueSelection(mode, autoCycle, toggleAutoCycle)
 
     local selectedUnits = GetSelectedUnits()
 
-    if selectedUnits then
+    if jump == true then
+        cameraJump = true
+        print("Jump to next")
+    elseif selectedUnits then
         if table.getn(selectedUnits) > 1 then
-            if mode == nil then
-                -- cycleMode = "closest"
-            else
+            if mode ~= nil then
                 cycleMode = mode
             end
-            if toggleAutoCycle == true then
+            if jump ~= true then
+                cameraJump = false
+            end
+            if autoCycle == "toggle" then
                 automaticallyCycle = false
                 PrintAutoCycle(automaticallyCycle)
             end
             CreateSelection()
             return
         elseif SelectionIsCurrent(selectedUnits) then
-            if toggleAutoCycle == true then
+            if autoCycle == "toggle" then
                 automaticallyCycle = not automaticallyCycle
                 PrintAutoCycle(automaticallyCycle)
             else
