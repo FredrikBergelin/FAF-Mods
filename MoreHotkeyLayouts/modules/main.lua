@@ -153,10 +153,10 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
 	end) end,
 	['Shift-Backslash'] = function() Hotkey('Shift-Backslash', function(hotkey)
-		CreateOrContinueSelection(nil, "camera_create")
+		CreateOrContinueSelection(nil, "camera")
 	end) end,
 	['Ctrl-Backslash'] = function() Hotkey('Ctrl-Backslash', function(hotkey)
-		-- TODO: CreateCamera
+		CreateOrContinueSelection(nil, "camera_create")
 	end) end,
 	['Ctrl-Shift-Backslash'] = function() Hotkey('Ctrl-Shift-Backslash', function(hotkey)
 		-- TODO: DeleteCamera
@@ -265,7 +265,7 @@ local customKeyMap = {
 			})
 		end
 	end) end,
-	['Shift-Q']  = function() Hotkey('Shift-Q', function(hotkey)
+	['Shift-Q'] = function() Hotkey('Shift-Q', function(hotkey)
 		if AnyUnitSelected() then
 			ConExecute 'StartCommandMode order RULEUCC_Patrol'
 		else

@@ -5,7 +5,7 @@ local completeCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface',
 local completePartialCycleSound = Sound { Cue = 'UI_Menu_Error_01', Bank = 'Interface', }
 
 -- Static for now
-local continious = true
+local continious = false
 
 local sortMode = "closest"
 local cycleMode = "auto"
@@ -208,29 +208,29 @@ function SelectNext()
         return
     end
 
+    currentUnit = nextUnit
+    currentUnitWithoutOrderIndex = nextUnitIndex
+
     if cycleMode == "camera" then
         local currentCamSettings = GetCamera('WorldCamera'):SaveSettings()
         local unitPos = nextUnit:GetPosition()
 
-        if currentCamSettings.Focus == unitPos then
-            LOG("SAME position")
-
-            MoveCurrentToWithOrder()
-        else
-            LOG("DIFFERENT position")
-        end
+        MoveCurrentToWithOrder()
+        -- if currentCamSettings.Focus == unitPos then
+        --     LOG("SAME position")
+        --     MoveCurrentToWithOrder()
+        -- else
+        --     LOG("DIFFERENT position")
+        -- end
 
         currentCamSettings.Focus = unitPos
         GetCamera('WorldCamera'):RestoreSettings(currentCamSettings)
+    else
+        SelectUnits { nextUnit }
+
+        CM.StartCommandMode(commandMode, commandModeData)
+        selectionChangedSinceLastCycle = false
     end
-
-    currentUnit = nextUnit
-    currentUnitWithoutOrderIndex = nextUnitIndex
-
-    SelectUnits { nextUnit }
-    CM.StartCommandMode(commandMode, commandModeData)
-
-    selectionChangedSinceLastCycle = false
 end
 
 function CreateSelection(units, sort, cycle)
@@ -268,18 +268,17 @@ end
 -- TODO: Hotkey to get all of the current type of mex to assist, ie t1 upgrading first then t1, then t2 upgrading etc
 
 function CreateOrContinueSelection(sort, cycle)
-
     local selected = GetSelectedUnits()
 
     if cycle == "camera_create" then
-        CreateSelection(selected, sort, "camera")
+        CreateSelection(selected, "closest", "camera")
     elseif cycle == "camera" then
         SelectNext()
     elseif selected and table.getn(selected) > 1 then
         -- Whenever we have more than one unit selected we intend to create that cycle group, unless we are in camera mode
             CreateSelection(selected, sort, cycle)
             SelectNext()
-            return
+            -- return
     elseif selected and SelectionIsCurrent(selected) then
         if cycle == "toggle" then
             if cycleMode == "auto" then cycleMode = "manual" elseif cycleMode == "manual" then cycleMode = "manual" end
@@ -288,10 +287,10 @@ function CreateOrContinueSelection(sort, cycle)
             MoveCurrentToWithOrder()
             SelectNext()
         end
-        return
+        -- return
+    else
+        SelectNext()
     end
-
-    SelectNext()
 end
 
 function SelectAll()
