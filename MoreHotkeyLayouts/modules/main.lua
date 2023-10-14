@@ -81,11 +81,21 @@ local function AllHasCategory(category)
 	return true
 end
 
-local GetUpgradesOfUnit = import("/lua/ui/game/hotkeys/upgrade-structure.lua").GetUpgradesOfUnit
+local isReplay = import("/lua/ui/game/gamemain.lua").GetReplayState()
+
+local GetUpgradesOfUnit = false
+if not isReplay then
+	GetUpgradesOfUnit = import("/lua/ui/game/hotkeys/upgrade-structure.lua").GetUpgradesOfUnit
+end
+
 local TablEmpty = table.empty
 
 local function AnyUnitCanUpgrade()
-    local units = GetSelectedUnits()
+	local units = GetSelectedUnits()
+
+	if isReplay then
+		return false
+	end
 
 	if units == nil then
 		return false
@@ -603,7 +613,7 @@ local customKeyMap = {
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
 			end
-		elseif AnyUnitCanUpgrade() then
+		elseif not isReplay and AnyUnitCanUpgrade() then
 			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
 			print("In-view Fighters")
@@ -619,7 +629,7 @@ local customKeyMap = {
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
 			end
-		elseif AnyUnitCanUpgrade() then
+		elseif not isReplay and AnyUnitCanUpgrade() then
 			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
 			print("All Fighters")
@@ -846,7 +856,6 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()' -- TODO
 		end
 	end) end,
-
 
 	Z = function() Hotkey('Z', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then

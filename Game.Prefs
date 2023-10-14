@@ -571,7 +571,6 @@ profile = {
                 End = 'split_screen_disable',
                 ['Ctrl-Alt-5'] = 'fac_group5',
                 ['Shift-6'] = 'Append to control group 6',
-                ['Alt-0'] = 'revert_selection_set',
                 ['Shift-Esc'] = 'stop',
                 F2 = 'SHK F2',
                 ['Alt-Shift-6'] = 'set_group6',
@@ -595,7 +594,6 @@ profile = {
                 J = 'SHK J',
                 ['Alt-1'] = 'group1',
                 ['Ctrl-Shift-Minus'] = 'set_game_speed_plus_10',
-                ['Ctrl-Alt-Space'] = 'split_tech',
                 L = 'SHK L',
                 F5 = 'SHK F5',
                 ['Ctrl-Alt-R'] = 'SHK Ctrl_Alt_R',
@@ -2266,11 +2264,6 @@ profile = {
                     action = "UI_Lua import('/lua/hotbuild/hotbuild.lua').buildAction('T3_Battleship','ALT')",
                     category = 'hotbuild'
                 },
-                ['Set to target type at mouse, or back to default if no target'] = {
-                    order = 74,
-                    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetToMouseTargetOrDefault(false)',
-                    category = 'Target priorities'
-                },
                 ['SHK F3'] = {
                     action = 'UI_Lua import("/mods/MoreHotkeyLayouts/modules/main.lua").RunCustom("F3")',
                     category = 'SHK'
@@ -3069,11 +3062,6 @@ profile = {
                     order = 2048,
                     action = 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")',
                     category = 'HotBuild Overhaul'
-                },
-                ['Set to target blueprint at mouse, or back to default if no target'] = {
-                    order = 74,
-                    action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetToMouseTargetOrDefault(true)',
-                    category = 'Target priorities'
                 },
                 build_T2_Destroyer = {
                     order = 10165,

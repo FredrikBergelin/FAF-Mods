@@ -2,7 +2,7 @@ local originalSetWeaponPriorities = SetWeaponPriorities
 local updatePrioState
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 local PrioritySettings
-local SetWeaponPrioritiesToUnitType = import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesToUnitType
+-- local SetWeaponPrioritiesToUnitType = import("/lua/keymap/misckeyactions.lua").SetWeaponPrioritiesToUnitType
 
 function SetWeaponPriorities(prioritiesString, name, exclusive)
     originalSetWeaponPriorities(prioritiesString, name, exclusive)
@@ -22,9 +22,11 @@ function SetWeaponPrioritiesHotkey(name)
     SetWeaponPriorities(PrioritySettings.priorityTables[name], name, PrioritySettings.exclusive[name])
 end
 
+local isReplay = import("/lua/ui/game/gamemain.lua").GetReplayState()
+
 function SetToMouseTargetOrDefault()
     local info = GetRolloverInfo()
-    if info and info.blueprintId ~= "unknown" then
+    if not isReplay and info and info.blueprintId ~= "unknown" then
         SetWeaponPrioritiesToUnitType()
     else
         SetWeaponPriorities(0, "Default", false)
