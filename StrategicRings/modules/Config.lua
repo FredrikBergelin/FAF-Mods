@@ -1,6 +1,7 @@
 local UnitUtils = import('/mods/StrategicRings/modules/UnitUtil.lua')
 
 Menus = {
+    -- TODO colors
     Default = {
         {
             {Type = "Label", Text = "Tactical"},
@@ -65,6 +66,7 @@ Wheels = {
                 }
             }
         },
+        -- TODO colors
         Items = {
             {Radius = 26, Texture = "YELLOW", Static = false, Text = {{Value = '[P] ', Color = 'ffd300', Size = 0.04}, {Value = 'PD1'}}},
             {Radius = 50, Texture = "YELLOW", Static = false, Text = {{Value = '[P] ', Color = 'ffd300', Size = 0.04}, {Value = 'PD2/TL'}}},
@@ -83,48 +85,52 @@ Wheels = {
 }
 
 Hover = {
+    DirectFire = {
+        Texture = "DIRECTFIRE",
+        Category = (categories.STRUCTURE * categories.DIRECTFIRE),
+        Predicate = UnitUtils.HasWeapon,
+        Supplier = UnitUtils.GetLongestRangeWeapon
+    },
+    IndirectFire = {
+        Texture = "INDIRECTFIRE",
+        Category = (categories.STRUCTURE * categories.INDIRECTFIRE - categories.TACTICALMISSILEPLATFORM),
+        Predicate = UnitUtils.HasWeapon,
+        Supplier = UnitUtils.GetLongestRangeWeapon
+    },
+    TML = {
+        Texture = "TML",
+        Category = (categories.STRUCTURE * categories.TACTICALMISSILEPLATFORM),
+        Predicate = UnitUtils.HasWeapon,
+        Supplier = UnitUtils.GetLongestRangeWeapon
+    },
+    AntiAir = {
+        Texture = "ANTIAIR",
+        Category = (categories.STRUCTURE * categories.ANTIAIR),
+        Predicate = UnitUtils.HasWeapon,
+        Supplier = UnitUtils.GetLongestRangeWeapon
+    },
+    AntiNavy = {
+        Texture = "ANTINAVY",
+        Category = (categories.STRUCTURE * categories.ANTINAVY),
+        Predicate = UnitUtils.HasWeapon,
+        Supplier = UnitUtils.GetLongestRangeWeapon
+    },
+    AntiMissile = {
+        Texture = "PROTECTION",
+        Category = (categories.STRUCTURE * categories.ANTIMISSILE)
+            + (categories.STRUCTURE * categories.SHIELD),
+        Predicate = UnitUtils.HasWeapon,
+        Supplier = UnitUtils.GetShortestRangeWeapon
+    },
+    Radar = {
+        Texture = "RADAR",
+        Category = categories.STRUCTURE * categories.INTELLIGENCE,
+        Predicate = UnitUtils.HasRadar, Supplier = UnitUtils.GetRadarRange
+    },
     Omni = {
-        Texture = "VIOLET",
+        Texture = "OMNI",
         Category = categories.STRUCTURE * categories.INTELLIGENCE,
         Predicate = UnitUtils.HasOmni,
         Supplier = UnitUtils.GetOmniRange
     },
-    Radar = {
-        Texture = "VIOLET",
-        Category = categories.STRUCTURE * categories.INTELLIGENCE,
-        Predicate = UnitUtils.HasRadar, Supplier = UnitUtils.GetRadarRange
-    },
-    SMD = {
-        Texture = "RED",
-        Category = categories.STRUCTURE * categories.SILO * categories.ANTIMISSILE,
-        Predicate = UnitUtils.HasWeapon,
-        Supplier = UnitUtils.GetLongestRangeWeapon
-    },
-    TMD = {
-        Texture = "RED",
-        Category = categories.STRUCTURE * categories.ANTIMISSILE,
-        Predicate = UnitUtils.HasWeapon,
-        Supplier = UnitUtils.GetShortestRangeWeapon
-    },
-    TML = {
-        Texture = "BLUE",
-        Category = categories.STRUCTURE * categories.SILO * categories.TACTICALMISSILEPLATFORM,
-        Predicate = UnitUtils.HasWeapon,
-        Supplier = UnitUtils.GetLongestRangeWeapon
-    },
-    Weapon = {
-        Texture = "YELLOW",
-        Category = (categories.STRUCTURE * categories.ANTIAIR)
-                + (categories.STRUCTURE * categories.ANTINAVY)
-                + (categories.STRUCTURE * categories.DIRECTFIRE)
-                + (categories.STRUCTURE * categories.INDIRECTFIRE),
-        Predicate = UnitUtils.HasWeapon,
-        Supplier = UnitUtils.GetLongestRangeWeapon
-    },
-    Shield = {
-        Texture = "BLUE",
-        Category = categories.STRUCTURE * categories.SHIELD,
-        Predicate = UnitUtils.HasShield,
-        Supplier = UnitUtils.GetShieldRadius
-    }
 }

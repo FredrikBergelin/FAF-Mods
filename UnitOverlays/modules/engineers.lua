@@ -148,23 +148,26 @@ local FactoryOverlay = Class(Overlay)
     end
 }
 
-local SiloOverlay = Class(Overlay)
+local MissileSiloOverlay = Class(Overlay)
 {
     __init = function(self, parent, unit)
         Overlay.__init(self, parent, unit)
-        self.offsetX = 5
-        self.offsetY = 1
-        self.hasSilo = false
-        self:SetTexture("/mods/UnitOverlays/textures/loaded.dds", 0)
-        LayoutHelpers.SetDimensions(self, 12, 12)
+        self.offsetX = 0
+        self.offsetY = 0
+        self.siloStorageCount = 0
+
+        self:SetTexture({
+            "/mods/UnitOverlays/textures/missile_loaded_0.dds",
+            "/mods/UnitOverlays/textures/missile_loaded_1.dds",
+            "/mods/UnitOverlays/textures/missile_loaded_2.dds",
+            "/mods/UnitOverlays/textures/missile_loaded_3.dds",
+            "/mods/UnitOverlays/textures/missile_loaded_4.dds",
+            "/mods/UnitOverlays/textures/missile_loaded_plus.dds",
+        })
     end,
 
     OnFrame = function(self, delta)
-        if self.hasSilo then
-            self:Update()
-        else
-            self:Hide()
-        end
+        self:Update()
     end,
 
     UpdateState = function(self)
@@ -173,9 +176,69 @@ local SiloOverlay = Class(Overlay)
             return
         end
         local mi = self.unit:GetMissileInfo()
-        self.hasSilo = (mi.nukeSiloStorageCount > 0) or (mi.tacticalSiloStorageCount > 0)
+        self.siloStorageCount = (mi.nukeSiloStorageCount or 0) + (mi.tacticalSiloStorageCount or 0)
+
+        if self.siloStorageCount == 0 then
+            self:SetFrame(0)
+        elseif self.siloStorageCount == 1 then
+            self:SetFrame(1)
+        elseif self.siloStorageCount == 2 then
+            self:SetFrame(2)
+        elseif self.siloStorageCount == 3 then
+            self:SetFrame(3)
+        elseif self.siloStorageCount == 4 then
+            self:SetFrame(4)
+        elseif self.siloStorageCount > 4 then
+            self:SetFrame(5)
+        end
     end
 }
+
+local AntiNukeSiloOverlay = Class(Overlay)
+{
+    __init = function(self, parent, unit)
+        Overlay.__init(self, parent, unit)
+        self.offsetX = 0
+        self.offsetY = 0
+        self.siloStorageCount = 0
+        self:SetTexture({
+            "/mods/UnitOverlays/textures/antimissile_loaded_0.dds",
+            "/mods/UnitOverlays/textures/antimissile_loaded_1.dds",
+            "/mods/UnitOverlays/textures/antimissile_loaded_2.dds",
+            "/mods/UnitOverlays/textures/antimissile_loaded_3.dds",
+            "/mods/UnitOverlays/textures/antimissile_loaded_4.dds",
+            "/mods/UnitOverlays/textures/antimissile_loaded_plus.dds",
+        })
+    end,
+
+    OnFrame = function(self, delta)
+        self:Update()
+    end,
+
+    UpdateState = function(self)
+        if self.unit:IsDead() or not siloOverlay then
+            self:Destroy()
+            return
+        end
+        local mi = self.unit:GetMissileInfo()
+        self.siloStorageCount = (mi.nukeSiloStorageCount or 0) + (mi.tacticalSiloStorageCount or 0)
+
+        if self.siloStorageCount == 0 then
+            self:SetFrame(0)
+        elseif self.siloStorageCount == 1 then
+            self:SetFrame(1)
+        elseif self.siloStorageCount == 2 then
+            self:SetFrame(2)
+        elseif self.siloStorageCount == 3 then
+            self:SetFrame(3)
+        elseif self.siloStorageCount == 4 then
+            self:SetFrame(4)
+        elseif self.siloStorageCount > 4 then
+            self:SetFrame(5)
+        end
+    end
+}
+
 local MexOverlay = Class(Overlay)
 {
     __init = function(self, parent, unit)
@@ -229,8 +292,10 @@ local function CreateUnitOverlays()
                 overlays[id] = EngineerOverlay(worldView, unit)
             elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("CRABEGG") then
                 overlays[id] = FactoryOverlay(worldView, unit)
-            elseif siloOverlay and unit:IsInCategory("SILO") then
-                overlays[id] = SiloOverlay(worldView, unit)
+            elseif siloOverlay and unit:IsInCategory("SILO") and (unit:IsInCategory("TACTICALMISSILEPLATFORM") or unit:IsInCategory("NUKE"))then
+                overlays[id] = MissileSiloOverlay(worldView, unit)
+            elseif siloOverlay and unit:IsInCategory("SILO") and unit:IsInCategory("ANTIMISSILE") and unit:IsInCategory("TECH3") then
+                overlays[id] = AntiNukeSiloOverlay(worldView, unit)
             elseif massExtractorsOverlay and unit:IsInCategory("MASSEXTRACTION") and unit:IsInCategory("STRUCTURE") then
                 overlays[id] = MexOverlay(worldView, unit)
             end

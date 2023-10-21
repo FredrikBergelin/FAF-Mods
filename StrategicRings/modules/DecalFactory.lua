@@ -3,10 +3,19 @@ local EscapeHandler = import('/lua/ui/dialogs/eschandler.lua')
 local WorldView = import('/lua/ui/game/worldview.lua')
 
 Textures = {
+    DIRECTFIRE = '/mods/StrategicRings/textures/ring_directfire.dds',
+    INDIRECTFIRE = '/mods/StrategicRings/textures/ring_indirectfire.dds',
+    TML = '/mods/StrategicRings/textures/ring_tml.dds',
+    ANTIAIR = '/mods/StrategicRings/textures/ring_antiair.dds',
+    ANTINAVY = '/mods/StrategicRings/textures/ring_antinavy.dds',
+    PROTECTION = '/mods/StrategicRings/textures/ring_protection.dds',
+    RADAR = '/mods/StrategicRings/textures/ring_radar.dds',
+    OMNI = '/mods/StrategicRings/textures/ring_omni.dds',
+
     RED = '/mods/StrategicRings/textures/ring_red.dds',
     YELLOW = '/mods/StrategicRings/textures/ring_yellow.dds',
     BLUE = '/mods/StrategicRings/textures/ring_blue.dds',
-    VIOLET = '/mods/StrategicRings/textures/ring_violet.dds'
+    VIOLET = '/mods/StrategicRings/textures/ring_violet.dds',
 }
 
 local activeRing

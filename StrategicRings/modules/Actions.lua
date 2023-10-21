@@ -83,7 +83,7 @@ function HoverRing()
                 Static = true
             })
 
-            return
+            -- return -- Show all possible rings
         end
     end
 end
