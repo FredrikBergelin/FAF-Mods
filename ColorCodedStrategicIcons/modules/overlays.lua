@@ -39,11 +39,11 @@ local EngineerOverlay = Class(Overlay)
         self.offsetY = 0
         self.isIdle = false
         if unit:IsInCategory("TECH1") then
-            self:SetTexture("/mods/UnitOverlays/textures/t1_idle.dds", 0)
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t1_idle.dds", 0)
         elseif unit:IsInCategory("TECH2") then
-            self:SetTexture("/mods/UnitOverlays/textures/t2_idle.dds", 0)
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t2_idle.dds", 0)
         elseif unit:IsInCategory("TECH3") then
-            self:SetTexture("/mods/UnitOverlays/textures/t3_idle.dds", 0)
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t3_idle.dds", 0)
         end
     end,
 
@@ -77,28 +77,28 @@ local FactoryOverlay = Class(Overlay)
 
         if unit:IsInCategory("LAND") then
             if unit:IsInCategory("TECH1") then
-                table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory1_land.dds")
-                table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory1_land.dds")
+                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory1_land.dds")
+                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory1_land.dds")
             elseif unit:IsInCategory("TECH2") then
-                table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory2_land.dds")
-                table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory2_land.dds")
+                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory2_land.dds")
+                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory2_land.dds")
             elseif unit:IsInCategory("TECH3") then
-                table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory3_land.dds")
-                table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory3_land.dds")
+                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory3_land.dds")
+                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory3_land.dds")
             end
         elseif unit:IsInCategory("NAVAL") then
-            table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory_naval.dds")
-            table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory_naval.dds")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_naval.dds")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_naval.dds")
         elseif unit:IsInCategory("AIR") then
-            table.insert(tempOverlays, "/mods/UnitOverlays/textures/paused_factory_air.dds")
-            table.insert(tempOverlays, "/mods/UnitOverlays/textures/idle_factory_air.dds")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_air.dds")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_air.dds")
         else
             WARN("------------NOT IN ANY CATEGORY-----------")
         end
 
-        table.insert(tempOverlays, "/mods/UnitOverlays/textures/buildingEngineer.dds")
-        table.insert(tempOverlays, "/mods/UnitOverlays/textures/repeat.dds")
-        table.insert(tempOverlays, "/mods/UnitOverlays/textures/upgrading.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/buildingEngineer.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/repeat.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/upgrading.dds")
 
         self:SetTexture(tempOverlays)
 
@@ -157,12 +157,12 @@ local MissileSiloOverlay = Class(Overlay)
         self.siloStorageCount = 0
 
         self:SetTexture({
-            "/mods/UnitOverlays/textures/missile_loaded_0.dds",
-            "/mods/UnitOverlays/textures/missile_loaded_1.dds",
-            "/mods/UnitOverlays/textures/missile_loaded_2.dds",
-            "/mods/UnitOverlays/textures/missile_loaded_3.dds",
-            "/mods/UnitOverlays/textures/missile_loaded_4.dds",
-            "/mods/UnitOverlays/textures/missile_loaded_plus.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_0.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_1.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_2.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_3.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_4.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds",
         })
     end,
 
@@ -202,12 +202,12 @@ local AntiNukeSiloOverlay = Class(Overlay)
         self.offsetY = 0
         self.siloStorageCount = 0
         self:SetTexture({
-            "/mods/UnitOverlays/textures/antimissile_loaded_0.dds",
-            "/mods/UnitOverlays/textures/antimissile_loaded_1.dds",
-            "/mods/UnitOverlays/textures/antimissile_loaded_2.dds",
-            "/mods/UnitOverlays/textures/antimissile_loaded_3.dds",
-            "/mods/UnitOverlays/textures/antimissile_loaded_4.dds",
-            "/mods/UnitOverlays/textures/antimissile_loaded_plus.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_0.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_1.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_2.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_3.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_4.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_plus.dds",
         })
     end,
 
@@ -246,7 +246,7 @@ local MexOverlay = Class(Overlay)
         self.offsetX = 5
         self.offsetY = -7
         self.isUpgrading = false
-        self:SetTexture("/mods/UnitOverlays/textures/up.dds", 0)
+        self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/up.dds", 0)
         LayoutHelpers.SetDimensions(self, 12, 16)
     end,
 
