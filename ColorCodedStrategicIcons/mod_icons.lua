@@ -73,6 +73,22 @@ UnitIconAssignments = {
 	{BlueprintId = "XSB2401", IconSet = "icon_experimental_yolona"},
 	{BlueprintId = "XSL0401", IconSet = "icon_experimental_yota"},
 	{BlueprintId = "UAL0401", IconSet = "icon_experimental_gc"},
+
+	{BlueprintId = "URL0101", IconSet = "icon_land1_intel_unarmed"},
+	{BlueprintId = "UAL0101", IconSet = "icon_land1_intel_hover"},
+	{BlueprintId = "UAL0201", IconSet = "icon_land1_directfire_hover"},
+	{BlueprintId = "XSL0103", IconSet = "icon_land1_artillery_hover"},
+
+	{BlueprintId = "URL0203", IconSet = "icon_land2_directfire_antinavy_seabed"},
+	{BlueprintId = "XAL0203", IconSet = "icon_land2_directfire_hover"},
+	{BlueprintId = "XSL0203", IconSet = "icon_land2_directfire_hover"},
+	{BlueprintId = "UAL0205", IconSet = "icon_land2_antiair_hover"},
+	{BlueprintId = "XSL0205", IconSet = "icon_land2_antiair_hover"},
+	{BlueprintId = "UAL0307", IconSet = "icon_land2_shield_hover"},
+
+	{BlueprintId = "XSL0307", IconSet = "icon_land3_shield_hover"},
+	{BlueprintId = "DAL0310", IconSet = "icon_land3_antishield_hover"},
+
 }
 
 --- Entry point for scripted assignments. This function has a limited scope and any changes to the 
