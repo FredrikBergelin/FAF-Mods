@@ -89,6 +89,26 @@ UnitIconAssignments = {
 	{BlueprintId = "XSL0307", IconSet = "icon_land3_shield_hover"},
 	{BlueprintId = "DAL0310", IconSet = "icon_land3_antishield_hover"},
 
+	{BlueprintId = "UAS0103", IconSet = "icon_ship1_intel_aeon"},
+
+	{BlueprintId = "URS0201", IconSet = "icon_ship2_antinavy_cybran"},
+	{BlueprintId = "UAS0201", IconSet = "icon_ship2_antinavy_aeon"},
+
+	{BlueprintId = "URS0202", IconSet = "icon_ship2_antiair_cybran"},
+	{BlueprintId = "UAS0202", IconSet = "icon_ship2_antiair_aeon"},
+	{BlueprintId = "UES0202", IconSet = "icon_ship2_antiair_uef"},
+	{BlueprintId = "XSS0202", IconSet = "icon_ship2_antiair_sera"},
+
+	{BlueprintId = "XRS0204", IconSet = "icon_sub2_antinavy_cybran"},
+	{BlueprintId = "XAS0204", IconSet = "icon_sub2_antinavy_aeon"},
+
+	{BlueprintId = "XSS0304", IconSet = "icon_sub3_antinavy_sera"},
+
+	{BlueprintId = "UES0302", IconSet = "icon_ship3_directfire_uef"},
+	{BlueprintId = "URS0302", IconSet = "icon_ship3_directfire_cybran"},
+	{BlueprintId = "UAS0302", IconSet = "icon_ship3_directfire_aeon"},
+	{BlueprintId = "XSS0302", IconSet = "icon_ship3_directfire_sera"},
+
 }
 
 --- Entry point for scripted assignments. This function has a limited scope and any changes to the 
