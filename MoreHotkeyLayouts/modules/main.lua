@@ -640,6 +640,8 @@ local customKeyMap = {
 	['Ctrl-A'] = function() Hotkey('Ctrl-A', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_AirFact")'
+		else
+			ConExecute 'UI_SelectByCategory FACTORY AIR'
 		end
 	end) end,
 	['Ctrl-Shift-A'] = function() Hotkey('Ctrl-Shift-A', function(hotkey)
@@ -685,6 +687,8 @@ local customKeyMap = {
 	['Ctrl-S'] = function() Hotkey('Ctrl-S', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_NavalFact")'
+		else
+			ConExecute 'UI_SelectByCategory FACTORY NAVAL'
 		end
 	end) end,
 	['Ctrl-Shift-S'] = function() Hotkey('Ctrl-Shift-S', function(hotkey)
@@ -718,6 +722,8 @@ local customKeyMap = {
 	['Ctrl-D'] = function() Hotkey('Ctrl-D', function(hotkey)
 		if AllHasCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_LandFact")'
+		else
+			ConExecute 'UI_SelectByCategory FACTORY LAND'
 		end
 	end) end,
 	['Ctrl-Shift-D'] = function() Hotkey('Ctrl-Shift-D', function(hotkey)
