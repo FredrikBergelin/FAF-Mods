@@ -440,7 +440,11 @@ function UpdateResourcesUi()
 			isUpkeep = false
 		else
 			unitToGetDataFrom = unit
-			isUpkeep = true
+			if unit:IsInCategory 'COMMAND' then
+				isUpkeep = false
+			else
+				isUpkeep = true
+			end
 		end
 
 		local unitType = GetUnitType(unitToGetDataFrom)
@@ -466,27 +470,18 @@ function UpdateResourcesUi()
 			end
 		end)
 
-		-- TODO
+		-- TODO:
 		if unitHasUsage then
 			if (isUpkeep) then
-				table.insert(unitType.upkeepUnits, unit)
+				if unit:IsInCategory 'COMMAND' then
+					table.insert(unitType.productionUnits, unit)
+				else
+					table.insert(unitType.upkeepUnits, unit)
+				end
 			else
 				table.insert(unitType.productionUnits, unit)
 			end
 		end
-
-		-- TODO:
-		-- if unitHasUsage then
-		-- 	if (isUpkeep) then
-		-- 		if unit:IsInCategory 'COMMAND' then
-		-- 			table.insert(unitType.productionUnits, unit)
-		-- 		else
-		-- 			table.insert(unitType.upkeepUnits, unit)
-		-- 		end
-		-- 	else
-		-- 		table.insert(unitType.productionUnits, unit)
-		-- 	end
-		-- end
 	end)
 
 	-- update ui
