@@ -559,9 +559,21 @@ local customKeyMap = {
 				U = function() SubHotkey('U', function(hotkey)
 					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderGunUpgrade()'
 				end) end,
+				G = function() SubHotkey('G', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderRASUpgrade()'
+				end) end,
 				H = function() SubHotkey('H', function(hotkey)
 					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderNanoUpgrade()'
 				end) end,
+				J = function() SubHotkey('J', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderTorpedoUpgrade()'
+				end) end,
+				['6'] = function() SubHotkey('6', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderTeleUpgrade()'
+				end) end,
+				['7'] = function() SubHotkey('7', function(hotkey)
+					ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/ACUEnhancements.lua").OrderSpecialUpgrade()'
+				end) end
 			})
 		end
 	end) end,

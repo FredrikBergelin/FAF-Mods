@@ -113,22 +113,38 @@ function UpgradeNano(unit)
     Enhancements.OrderUnitEnhancement(unit, upgrade)
 end
 
+
+local torp1UpgradeMap =
+{
+    ["url0001"] = "NaniteTorpedoTube",
+}
+
+---@param unit UserUnit
+function UpgradeTorpedo(unit)
+    local bpEnhancements = Enhancements.GetBluePrintEnhancements(unit:GetBlueprint())
+    if not bpEnhancements then return end
+
+    local upgrade = torp1UpgradeMap[unit:GetBlueprint().BlueprintId:lower()]
+    if not upgrade then return end
+
+    Enhancements.OrderUnitEnhancement(unit, upgrade)
+end
+
 function OrderTechUpgrade()
     Enhancements.ApplyToSelectedUnits(UpgradeTech)
 end
-
 function OrderRASUpgrade()
     Enhancements.ApplyToSelectedUnits(UpgradeRas)
 end
-
 function OrderTeleUpgrade()
     Enhancements.ApplyToSelectedUnits(UpgradeTele)
 end
-
 function OrderGunUpgrade()
     Enhancements.ApplyToSelectedUnits(UpgradeGun)
 end
-
+function OrderTorpedoUpgrade()
+    Enhancements.ApplyToSelectedUnits(UpgradeTorpedo)
+end
 function OrderNanoUpgrade()
     Enhancements.ApplyToSelectedUnits(UpgradeNano)
 end

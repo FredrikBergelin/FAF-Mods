@@ -3,7 +3,6 @@ local EnhancementQueueFile = import("/lua/ui/notify/enhancementqueue.lua")
 
 local LuaQ = UMT.LuaQ
 
-
 function HasOrderedUpgrades(unit)
     if not unit:IsIdle() then
         local cmdqueue = unit:GetCommandQueue()
@@ -62,7 +61,6 @@ function OrderUnitEnhancement(unit, enhancement)
     local enhancementQueue = EnhancementQueueFile.getEnhancementQueue()
     local orderedEnhancements = enhancementQueue[id] or {}
 
-
     local orders = {}
     local prerequisite = bpEnhancements[enhancement].Prerequisite
 
@@ -76,7 +74,6 @@ function OrderUnitEnhancement(unit, enhancement)
                 table.insert(orders, enh .. "Remove")
             end
         end
-
     end
 
     RemoveUpgradeInRequiredSlot()
@@ -95,9 +92,7 @@ function OrderUnitEnhancement(unit, enhancement)
 
     table.insert(orders, enhancement)
 
-
     local cleanOrder = not HasOrderedUpgrades(unit)
-
 
     for _, order in orders do
         IssueCommand("UNITCOMMAND_Script",
@@ -108,8 +103,6 @@ function OrderUnitEnhancement(unit, enhancement)
             cleanOrder)
         cleanOrder = false
     end
-
-
 end
 
 local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
