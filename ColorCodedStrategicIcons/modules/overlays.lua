@@ -48,7 +48,7 @@ local EngineerOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
-        if self.isIdle and blinkState then
+        if self.isIdle then -- and blinkState
             self:Update()
         else
             self:Hide()
@@ -76,29 +76,31 @@ local FactoryOverlay = Class(Overlay)
         local tempOverlays = {}
 
         if unit:IsInCategory("LAND") then
-            if unit:IsInCategory("TECH1") then
-                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory1_land.dds")
-                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory1_land.dds")
-            elseif unit:IsInCategory("TECH2") then
-                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory2_land.dds")
-                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory2_land.dds")
-            elseif unit:IsInCategory("TECH3") then
-                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory3_land.dds")
-                table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory3_land.dds")
-            end
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_land.dds")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_land.dds")
+            -- if unit:IsInCategory("TECH1") then
+            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory1_land.dds")
+            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory1_land.dds")
+            -- elseif unit:IsInCategory("TECH2") then
+            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory2_land.dds")
+            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory2_land.dds")
+            -- elseif unit:IsInCategory("TECH3") then
+            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory3_land.dds")
+            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory3_land.dds")
+            -- end
         elseif unit:IsInCategory("NAVAL") then
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_naval.dds")
-            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_naval.dds")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_naval.dds")
+            -- table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_naval.dds")
         elseif unit:IsInCategory("AIR") then
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_air.dds")
-            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_air.dds")
-        else
-            WARN("------------NOT IN ANY CATEGORY-----------")
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_air.dds")
+            -- table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_air.dds")
         end
 
-        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/buildingEngineer.dds")
-        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/repeat.dds")
-        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/upgrading.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_eng.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_repeat.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_upgrading.dds")
 
         self:SetTexture(tempOverlays)
 
@@ -120,27 +122,31 @@ local FactoryOverlay = Class(Overlay)
         end
 
         if GetIsPaused { self.unit } then
-            if blinkState then
-                self:SetFrame(0)
-                self.showState = true
-            else
-                self.showState = false
-            end
+            self:SetFrame(0)
+            self.showState = true
+            -- if blinkState then
+            --     self:SetFrame(0)
+            --     self.showState = true
+            -- else
+            --     self.showState = false
+            -- end
         elseif self.unit:IsIdle() then
-            if blinkState then
-                self:SetFrame(1)
-                self.showState = true
-            else
-                self.showState = false
-            end
+            self:SetFrame(1)
+            self.showState = true
+            -- if blinkState then
+            --     self:SetFrame(1)
+            --     self.showState = true
+            -- else
+            --     self.showState = false
+            -- end
+        elseif self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("FACTORY") then
+            self:SetFrame(4)
+            self.showState = true
         elseif self.unit:IsRepeatQueue() and self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("ENGINEER") then
             self:SetFrame(2)
             self.showState = true
         elseif self.unit:IsRepeatQueue() then
             self:SetFrame(3)
-            self.showState = true
-        elseif self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("FACTORY") then
-            self:SetFrame(4)
             self.showState = true
         else
             self.showState = false
@@ -243,11 +249,11 @@ local MexOverlay = Class(Overlay)
 {
     __init = function(self, parent, unit)
         Overlay.__init(self, parent, unit)
-        self.offsetX = 5
+        self.offsetX = 7
         self.offsetY = -7
         self.isUpgrading = false
-        self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/up.dds", 0)
-        LayoutHelpers.SetDimensions(self, 12, 16)
+        self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/upgrading.dds", 0)
+        LayoutHelpers.SetDimensions(self, 9, 10)
     end,
 
     OnFrame = function(self, delta)
