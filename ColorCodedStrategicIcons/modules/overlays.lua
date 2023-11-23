@@ -28,7 +28,6 @@ local overlays = UMT.Weak.Value {}
 
 local Overlay = UMT.Views.UnitOverlay
 
-local blinkState = true -- Should overlays that blinks be on
 local frameCounter = 0
 
 local EngineerOverlay = Class(Overlay)
@@ -48,7 +47,7 @@ local EngineerOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
-        if self.isIdle then -- and blinkState
+        if self.isIdle then
             self:Update()
         else
             self:Hide()
@@ -71,36 +70,20 @@ local FactoryOverlay = Class(Overlay)
         self.offsetX = 0
         self.offsetY = 0
         self.isIdle = false
-        self.showState = false
 
         local tempOverlays = {}
 
         if unit:IsInCategory("LAND") then
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_land.dds")
-            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_land.dds")
-            -- if unit:IsInCategory("TECH1") then
-            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory1_land.dds")
-            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory1_land.dds")
-            -- elseif unit:IsInCategory("TECH2") then
-            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory2_land.dds")
-            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory2_land.dds")
-            -- elseif unit:IsInCategory("TECH3") then
-            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory3_land.dds")
-            --     table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory3_land.dds")
-            -- end
         elseif unit:IsInCategory("NAVAL") then
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_naval.dds")
-            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_naval.dds")
-            -- table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_naval.dds")
         elseif unit:IsInCategory("AIR") then
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_air.dds")
-            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_air.dds")
-            -- table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/idle_factory_air.dds")
         end
 
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_upgrading.dds")
         table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_eng.dds")
         table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_repeat.dds")
-        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_upgrading.dds")
 
         self:SetTexture(tempOverlays)
 
@@ -108,11 +91,7 @@ local FactoryOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
-        if self.showState then
-            self:Update()
-        else
-            self:Hide()
-        end
+        self:Update()
     end,
 
     UpdateState = function(self)
@@ -121,35 +100,16 @@ local FactoryOverlay = Class(Overlay)
             return
         end
 
-        if GetIsPaused { self.unit } then
+        if GetIsPaused { self.unit } or self.unit:IsIdle() then
             self:SetFrame(0)
-            self.showState = true
-            -- if blinkState then
-            --     self:SetFrame(0)
-            --     self.showState = true
-            -- else
-            --     self.showState = false
-            -- end
-        elseif self.unit:IsIdle() then
-            self:SetFrame(1)
-            self.showState = true
-            -- if blinkState then
-            --     self:SetFrame(1)
-            --     self.showState = true
-            -- else
-            --     self.showState = false
-            -- end
         elseif self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("FACTORY") then
-            self:SetFrame(4)
-            self.showState = true
+            self:SetFrame(1)
         elseif self.unit:IsRepeatQueue() and self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("ENGINEER") then
             self:SetFrame(2)
-            self.showState = true
         elseif self.unit:IsRepeatQueue() then
             self:SetFrame(3)
-            self.showState = true
         else
-            self.showState = false
+            self:Hide()
         end
     end
 }
@@ -168,6 +128,8 @@ local MissileSiloOverlay = Class(Overlay)
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_2.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_3.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_4.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds", --TODO
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds", --TODO
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds",
         })
     end,
@@ -194,8 +156,12 @@ local MissileSiloOverlay = Class(Overlay)
             self:SetFrame(3)
         elseif self.siloStorageCount == 4 then
             self:SetFrame(4)
-        elseif self.siloStorageCount > 4 then
+        elseif self.siloStorageCount == 5 then
             self:SetFrame(5)
+        elseif self.siloStorageCount == 6 then
+            self:SetFrame(6)
+        elseif self.siloStorageCount > 6 then
+            self:SetFrame(7)
         end
     end
 }
@@ -279,11 +245,6 @@ local function UpdateOverlays()
             continue
         end
         overlay:UpdateState()
-    end
-
-    frameCounter = frameCounter + 1
-    if (math.mod(frameCounter, 10) == 0) then
-        blinkState = not blinkState
     end
 end
 
