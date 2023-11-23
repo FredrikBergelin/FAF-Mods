@@ -663,6 +663,8 @@ local customKeyMap = {
 	['Ctrl-A'] = function() Hotkey('Ctrl-A', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_AirFact")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")'
 		else
 			ConExecute 'UI_SelectByCategory +inview FACTORY AIR'
 		end
@@ -719,6 +721,8 @@ local customKeyMap = {
 	['Ctrl-S'] = function() Hotkey('Ctrl-S', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_NavalFact")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_5")'
 		else
 			ConExecute 'UI_SelectByCategory +inview FACTORY NAVAL'
 		end
@@ -763,6 +767,8 @@ local customKeyMap = {
 	['Ctrl-D'] = function() Hotkey('Ctrl-D', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_LandFact")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_6")'
 		else
 			ConExecute 'UI_SelectByCategory +inview FACTORY LAND'
 		end
@@ -814,6 +820,8 @@ local customKeyMap = {
 	['Ctrl-F'] = function() Hotkey('Ctrl-F', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Sonar")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_7")'
 		end
 	end) end,
 	['Ctrl-Shift-F'] = function() Hotkey('Ctrl-Shift-F', function(hotkey)
@@ -840,6 +848,11 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")'
 		else
 			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(false)'
+		end
+	end) end,
+	['Ctrl-G'] = function() Hotkey('Ctrl-G', function(hotkey)
+		if AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_8")'
 		end
 	end) end,
 
@@ -939,6 +952,8 @@ local customKeyMap = {
 	['Ctrl-Z'] = function() Hotkey('Ctrl-Z', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_MissileDef")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_4")'
 		end
 	end) end,
 	['Ctrl-Shift-Z'] = function() Hotkey('Ctrl-Shift-Z', function(hotkey)
@@ -989,6 +1004,8 @@ local customKeyMap = {
 	['Ctrl-X'] = function() Hotkey('Ctrl-X', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ArtyMissiles")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_5")'
 		end
 	end) end,
 	['Ctrl-Shift-X'] = function() Hotkey('Ctrl-Shift-X', function(hotkey)
@@ -1022,6 +1039,8 @@ local customKeyMap = {
 	['Ctrl-C'] = function() Hotkey('Ctrl-C', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_TorpedoDef")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_6")'
 		end
 	end) end,
 	['Ctrl-Shift-C'] = function() Hotkey('Ctrl-Shift-C', function(hotkey)
@@ -1050,6 +1069,8 @@ local customKeyMap = {
 	['Ctrl-V'] = function() Hotkey('Ctrl-V', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Stations")'
+		elseif AllHaveCategory(categories.FACTORY) then
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_7")'
 		end
 	end) end,
 	['Ctrl-Shift-V'] = function() Hotkey('Ctrl-Shift-V', function(hotkey)

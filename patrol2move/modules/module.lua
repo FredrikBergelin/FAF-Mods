@@ -13,7 +13,7 @@ function ConvertToMove()
 
 		for _, command in comQ do
 			if (command.type == 'Patrol') then
-				-- convert to Move				
+				-- convert to Move
 				table.insert(patrolCommands, {
 					["CommandType"] = "Move",
 					["Position"] = command.position

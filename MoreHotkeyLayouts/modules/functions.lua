@@ -78,7 +78,7 @@ function SelectSimilarUnits(scope)
 	local str = ''
     local similarUnitsBlueprints = from(units).select(function(k, u) return u:GetBlueprint(); end).distinct()
     similarUnitsBlueprints.foreach(function(k,v) str = str .. " " .. scope .. " " .. v.BlueprintId .. "," end)
-
+    print("Ui_SelectByCategory " .. str .. "SOMETHINGUNPOSSIBLE")
     ConExecute("Ui_SelectByCategory " .. str .. "SOMETHINGUNPOSSIBLE") -- dodgy hack at the end there to
 end
 
