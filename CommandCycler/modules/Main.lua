@@ -234,7 +234,6 @@ function SelectNext()
 end
 
 function CreateSelection(units, sort, cycle)
-    -- closest, furthest, damage, health, closest_missile, furthest_missile
     if sort ~= nil then
         sortMode = sort
     end
@@ -255,16 +254,6 @@ function MoveCurrentToWithOrder()
     table.remove(selectionWithoutOrder, currentUnitWithoutOrderIndex)
 end
 
-function PrintAutoCycle(autoCycle)
-    if autoCycle then
-        print("Automatic Cycling")
-    else
-        print("Manual cycling")
-    end
-end
-
--- PrintAutoCycle(cycleMode)
-
 -- TODO: Hotkey to get all of the current type of mex to assist, ie t1 upgrading first then t1, then t2 upgrading etc
 
 function CreateOrContinueSelection(sort, cycle)
@@ -276,9 +265,9 @@ function CreateOrContinueSelection(sort, cycle)
         SelectNext()
     elseif selected and table.getn(selected) > 1 then
         -- Whenever we have more than one unit selected we intend to create that cycle group, unless we are in camera mode
-            CreateSelection(selected, sort, cycle)
-            SelectNext()
-            -- return
+        CreateSelection(selected, sort, cycle)
+        SelectNext()
+        -- return
     elseif selected and SelectionIsCurrent(selected) then
         if cycle == "toggle" then
             if cycleMode == "auto" then cycleMode = "manual" elseif cycleMode == "manual" then cycleMode = "manual" end
