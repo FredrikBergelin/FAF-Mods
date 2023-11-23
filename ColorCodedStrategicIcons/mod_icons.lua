@@ -92,6 +92,7 @@ UnitIconAssignments = {
 
 	{BlueprintId = "UAS0103", IconSet = "icon_ship1_intel_aeon"},
 
+	{BlueprintId = "XES0102", IconSet = "icon_ship2_antinavy_torpedoboat"},
 	{BlueprintId = "URS0201", IconSet = "icon_ship2_antinavy_cybran"},
 	{BlueprintId = "UAS0201", IconSet = "icon_ship2_antinavy_aeon"},
 
