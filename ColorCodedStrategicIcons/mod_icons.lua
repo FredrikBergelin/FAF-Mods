@@ -80,6 +80,7 @@ UnitIconAssignments = {
 	{BlueprintId = "XSL0103", IconSet = "icon_land1_artillery_hover"},
 
 	{BlueprintId = "URL0203", IconSet = "icon_land2_directfire_antinavy_seabed"},
+	{BlueprintId = "UEL0203", IconSet = "icon_land2_directfire_hover"},
 	{BlueprintId = "XAL0203", IconSet = "icon_land2_directfire_hover"},
 	{BlueprintId = "XSL0203", IconSet = "icon_land2_directfire_hover"},
 	{BlueprintId = "UAL0205", IconSet = "icon_land2_antiair_hover"},
