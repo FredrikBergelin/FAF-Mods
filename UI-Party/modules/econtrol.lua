@@ -28,11 +28,11 @@ productionStatusIconLeftIn = rootWidth - iconSize - outerPadding
 
 colors = {
 	energy = {
-		active = "ffa500",
+		active = "ff5dff",
 		paused = "ff0000"
 	},
 	mass = {
-		active = "00ff00",
+		active = "29ff00",
 		paused = "00ffff",
 	}
 }
