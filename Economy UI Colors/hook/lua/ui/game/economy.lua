@@ -1,41 +1,40 @@
-local lowResourceColor = 'ffe826ff' --red default 'ffff0000'
-local medResourceColor = 'ffffff00' --yellow default 'ffffff00'
-local highResourceColor = 'ffb7e75f' --green default 'ffb7e75f'
+local lowResourceColor = 'ffffffff' --red default 'ffff0000'
+local medResourceColor = 'ffffffff' --yellow default 'ffffff00'
+local highResourceColor = 'ffffffff' --green default 'ffb7e75f'
 local flashingResourceColor = 'ffffffff' --white default 'ffffffff'
-local altResourceColor = 'ff404040' --gray default 'ff404040'
+local altResourceColor = 'ffffffff' --gray default 'ff404040'
 
 -- global for economy_mini.lua
-GUI.incomeColor = 'ffb7e75f' --green default 'ffb7e75f'
-GUI.expenseColor = 'ffe826ff' --red default 'fff30017'
+GUI.incomeColor = 'ffffffff' --green default 'ffb7e75f'
+GUI.expenseColor = 'ffffffff' --red default 'fff30017'
 
 local originalCreateUI = CreateUI
 function CreateUI()
-	originalCreateUI()
-	
-	local RewrittenFunction = function(self, state)
-		if self.State ~= state then
-			if state == lowResourceColor then
-				self:SetTexture(UIUtil.UIFile('/game/resource-panel/alert-'..self.warningBitmap..'-panel_bmp.dds'))
-				self.flashMod = 1.6
-			elseif state == medResourceColor then
-				self:SetTexture(UIUtil.UIFile('/game/resource-panel/caution-'..self.warningBitmap..'-panel_bmp.dds'))
-				self.flashMod = 1.25
-			end
-			self.cycles = 0
-			self.State = state
-			self:SetNeedsFrameUpdate(true)
-		end
-	end
-	
-	GUI.energy.warningBG.SetToState = RewrittenFunction
-	GUI.mass.warningBG.SetToState = RewrittenFunction
-	
-	-- CTRL+R economic overlay
-	--local EconOverlayParams = import('/lua/ui/game/econoverlayparams.lua').EconOverlayParams
-	-- EconOverlayParams.positiveColor = GUI.incomeColor
+    originalCreateUI()
+
+    local RewrittenFunction = function(self, state)
+        if self.State ~= state then
+            if state == lowResourceColor then
+                self:SetTexture(UIUtil.UIFile('/game/resource-panel/alert-' .. self.warningBitmap .. '-panel_bmp.dds'))
+                self.flashMod = 1.6
+            elseif state == medResourceColor then
+                self:SetTexture(UIUtil.UIFile('/game/resource-panel/caution-' .. self.warningBitmap .. '-panel_bmp.dds'))
+                self.flashMod = 1.25
+            end
+            self.cycles = 0
+            self.State = state
+            self:SetNeedsFrameUpdate(true)
+        end
+    end
+
+    GUI.energy.warningBG.SetToState = RewrittenFunction
+    GUI.mass.warningBG.SetToState = RewrittenFunction
+
+    -- CTRL+R economic overlay
+    --local EconOverlayParams = import('/lua/ui/game/econoverlayparams.lua').EconOverlayParams
+    -- EconOverlayParams.positiveColor = GUI.incomeColor
     -- EconOverlayParams.negativeColor = GUI.expenseColor
 end
-
 
 -- Eternal-: Fully hooked
 --
