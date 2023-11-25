@@ -79,6 +79,9 @@ UnitIconAssignments = {
 	{BlueprintId = "UAL0201", IconSet = "icon_land1_directfire_hover"},
 	{BlueprintId = "XSL0103", IconSet = "icon_land1_artillery_hover"},
 
+	{BlueprintId = "UEL0204", IconSet = "icon_land2_mongoose"},
+	{BlueprintId = "DRL0204", IconSet = "icon_land2_hoplite"},
+
 	{BlueprintId = "URL0203", IconSet = "icon_land2_directfire_antinavy_seabed"},
 	{BlueprintId = "UEL0203", IconSet = "icon_land2_directfire_hover"},
 	{BlueprintId = "XAL0203", IconSet = "icon_land2_directfire_hover"},
@@ -89,6 +92,12 @@ UnitIconAssignments = {
 
 	{BlueprintId = "XSL0307", IconSet = "icon_land3_shield_hover"},
 	{BlueprintId = "DAL0310", IconSet = "icon_land3_antishield_hover"},
+
+	{BlueprintId = "UEL0303", IconSet = "icon_land3_directfire_titan"},
+	{BlueprintId = "URL0303", IconSet = "icon_land3_directfire_loyalist"},
+	{BlueprintId = "UAL0303", IconSet = "icon_land3_directfire_harbinger"},
+	{BlueprintId = "XSL0303", IconSet = "icon_land3_directfire_othuum"},
+	{BlueprintId = "UAL0304", IconSet = "icon_land3_artillery_serenity"},
 
 	{BlueprintId = "UAS0103", IconSet = "icon_ship1_intel_aeon"},
 
