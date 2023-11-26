@@ -30,40 +30,7 @@ function CycleTemplates()
     end
 end
 
-function UpgradeStructuresEngineersCycleTemplates()
-    local units = GetSelectedUnits()
-
-    for i, unit in units do
-        if unit:IsInCategory("ENGINEER") then
-            if units then
-                local tech2 = EntityCategoryFilterDown(categories.TECH2, units)
-                local tech3 = EntityCategoryFilterDown(categories.TECH3, units)
-                local sACUs = EntityCategoryFilterDown(categories.SUBCOMMANDER, units)
-
-                if next(sACUs) then
-                    SimCallback(
-                        { Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = sACUs[1]:GetEntityId() } }, true)
-                    SelectUnits(sACUs)
-                elseif next(tech3) then
-                    SimCallback(
-                        { Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = tech3[1]:GetEntityId() } }, true)
-                    SelectUnits(tech3)
-                elseif next(tech2) then
-                    SimCallback(
-                        { Func = 'SelectHighestEngineerAndAssist', Args = { TargetId = tech2[1]:GetEntityId() } }, true)
-                    SelectUnits(tech2)
-                else
-                end
-            end
-
-            import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
-            return
-        end
-    end
-
-    import("/lua/keymap/hotbuild.lua").buildActionUpgrade()
-end
-
+-- TODO add
 -- Decrease Unit count in factory queue
 local DecreaseBuildCountInQueue = import("/lua/ui/game/construction.lua").DecreaseBuildCountInQueue
 local RefreshUI = import("/lua/ui/game/construction.lua").RefreshUI

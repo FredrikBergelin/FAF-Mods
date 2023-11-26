@@ -257,7 +257,7 @@ local function CreateUnitOverlays()
             elseif unit:IsInCategory("COMMAND") then
             elseif engineersOverlay and unit:IsInCategory("ENGINEER") then
                 overlays[id] = EngineerOverlay(worldView, unit)
-            elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("CRABEGG") then
+            elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("EXPERIMENTAL") and not unit:IsInCategory("CRABEGG") then
                 overlays[id] = FactoryOverlay(worldView, unit)
             elseif siloOverlay and unit:IsInCategory("SILO") and (unit:IsInCategory("TACTICALMISSILEPLATFORM") or unit:IsInCategory("NUKE"))then
                 overlays[id] = MissileSiloOverlay(worldView, unit)

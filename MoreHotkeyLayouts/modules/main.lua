@@ -618,12 +618,11 @@ local customKeyMap = {
 		-- Filter paused
 	end) end,
 
-	-- 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").UpgradeStructuresEngineersCycleTemplates()'
-	-- function HotkeyToCap(ringAllFabricators, clearCommands)
 	A = function() Hotkey('A', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			local hoveredUnit = GetRolloverInfo().userUnit
-			if hoveredUnit and not IsDestroyed(hoveredUnit) and hoveredUnit:IsInCategory('STRUCTURE') then
+			if hoveredUnit and not IsDestroyed(hoveredUnit) and hoveredUnit:IsInCategory('STRUCTURE') and
+				(hoveredUnit:IsInCategory('MASSEXTRACTION') or hoveredUnit:IsInCategory('ARTILLERY') or hoveredUnit:IsInCategory('RADAR')  or hoveredUnit:IsInCategory('OMNI')) then
 				ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/capping.lua").HotkeyToCap(true, true)'
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
@@ -904,8 +903,9 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 			Functions.ToggleRepeatBuildOrSetTo(true)
 		elseif AllHaveCategory(categories.ENGINEER) then
+			-- ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
 			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
-			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").CycleTemplates()'
+			import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
 		end
 	end) end,
 	['Shift-Chevron'] = function() Hotkey('Shift-Chevron', function(hotkey)
@@ -913,18 +913,13 @@ local customKeyMap = {
 			Functions.ToggleRepeatBuildOrSetTo(false)
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
-			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/orders.lua").CycleTemplates()'
+			import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
 		end
 	end) end,
 	['Ctrl-Chevron'] = function() Hotkey('Ctrl-Chevron', function(hotkey)
-		if AllHaveCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()' -- TODO
-		end
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
 	end) end,
 	['Ctrl-Shift-Chevron'] = function() Hotkey('Ctrl-Shift-Chevron', function(hotkey)
-		if AllHaveCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()' -- TODO
-		end
 	end) end,
 
 	Z = function() Hotkey('Z', function(hotkey)
@@ -1083,7 +1078,7 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_4")'
 		else
-			ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders()'
+			ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(false)'
 		end
 	end) end,
 	['Shift-B'] = function() Hotkey('Shift-B', function(hotkey)
