@@ -72,7 +72,10 @@ UnitIconAssignments = {
 	{BlueprintId = "UAS0401", IconSet = "icon_experimental_tempest"},
 	{BlueprintId = "XSB2401", IconSet = "icon_experimental_yolona"},
 	{BlueprintId = "XSL0401", IconSet = "icon_experimental_yota"},
+	{BlueprintId = "XSL0402", IconSet = "icon_experimental_storm"},
 	{BlueprintId = "UAL0401", IconSet = "icon_experimental_gc"},
+	{BlueprintId = "XEA0002", IconSet = "icon_experimental_satellite"},
+
 
 	{BlueprintId = "URL0101", IconSet = "icon_land1_intel_unarmed"},
 	{BlueprintId = "UAL0101", IconSet = "icon_land1_intel_hover"},
