@@ -179,6 +179,8 @@ local AntiNukeSiloOverlay = Class(Overlay)
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_2.dds",
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_3.dds",
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_4.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_5.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_6.dds",
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_plus.dds",
         })
     end,
