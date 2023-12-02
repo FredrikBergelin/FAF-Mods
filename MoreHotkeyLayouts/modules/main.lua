@@ -318,7 +318,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Ctrl-Q'] = function() Hotkey('Ctrl-Q', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
 		else
 			print("Select patrollers")
@@ -326,7 +326,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Ctrl-Shift-Q'] = function() Hotkey('Ctrl-Shift-Q', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
 		else
 			print("Convert to move")
@@ -341,14 +341,14 @@ local customKeyMap = {
 	end) end,
 
 	W = function() Hotkey('W', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_1")'
 		elseif AnyUnitSelected() then
 			ConExecute 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()'
 		end
 	end) end,
 	['Shift-W'] = function() Hotkey('Shift-W', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_1")'
 		elseif AnyUnitSelected() then
 			ConExecute 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()'
@@ -357,14 +357,14 @@ local customKeyMap = {
 		end
 	end) end,
 	['Ctrl-W'] = function() Hotkey('Ctrl-W', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
 		else
 			ConExecute 'StartCommandMode order RULEUCC_Attack'
 		end
 	end) end,
 	['Ctrl-Shift-W'] = function() Hotkey('Ctrl-Shift-W', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
 		else
 			ConExecute 'StartCommandMode order RULEUCC_Attack'
@@ -374,7 +374,7 @@ local customKeyMap = {
 	['Alt-Shift-W'] = function() Hotkey('Alt-Shift-W', function(hotkey) end) end,
 
 	E = function() Hotkey('E', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_2")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
@@ -391,7 +391,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Shift-E'] = function() Hotkey('Shift-E', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_2")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
@@ -401,7 +401,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Ctrl-E'] = function() Hotkey('Ctrl-E', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_6")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'StartCommandMode order RULEUCC_Repair'
