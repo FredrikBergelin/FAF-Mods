@@ -119,7 +119,6 @@ UnitIconAssignments = {
 	-- {BlueprintId = "XSS0304", IconSet = "icon_sub3_antinavy_sera"},
 
 	{BlueprintId = "UES0302", IconSet = "icon_ship3_directfire_uef"},
-	{BlueprintId = "URS0302", IconSet = "icon_ship3_directfire_cybran"},
 	{BlueprintId = "UAS0302", IconSet = "icon_ship3_directfire_aeon"},
 	{BlueprintId = "XSS0302", IconSet = "icon_ship3_directfire_sera"},
 
