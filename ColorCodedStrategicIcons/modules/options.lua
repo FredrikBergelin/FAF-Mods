@@ -10,8 +10,6 @@ do
 
     engineersOption = ModOptionVar("engineersOverlay", true)
     factoriesOption = ModOptionVar("factoriesOverlay", true)
-    supportCommanderOption = ModOptionVar("supportCommanderOverlay", true)
-    commanderOverlayOption = ModOptionVar("commanderOverlayOption", false)
     siloOption = ModOptionVar("siloOverlay", true)
     massExtractorsOption = ModOptionVar("massExtractorsOverlay", true)
 
@@ -19,7 +17,6 @@ do
         GlobalOptions.AddOptions(modName, "Unit Overlays",
             {
                 OptionsUtils.Filter("Show engineers ovelays", engineersOption),
-                OptionsUtils.Filter("Show commander ovelays", commanderOverlayOption),
                 OptionsUtils.Filter("Show factories ovelays", factoriesOption),
                 OptionsUtils.Filter("Show Nukes and TMLs ovelays", siloOption),
                 OptionsUtils.Filter("Show Mex ovelays", massExtractorsOption)

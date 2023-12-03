@@ -1,34 +1,22 @@
 local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
-local Bitmap = import("/lua/maui/bitmap.lua").Bitmap
-local Group = import("/lua/maui/group.lua").Group
-local UIUtil = import("/lua/ui/uiutil.lua")
-local Prefs = import("/lua/user/prefs.lua")
 local AddBeatFunction = import("/lua/ui/game/gamemain.lua").AddBeatFunction
-local LazyVar = import("/lua/lazyvar.lua")
 
 local GetUnits = UMT.Units.GetFast
 local Options = import("options.lua")
-local LayoutFor = UMT.Layouter.ReusedLayoutFor
 
 local engineersOption = Options.engineersOption
 local factoriesOption = Options.factoriesOption
-local supportCommanderOption = Options.supportCommanderOption
-local commanderOverlayOption = Options.commanderOverlayOption
 local siloOption = Options.siloOption
 local massExtractorsOption = Options.massExtractorsOption
 
 local engineersOverlay = engineersOption()
 local factoriesOverlay = factoriesOption()
-local commanderOverlay = commanderOverlayOption()
-local supportCommanderOverlay = supportCommanderOption()
 local siloOverlay = siloOption()
 local massExtractorsOverlay = massExtractorsOption()
 
 local overlays = UMT.Weak.Value {}
 
 local Overlay = UMT.Views.UnitOverlay
-
-local frameCounter = 0
 
 local EngineerOverlay = Class(Overlay)
 {
@@ -63,7 +51,7 @@ local EngineerOverlay = Class(Overlay)
     end
 }
 
-local FactoryOverlay = Class(Overlay)
+local StationaryFactoryOverlay = Class(Overlay)
 {
     __init = function(self, parent, unit)
         Overlay.__init(self, parent, unit)
@@ -79,8 +67,54 @@ local FactoryOverlay = Class(Overlay)
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_naval.dds")
         elseif unit:IsInCategory("AIR") then
             table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_air.dds")
+        elseif unit:IsInCategory("GATE") then
+            table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/paused_factory_gate.dds")
         end
 
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_upgrading.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_eng.dds")
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_repeat.dds")
+
+        self:SetTexture(tempOverlays)
+
+        LayoutHelpers.SetDimensions(self, 32, 32)
+    end,
+
+    OnFrame = function(self, delta)
+        self:Update()
+    end,
+
+    UpdateState = function(self)
+        if self.unit:IsDead() or not factoriesOverlay then
+            self:Destroy()
+            return
+        end
+
+        if GetIsPaused { self.unit } or self.unit:IsIdle() then
+            self:SetFrame(0)
+        elseif self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("FACTORY") then
+            self:SetFrame(1)
+        elseif self.unit:IsRepeatQueue() and self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("ENGINEER") then
+            self:SetFrame(2)
+        elseif self.unit:IsRepeatQueue() then
+            self:SetFrame(3)
+        else
+            self:Hide()
+        end
+    end
+}
+
+local MobileFactoryOverlay = Class(Overlay)
+{
+    __init = function(self, parent, unit)
+        Overlay.__init(self, parent, unit)
+        self.offsetX = 0
+        self.offsetY = 0
+        self.isIdle = false
+
+        local tempOverlays = {}
+
+        table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_paused.dds")
         table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_upgrading.dds")
         table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_eng.dds")
         table.insert(tempOverlays, "/mods/ColorCodedStrategicIcons/overlays/fact_repeat.dds")
@@ -255,12 +289,10 @@ local function CreateUnitOverlays()
     local worldView = import("/lua/ui/game/worldview.lua").viewLeft
     for id, unit in allunits do
         if IsDestroyed(overlays[id]) and not unit:IsDead() then
-            if supportCommanderOverlay and unit:IsInCategory("SUBCOMMANDER") then
-            elseif unit:IsInCategory("COMMAND") then
-            elseif engineersOverlay and unit:IsInCategory("ENGINEER") then
+            if engineersOverlay and unit:IsInCategory("ENGINEER") then
                 overlays[id] = EngineerOverlay(worldView, unit)
-            elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("EXPERIMENTAL") and not unit:IsInCategory("CRABEGG") then
-                overlays[id] = FactoryOverlay(worldView, unit)
+            elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("EXTERNALFACTORYUNIT") and not unit:IsInCategory("EXPERIMENTAL") and not unit:IsInCategory("CRABEGG") then
+                overlays[id] = StationaryFactoryOverlay(worldView, unit)
             elseif siloOverlay and unit:IsInCategory("SILO") and (unit:IsInCategory("TACTICALMISSILEPLATFORM") or unit:IsInCategory("NUKE"))then
                 overlays[id] = MissileSiloOverlay(worldView, unit)
             elseif siloOverlay and unit:IsInCategory("SILO") and unit:IsInCategory("ANTIMISSILE") and unit:IsInCategory("TECH3") then
@@ -278,14 +310,8 @@ function Init(isReplay)
     engineersOption.OnChange = function(var)
         engineersOverlay = var()
     end
-    commanderOverlayOption.OnChange = function(var)
-        commanderOverlay = var()
-    end
     factoriesOption.OnChange = function(var)
         factoriesOverlay = var()
-    end
-    supportCommanderOption.OnChange = function(var)
-        supportCommanderOverlay = var()
     end
     siloOption.OnChange = function(var)
         siloOverlay = var()
