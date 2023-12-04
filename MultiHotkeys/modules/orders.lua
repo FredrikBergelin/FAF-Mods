@@ -102,7 +102,7 @@ unitToggleRules = {
     Intel = 3,
     Production = 4,
     Stealth = 5,
-    Gceneric = 6,
+    Generic = 6,
     Special = 7,
     Cloak = 8,
 }
@@ -116,7 +116,7 @@ function SetProductionAndAbilities(setActive, abilities)
     local units = GetSelectedUnits()
 
     abilities = abilities or
-    { "Pause", "Shield", "Weapon", "Jamming", "Intel", "Stealth", "Generic", "Special" } -- "Production" left out
+    { "Pause", "Shield", "Weapon", "Jamming", "Intel", "Stealth", "Generic", "Special", "Cloak" } -- "Production" left out
 
     if setActive then
         PlaySound(Sound { Cue = "UI_Tab_Click_02", Bank = "Interface" })
