@@ -6,16 +6,41 @@ UnitIconAssignments = {
 	{BlueprintId = "XSL0001", IconSet = "icon_commander_seraphim"},
 	{BlueprintId = "UAL0001", IconSet = "icon_commander_aeon"},
 
-	{BlueprintId = "URL0301_RAS", IconSet = "SACU_RAS"},
-    {BlueprintId = "UEL0301_RAS", IconSet = "SACU_RAS"},
-    {BlueprintId = "UAL0301_RAS", IconSet = "SACU_RAS"},
-    {BlueprintId = "UEL0301_ENGINEER", IconSet = "SACU_ENG"},
-    {BlueprintId = "UAL0301_ENGINEER", IconSet = "SACU_ENG"},
-    {BlueprintId = "URL0301_ENGINEER", IconSet = "SACU_ENG"},
-    {BlueprintId = "XSL0301_ENGINEER", IconSet = "SACU_ENG"},
-    {BlueprintId = "XSL0301_RAMBO", IconSet = "SACU_SHIELD"},
-    {BlueprintId = "UEL0301_RAMBO", IconSet = "SACU_SHIELD"},
-    {BlueprintId = "UAL0301_SHIELDCombat", IconSet = "SACU_SHIELD"},
+	{BlueprintId = "URL0301_RAS", IconSet = "icon_subcommander_ras"},
+    {BlueprintId = "UEL0301_RAS", IconSet = "icon_subcommander_ras"},
+    {BlueprintId = "UAL0301_RAS", IconSet = "icon_subcommander_ras"},
+
+    {BlueprintId = "UEL0301_Combat", IconSet = "icon_subcommander_combat"},
+    {BlueprintId = "URL0301_Combat", IconSet = "icon_subcommander_combat"},
+    {BlueprintId = "UAL0301_Combat", IconSet = "icon_subcommander_combat"},
+    {BlueprintId = "XSL0301_Combat", IconSet = "icon_subcommander_combat"},
+
+	{BlueprintId = "UAL0301_NanoCombat", IconSet = "icon_subcommander_combat"},
+    {BlueprintId = "XSL0301_AdvancedCombat", IconSet = "icon_subcommander_combat"},
+
+	{BlueprintId = "UEL0301_Engineer", IconSet = "icon_subcommander_engineer"},
+    {BlueprintId = "UAL0301_Engineer", IconSet = "icon_subcommander_engineer"},
+    {BlueprintId = "URL0301_Engineer", IconSet = "icon_subcommander_engineer"},
+    {BlueprintId = "XSL0301_Engineer", IconSet = "icon_subcommander_engineer"},
+
+	{BlueprintId = "UEL0301_Rambo", IconSet = "icon_subcommander_rambo"},
+    {BlueprintId = "UAL0301_Rambo", IconSet = "icon_subcommander_rambo"},
+    {BlueprintId = "URL0301_Rambo", IconSet = "icon_subcommander_rambo"},
+    {BlueprintId = "XSL0301_Rambo", IconSet = "icon_subcommander_rambo"},
+
+	{BlueprintId = "URL0301_Stealth", IconSet = "icon_subcommander_stealth"},
+	{BlueprintId = "URL0301_Cloak", IconSet = "icon_subcommander_cloak"},
+	{BlueprintId = "URL0301_AntiAir", IconSet = "icon_subcommander_antiair"},
+
+    {BlueprintId = "UEL0301_BubbleShield", IconSet = "icon_subcommander_shield"},
+    {BlueprintId = "UEL0301_IntelJammer", IconSet = "icon_subcommander_jammer"},
+
+    {BlueprintId = "UAL0301_NanoCombat", IconSet = "icon_subcommander_nanocombat"},
+    {BlueprintId = "UAL0301_ShieldCombat", IconSet = "icon_subcommander_shieldcombat"},
+
+    {BlueprintId = "XSL0301_NanoCombat", IconSet = "icon_subcommander_nanocombat"},
+    {BlueprintId = "XSL0301_AdvancedCombat", IconSet = "icon_subcommander_advancedcombat"},
+    {BlueprintId = "XSL0301_Missile", IconSet = "icon_subcommander_missile"},
 
 	{BlueprintId = "XEA3204", IconSet = "icon_drone_engineer"},
 	{BlueprintId = "XEL0209", IconSet = "icon_land2_sparky"},
