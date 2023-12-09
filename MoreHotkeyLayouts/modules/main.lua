@@ -4,13 +4,13 @@ local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap') -- Eg: Tab = 'Cycle
 
 local Functions = import("/mods/MoreHotkeyLayouts/modules/functions.lua")
 local AnyUnitSelected = import('/mods/common/modules/misc.lua').AnyUnitSelected
+local CreateOrContinueSelection = import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection
 
 local subHotkeys = nil
 local subHotkey = nil
 
 local storedUniqueIdentifier
 local lastClickTime = -9999
-local clickCount = 1
 
 local function Hotkey(hotkey, func)
 	subHotkey = subHotkeys[hotkey]
@@ -38,10 +38,7 @@ local function SubHotkey(hotkey, func)
 	local decay = 0.001 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
 
 	if storedUniqueIdentifier == hotkey and diffTime < decay then
-		clickCount = clickCount + 1
 		subHotkey = subHotkeys[hotkey]
-	else
-		clickCount = 1
 	end
 
 	storedUniqueIdentifier = hotkey
@@ -111,58 +108,273 @@ local function AnyUnitCanUpgrade()
 	return false
 end
 
-local CreateOrContinueSelection = import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection
+-- ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("AlertExtended")'
+-- ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("Util")'
+-- ConExecute 'UI_Lua import("/mods/ChatWheel/modules/CWMain.lua").call()'
+-- ConExecute 'UI_Lua import("/lua/ui/game/objectivedetail.lua").ToggleDisplay()'
+-- ConExecute 'UI_Lua import("/lua/ui/game/connectivity.lua").CreateUI()'
+-- ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("main")'
 
 local customKeyMap = {
 
-	-- ['Esc'] = function() Hotkey('Esc', function(hotkey)
-	-- end) end,
+	['Esc'] = function() Hotkey('Esc', function(hotkey)
+		print("Soft stop")
+		ConExecute 'UI_Lua import("/lua/ui/game/orders.lua").SoftStop()'
+
+		SubHotkeys({
+			['Esc'] = function() SubHotkey('Esc', function(hotkey)
+				print("Stop")
+				ConExecute 'UI_Lua import("/lua/ui/game/orders.lua").Stop()'
+			end) end,
+		})
+	end) end,
 
 	F1 = function() Hotkey('F1', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("AlertExtended")'
+		print("Onscreen Filter 1")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(1, false)'
+
+		SubHotkeys({
+			F1 = function() SubHotkey('F1', function(hotkey)
+				print("All Filter 1")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(1, true)'
+			end) end,
+		})
 	end) end,
+	["Shift-F1"] = function() Hotkey('Shift-F1', function(hotkey)
+		print("Add Onscreen Filter 1")
+		Functions.AddToSelection(function()
+			ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(1, false)'
+		end)
+
+		SubHotkeys({
+			["Shift-F1"] = function() SubHotkey('Shift-F1', function(hotkey)
+				print("Add All Filter 1")
+				Functions.AddToSelection(function()
+					ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(1, true)'
+				end)
+			end) end,
+		})
+	end) end,
+	["Ctrl-F1"] = function() Hotkey('Ctrl-F1', function(hotkey)
+		print("Create Filter 1")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").AddFilterSelection(1, false)'
+
+		SubHotkeys({
+			["Ctrl-F1"] = function() SubHotkey('Ctrl-F1', function(hotkey)
+				print("Save Filter 1")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").SaveFilterSelection(1, true)'
+			end) end,
+		})
+	end) end,
+
 	F2 = function() Hotkey('F2', function(hotkey)
-		-- ConExecute 'UI_Lua import("/mods/ChatWheel/modules/CWMain.lua").call()'
-		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("Util")'
+		print("Onscreen Filter 2")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(2, false)'
+
+		SubHotkeys({
+			F2 = function() SubHotkey('F2', function(hotkey)
+				print("All Filter 2")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(2, true)'
+			end) end,
+		})
 	end) end,
+	["Shift-F2"] = function() Hotkey('Shift-F2', function(hotkey)
+		print("Add Onscreen Filter 2")
+		Functions.AddToSelection(function()
+			ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(2, false)'
+		end)
+
+		SubHotkeys({
+			["Shift-F2"] = function() SubHotkey('Shift-F2', function(hotkey)
+				print("Add All Filter 2")
+				Functions.AddToSelection(function()
+					ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(2, true)'
+				end)
+			end) end,
+		})
+	end) end,
+	["Ctrl-F2"] = function() Hotkey('Ctrl-F2', function(hotkey)
+		print("Create Filter 2")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").AddFilterSelection(2, false)'
+
+		SubHotkeys({
+			["Ctrl-F2"] = function() SubHotkey('Ctrl-F2', function(hotkey)
+				print("Save Filter 2")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").SaveFilterSelection(2, true)'
+			end) end,
+		})
+	end) end,
+
 	F3 = function() Hotkey('F3', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("TargetPriorityExtended")'
+		print("Onscreen Filter 3")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(3, false)'
+
+		SubHotkeys({
+			F3 = function() SubHotkey('F3', function(hotkey)
+				print("All Filter 3")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(3, true)'
+			end) end,
+		})
 	end) end,
+	["Shift-F3"] = function() Hotkey('Shift-F3', function(hotkey)
+		print("Add Onscreen Filter 3")
+		Functions.AddToSelection(function()
+			ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(3, false)'
+		end)
+
+		SubHotkeys({
+			["Shift-F3"] = function() SubHotkey('Shift-F3', function(hotkey)
+				print("Add All Filter 3")
+				Functions.AddToSelection(function()
+					ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(3, true)'
+				end)
+			end) end,
+		})
+	end) end,
+	["Ctrl-F3"] = function() Hotkey('Ctrl-F3', function(hotkey)
+		print("Create Filter 3")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").AddFilterSelection(3, false)'
+
+		SubHotkeys({
+			["Ctrl-F3"] = function() SubHotkey('Ctrl-F3', function(hotkey)
+				print("Save Filter 3")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").SaveFilterSelection(3, true)'
+			end) end,
+		})
+	end) end,
+
 	F4 = function() Hotkey('F4', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("diplomacy")'
+		print("Onscreen Filter 4")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(4, false)'
+
+		SubHotkeys({
+			F4 = function() SubHotkey('F4', function(hotkey)
+				print("All Filter 4")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(4, true)'
+			end) end,
+		})
 	end) end,
+	["Shift-F4"] = function() Hotkey('Shift-F4', function(hotkey)
+		print("Add Onscreen Filter 4")
+		Functions.AddToSelection(function()
+			ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(4, false)'
+		end)
+
+		SubHotkeys({
+			["Shift-F4"] = function() SubHotkey('Shift-F4', function(hotkey)
+				print("Add All Filter 4")
+				Functions.AddToSelection(function()
+					ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(4, true)'
+				end)
+			end) end,
+		})
+	end) end,
+	["Ctrl-F4"] = function() Hotkey('Ctrl-F4', function(hotkey)
+		print("Create Filter 4")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").AddFilterSelection(4, false)'
+
+		SubHotkeys({
+			["Ctrl-F4"] = function() SubHotkey('Ctrl-F4', function(hotkey)
+				print("Save Filter 4")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").SaveFilterSelection(4, true)'
+			end) end,
+		})
+	end) end,
+
 	F5 = function() Hotkey('F5', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleScore()'
-		-- Stops working after adding / removing a few rings, no error message
-		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenMenu("Default")'
-		-- ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").OpenWheel("Default")'
+		print("Onscreen Filter 5")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(5, false)'
+
+		SubHotkeys({
+			F5 = function() SubHotkey('F5', function(hotkey)
+				print("All Filter 5")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(5, true)'
+			end) end,
+		})
 	end) end,
+	["Shift-F5"] = function() Hotkey('Shift-F5', function(hotkey)
+		print("Add Onscreen Filter 5")
+		Functions.AddToSelection(function()
+			ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(5, false)'
+		end)
+
+		SubHotkeys({
+			["Shift-F5"] = function() SubHotkey('Shift-F5', function(hotkey)
+				print("Add All Filter 5")
+				Functions.AddToSelection(function()
+					ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(5, true)'
+				end)
+			end) end,
+		})
+	end) end,
+	["Ctrl-F5"] = function() Hotkey('Ctrl-F5', function(hotkey)
+		print("Create Filter 5")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").AddFilterSelection(5, false)'
+
+		SubHotkeys({
+			["Ctrl-F5"] = function() SubHotkey('Ctrl-F5', function(hotkey)
+				print("Save Filter 5")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").SaveFilterSelection(5, true)'
+			end) end,
+		})
+	end) end,
+
 	F6 = function() Hotkey('F6', function(hotkey)
+		print("Onscreen Filter 6")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(6, false)'
+
+		SubHotkeys({
+			F6 = function() SubHotkey('F6', function(hotkey)
+				print("All Filter 6")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(6, true)'
+			end) end,
+		})
 	end) end,
-	F7 = function() Hotkey('F7', function(hotkey)
-		-- 
+	["Shift-F6"] = function() Hotkey('Shift-F6', function(hotkey)
+		print("Add Onscreen Filter 6")
+		Functions.AddToSelection(function()
+			ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(6, false)'
+		end)
+
+		SubHotkeys({
+			["Shift-F6"] = function() SubHotkey('Shift-F6', function(hotkey)
+				print("Add All Filter 6")
+				Functions.AddToSelection(function()
+					ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").FilterSelect(6, true)'
+				end)
+			end) end,
+		})
 	end) end,
-	F8 = function() Hotkey('F8', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/objectivedetail.lua").ToggleDisplay()'
+	["Ctrl-F6"] = function() Hotkey('Ctrl-F6', function(hotkey)
+		print("Create Filter 6")
+		ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").AddFilterSelection(6, false)'
+
+		SubHotkeys({
+			["Ctrl-F6"] = function() SubHotkey('Ctrl-F6', function(hotkey)
+				print("Save Filter 6")
+				ConExecute 'UI_Lua import("/mods/FilterSelection/modules/FilterSelection.lua").SaveFilterSelection(6, true)'
+			end) end,
+		})
 	end) end,
-	F9 = function() Hotkey('F9', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/connectivity.lua").CreateUI()'
-	end) end,
-	F10 = function() Hotkey('F10', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("main")'
-	end) end,
-	F11 = function() Hotkey('F11', function(hotkey)
+
+	-- TODO: add all F groups when working
+
+	["Ctrl-F12"] = function() Hotkey('Ctrl-F12', function(hotkey)
+		print("Create Filter 5")
 		ConExecute 'PopupCreateUnitMenu'
-	end) end,
-	F12 = function() Hotkey('F12', function(hotkey)
-		ConExecute 'WIN_ToggleLogDialog'
 	end) end,
 
 	Backslash = function() Hotkey('Backslash', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
+		print("Onscreen mass extractors")
+		ConExecute("UI_SelectByCategory +inview MASSEXTRACTION")
 	end) end,
 	['Shift-Backslash'] = function() Hotkey('Shift-Backslash', function(hotkey)
-		CreateOrContinueSelection(nil, "camera")
+		if AnyUnitSelected() then
+			CreateOrContinueSelection(nil, "camera_create")
+		else
+			print("All mass extractors")
+			ConExecute("UI_SelectByCategory MASSEXTRACTION")
+		end
 	end) end,
 	['Ctrl-Backslash'] = function() Hotkey('Ctrl-Backslash', function(hotkey)
 		CreateOrContinueSelection(nil, "camera_create")
@@ -174,66 +386,163 @@ local customKeyMap = {
 		-- TODO: GoToNextCamera
 	end) end,
 
+	-- 'UI_MakeSelectionSet 1'
+	-- 'UI_ApplySelectionSet 1'
+	-- 'UI_Lua import("/lua/ui/game/selection.lua").FactorySelection(1)'
+
+	-- Ctrl-Z select_all_units_of_same_type
+	-- Shift-T create_build_template
+
+	-- ['T']                   = 'track_unit',
+    -- ['Ctrl-Shift-T']        = 'track_unit_minimap',
+    -- ['Ctrl-Alt-T']          = 'track_unit_second_mon',
+
 	['1'] = function() Hotkey('1', function(hotkey)
 		if AnyUnitSelected() then
-			SelectUnits(EntityCategoryFilterDown(categories.TECH1, GetSelectedUnits()))
+			print("Filter T1")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH1, GetSelectedUnits() or {}))
 		else
-            ConExecute("UI_SelectByCategory +inview BUILTBYTIER1FACTORY TECH1 ALLUNITS")
-			SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits()))
+			print("Onscreen T1 units")
+			ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH1 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
 
 			SubHotkeys({
 				['1'] = function() SubHotkey('1', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER1FACTORY TECH1")
+					print("All Filter 1")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH1 ALLUNITS")
+					SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
 				end) end,
 			})
 		end
 	end) end,
+	['Shift-1'] = function() Hotkey('Shift-1', function(hotkey)
+		print("Add Onscreen T1 units")
+		Functions.AddToSelection(function()
+			ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH1 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
+		end)
+
+		SubHotkeys({
+			['Shift-1'] = function() SubHotkey('Shift-1', function(hotkey)
+				print("Add All T1 units")
+				Functions.AddToSelection(function()
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH1 ALLUNITS")
+					SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
+				end)
+			end) end,
+		})
+	end) end,
+
 	['2'] = function() Hotkey('2', function(hotkey)
 		if AnyUnitSelected() then
-			SelectUnits(EntityCategoryFilterDown(categories.TECH2, GetSelectedUnits()))
+			print("Filter T2")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH2, GetSelectedUnits() or {}))
 		else
-            ConExecute("UI_SelectByCategory +inview BUILTBYTIER2FACTORY TECH2")
-			SelectUnits(EntityCategoryFilterDown(categories.TECH2 - categories.ENGINEER, GetSelectedUnits()))
+			print("Onscreen T2 units")
+			ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH2 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH2 - categories.ENGINEER, GetSelectedUnits() or {}))
 
 			SubHotkeys({
 				['2'] = function() SubHotkey('2', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER2FACTORY TECH2")
+					print("All Filter 2")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH2 ALLUNITS")
+					SelectUnits(EntityCategoryFilterDown(categories.TECH2 - categories.ENGINEER, GetSelectedUnits() or {}))
 				end) end,
 			})
 		end
 	end) end,
+
+	['Shift-2'] = function() Hotkey('Shift-2', function(hotkey)
+		print("Add Onscreen T2 units")
+		Functions.AddToSelection(function()
+			ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH2 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH2 - categories.ENGINEER, GetSelectedUnits() or {}))
+		end)
+
+		SubHotkeys({
+			['Shift-2'] = function() SubHotkey('Shift-2', function(hotkey)
+				print("Add All T2 units")
+				Functions.AddToSelection(function()
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH2 ALLUNITS")
+					SelectUnits(EntityCategoryFilterDown(categories.TECH2 - categories.ENGINEER, GetSelectedUnits() or {}))
+				end)
+			end) end,
+		})
+	end) end,
+
 	['3'] = function() Hotkey('3', function(hotkey)
 		if AnyUnitSelected() then
-			SelectUnits(EntityCategoryFilterDown(categories.TECH3, GetSelectedUnits()))
+			print("Filter T3")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH3, GetSelectedUnits() or {}))
 		else
-            ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH3")
-			SelectUnits(EntityCategoryFilterDown(categories.TECH3 - categories.ENGINEER, GetSelectedUnits()))
+			print("Onscreen T3 units")
+			ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH3 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH3 - categories.ENGINEER, GetSelectedUnits() or {}))
 
 			SubHotkeys({
 				['3'] = function() SubHotkey('3', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH3")
+					print("All Filter 3")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH3 ALLUNITS")
+					SelectUnits(EntityCategoryFilterDown(categories.TECH3 - categories.ENGINEER, GetSelectedUnits() or {}))
 				end) end,
 			})
 		end
 	end) end,
+
+	['Shift-3'] = function() Hotkey('Shift-3', function(hotkey)
+		print("Add Onscreen T3 units")
+		Functions.AddToSelection(function()
+			ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY TECH3 ALLUNITS")
+			SelectUnits(EntityCategoryFilterDown(categories.TECH3 - categories.ENGINEER, GetSelectedUnits() or {}))
+		end)
+
+		SubHotkeys({
+			['Shift-3'] = function() SubHotkey('Shift-3', function(hotkey)
+				print("Add All T3 units")
+				Functions.AddToSelection(function()
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH3 ALLUNITS")
+					SelectUnits(EntityCategoryFilterDown(categories.TECH3 - categories.ENGINEER, GetSelectedUnits() or {}))
+				end)
+			end) end,
+		})
+	end) end,
+
 	['4'] = function() Hotkey('4', function(hotkey)
 		if AnyUnitSelected() then
-			SelectUnits(EntityCategoryFilterDown(categories.EXPERIMENTAL, GetSelectedUnits()))
+			print("Filter T4")
+			SelectUnits(EntityCategoryFilterDown(categories.EXPERIMENTAL + categories.SUBCOMMANDER, GetSelectedUnits() or {}))
 		else
-            ConExecute("UI_SelectByCategory +inview EXPERIMENTAL")
+			print("Onscreen T4")
+			ConExecute("UI_SelectByCategory +inview EXPERIMENTAL ALLUNITS, SUBCOMMANDER")
 
 			SubHotkeys({
-				['4'] = function() SubHotkey('3', function(hotkey)
-					ConExecute("UI_SelectByCategory EXPERIMENTAL")
+				['4'] = function() SubHotkey('4', function(hotkey)
+					print("All T4")
+					ConExecute("UI_SelectByCategory EXPERIMENTAL ALLUNITS, SUBCOMMANDER")
 				end) end,
 			})
 		end
 	end) end,
-	-- Test
-	['5'] = function() Hotkey('5', function(hotkey)
-		-- ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
-		SelectUnits(Functions.FilterAvailableTransports())
+
+	['Shift-4'] = function() Hotkey('Shift-4', function(hotkey)
+		print("Add Onscreen T4 units")
+		Functions.AddToSelection(function()
+			ConExecute("UI_SelectByCategory +inview EXPERIMENTAL ALLUNITS, SUBCOMMANDER")
+		end)
+
+		SubHotkeys({
+			['Shift-4'] = function() SubHotkey('Shift-4', function(hotkey)
+				print("Add All T4 units")
+				Functions.AddToSelection(function()
+					ConExecute("UI_SelectByCategory EXPERIMENTAL ALLUNITS, SUBCOMMANDER")
+				end)
+			end) end,
+		})
 	end) end,
+
+	['5'] = function() Hotkey('5', function(hotkey) end)
+		ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").ACUSelectOCGoto()'
+	end,
 	['6'] = function() Hotkey('6', function(hotkey) end) end,
 	['7'] = function() Hotkey('7', function(hotkey) end) end,
 	['8'] = function() Hotkey('8', function(hotkey) end) end,
@@ -251,24 +560,34 @@ local customKeyMap = {
 		if AnyUnitSelected() then
 			ConExecute 'StartCommandMode order RULEUCC_Patrol'
 		else
-            ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH1")
+			print("Onscreen available engineers")
+            ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER")
 			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 
 			SubHotkeys({
-				['1'] = function() SubHotkey('1', function(hotkey)
-					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER")
+				['Shift-1'] = function() SubHotkey('Shift-1', function(hotkey)
+					print("Onscreen available T1+2 Engineers")
+					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH1, BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
-				['2'] = function() SubHotkey('2', function(hotkey)
-					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH2")
+				['Shift-2'] = function() SubHotkey('Shift-2', function(hotkey)
+					print("All available T2+3 Engineers")
+					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH2, BUILTBYTIER3FACTORY ENGINEER TECH3")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
-				['3'] = function() SubHotkey('3', function(hotkey)
-					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH3")
+				['Shift-3'] = function() SubHotkey('Shift-3', function(hotkey)
+					print("Onscreen available T3 Engineers + SACU")
+					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER TECH3, SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['4'] = function() SubHotkey('4', function(hotkey)
+					print("Onscreen available SACU")
 					ConExecute("UI_SelectByCategory +inview SUBCOMMANDER")
+					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
+				end) end,
+				['Shift-4'] = function() SubHotkey('Shift-4', function(hotkey)
+					print("Onscreen available Engineers and SACU")
+					ConExecute("UI_SelectByCategory +inview BUILTBYTIER3FACTORY ENGINEER, SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 			})
@@ -278,40 +597,34 @@ local customKeyMap = {
 		if AnyUnitSelected() then
 			ConExecute 'StartCommandMode order RULEUCC_Patrol'
 		else
-            ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH1")
+			print("All available engineers")
+            ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER")
 			SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 
 			SubHotkeys({
-				['1'] = function() SubHotkey('1', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
-				end) end,
 				['Shift-1'] = function() SubHotkey('Shift-1', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER")
+					print("All available T1+2 Engineers")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH1, BUILTBYTIER3FACTORY ENGINEER TECH2")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
-				['2'] = function() SubHotkey('2', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
-				end) end,
-				['Shift-2'] = function() SubHotkey('Shift-2', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2")
-					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
-				end) end,
-				['3'] = function() SubHotkey('3', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
+				['Shift-2'] = function() SubHotkey('Shift-2', function(hotkey)					print("All available T1+2 Engineers")
+					print("All available T2+3 Engineers")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH2, BUILTBYTIER3FACTORY ENGINEER TECH3")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['Shift-3'] = function() SubHotkey('Shift-3', function(hotkey)
-					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3")
+					print("All available T3 Engineers + SACU")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER TECH3, SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['4'] = function() SubHotkey('4', function(hotkey)
+					print("All available SACU")
 					ConExecute("UI_SelectByCategory SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 				['Shift-4'] = function() SubHotkey('Shift-4', function(hotkey)
-					ConExecute("UI_SelectByCategory SUBCOMMANDER")
+					print("All available Engineers and SACU")
+					ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER, SUBCOMMANDER")
 					SelectUnits(Functions.SelectedUnitsWithOnlyTheseCommands({"Idle", "Move", "Patrol", "AggressiveMove"}))
 				end) end,
 			})
@@ -320,17 +633,23 @@ local customKeyMap = {
 	['Ctrl-Q'] = function() Hotkey('Ctrl-Q', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
-		else
-			print("Select patrollers")
+		elseif AnyUnitSelected() then
+			print("Filter patrollers")
 			ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").SelectPatrolUnits()'
+		else
+			print("Onscreen idle engineers")
+            ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER +inview +idle")
 		end
 	end) end,
 	['Ctrl-Shift-Q'] = function() Hotkey('Ctrl-Shift-Q', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
+		elseif AnyUnitSelected() then
+			print("Select patrollers")
+			ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").SelectPatrolUnits()'
 		else
-			print("Convert to move")
-			ConExecute 'UI_Lua import("/mods/patrol2move/modules/module.lua").ConvertToMove()'
+			print("All idle engineers")
+            ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY ENGINEER +idle")
 		end
 	end) end,
 	['Alt-Q'] = function() Hotkey('Alt-Q', function(hotkey)
@@ -338,6 +657,7 @@ local customKeyMap = {
 	end) end,
 	['Alt-Shift-Q'] = function() Hotkey('Alt-Shift-Q', function(hotkey)
 		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
+		-- spreadattack
 	end) end,
 
 	W = function() Hotkey('W', function(hotkey)
@@ -345,6 +665,8 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_1")'
 		elseif AnyUnitSelected() then
 			ConExecute 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()'
+		else
+
 		end
 	end) end,
 	['Shift-W'] = function() Hotkey('Shift-W', function(hotkey)
@@ -353,24 +675,56 @@ local customKeyMap = {
 		elseif AnyUnitSelected() then
 			ConExecute 'UI_Lua import("/mods/Move/modules/Main.lua").Toggle()'
 		else
-			ConExecute 'UI_SelectByCategory AIR HIGHALTAIR ANTIAIR'
+
 		end
+	end) end,
+	['Alt-Shift-W'] = function() Hotkey('Alt-Shift-W', function(hotkey)
+		-- TODO: Detonate / Sacrifice etc?
 	end) end,
 	['Ctrl-W'] = function() Hotkey('Ctrl-W', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
-		else
+		elseif AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
+			ConExecute 'StartCommandMode order RULEUCC_Tactical'
+		elseif AllHaveCategory(categories.NUKE) then
+			ConExecute 'StartCommandMode order RULEUCC_Nuke'
+		elseif AnyUnitSelected() then
 			ConExecute 'StartCommandMode order RULEUCC_Attack'
+		else
+			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+			if AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
+				CreateOrContinueSelection("closest_missile", "auto") -- Manual cycle, tab, doesnt work properly
+			else
+				PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
+			end
 		end
 	end) end,
 	['Ctrl-Shift-W'] = function() Hotkey('Ctrl-Shift-W', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) and not AnyHasCategory(categories.EXPERIMENTAL) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
-		else
+		elseif AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
+			ConExecute 'StartCommandMode order RULEUCC_Tactical'
+		elseif AllHaveCategory(categories.NUKE) then
+			ConExecute 'StartCommandMode order RULEUCC_Nuke'
+		elseif AnyUnitSelected() then
 			ConExecute 'StartCommandMode order RULEUCC_Attack'
+		else
+			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+			if AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
+				CreateOrContinueSelection("closest_missile", "auto") -- Manual cycle, tab, doesnt work properly
+			else
+				PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
+			end
 		end
 	end) end,
-	['Alt-W'] = function() Hotkey('Alt-W', function(hotkey) end) end,
+	['Alt-W'] = function() Hotkey('Alt-W', function(hotkey) end)
+		ConExecute "UI_SelectByCategory NUKE"
+		if AllHaveCategory(categories.NUKE) then
+			CreateOrContinueSelection("furthest_missile", "auto")
+		else
+			PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
+		end
+	end,
 	['Alt-Shift-W'] = function() Hotkey('Alt-Shift-W', function(hotkey) end) end,
 
 	E = function() Hotkey('E', function(hotkey)
@@ -379,15 +733,7 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
 		else
-            ConExecute("UI_SelectByCategory +inview AIR BOMBER")
-			SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits()))
 
-			SubHotkeys({
-				['E'] = function() SubHotkey('E', function(hotkey)
-					ConExecute("UI_SelectByCategory AIR BOMBER")
-					SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits()))
-				end) end,
-			})
 		end
 	end) end,
 	['Shift-E'] = function() Hotkey('Shift-E', function(hotkey)
@@ -396,8 +742,9 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'StartCommandMode order RULEUCC_Reclaim'
 		else
+			print("All bombers")
 			ConExecute("UI_SelectByCategory AIR BOMBER")
-			SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits()))
+			SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits() or {}))
 		end
 	end) end,
 	['Ctrl-E'] = function() Hotkey('Ctrl-E', function(hotkey)
@@ -424,21 +771,17 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
 		elseif AnyHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Transport'
+		elseif AnyUnitSelected() then
+			print("Add onscreen available transports")
+			Functions.AddToSelection(function()
+				ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
+				SelectUnits(Functions.FilterAvailableTransports())
+			end)
 		else
 			-- TODO: Functions.AvailableTransport (no loaded units and not on a pickup order)
+			print("Onscreen transports")
 			ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
 			SelectUnits(Functions.FilterAvailableTransports())
-
-			SubHotkeys({
-				R = function() SubHotkey('R', function(hotkey)
-					ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
-					SubHotkeys({
-						R = function() SubHotkey('R', function(hotkey)
-							ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
-						end) end,
-					})
-				end) end,
-			})
 		end
 	end) end,
 	['Shift-R'] = function() Hotkey('Shift-R', function(hotkey)
@@ -446,52 +789,51 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
 		elseif AnyHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Transport'
+		elseif AnyUnitSelected() then
+			-- Add all available transports
+			print("Add all available transports")
+			Functions.AddToSelection(function()
+				ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
+				SelectUnits(Functions.FilterAvailableTransports())
+			end)
 		else
-			-- TODO: Functions.AvailableTransport (no loaded units and not on a pickup order)
-
+			print("All transports")
 			ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
-			SelectUnits(Functions.FilterAvailableTransports())
-
-			-- ConExecute 'UI_SelectByCategory +nearest +idle AIR TRANSPORTATION'
-			-- SubHotkeys({
-			-- 	R = function() SubHotkey('R', function(hotkey)
-			-- 		ConExecute 'UI_SelectByCategory +inview +idle AIR TRANSPORTATION'
-			-- 		SubHotkeys({
-			-- 			R = function() SubHotkey('R', function(hotkey)
-			-- 				ConExecute 'UI_SelectByCategory +idle AIR TRANSPORTATION'
-			-- 			end) end,
-			-- 		})
-			-- 	end) end,
-			-- })
 		end
 	end) end,
 	['Ctrl-R'] = function() Hotkey('Ctrl-R', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_7")'
-		elseif AllHaveCategory(categories.TRANSPORTATION) then
+		elseif AnyHasCategory(categories.TRANSPORTATION) then
 			ConExecute 'StartCommandMode order RULEUCC_Ferry'
 		else
+			print("Add range ring")
 			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 		end
 	end) end,
 	['Ctrl-Shift-R'] = function() Hotkey('Ctrl-Shift-R', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_7")'
+		elseif AnyHasCategory(categories.TRANSPORTATION) then
+			ConExecute 'StartCommandMode order RULEUCC_Ferry'
 		else
+			print("Delete closest range ring")
 			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
 		end
 	end) end,
 	['Alt-R'] = function() Hotkey('Alt-R', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(true)'
 	end) end,
 	['Alt-Shift-R'] = function() Hotkey('Alt-Shift-R', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").DeleteClosest()'
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(false)'
 	end) end,
 
 	T = function() Hotkey('T', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_4")'
 		elseif AnyUnitSelected() then
+			-- ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("TargetPriorityExtended")'
+
 			ConExecute 'UI_Lua import("/lua/keymap/misckeyactions.lua").SetToMouseTargetOrDefault()'
 			SubHotkeys({
 				-- TODO: Make queueable targeting, by holding shift, it puts it after order finishes? 
@@ -630,17 +972,9 @@ local customKeyMap = {
 		elseif not isReplay and AnyUnitCanUpgrade() then
 			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
-			print("In-view fighters")
-			ConExecute 'UI_SelectByCategory +inview AIR HIGHALTAIR ANTIAIR'
-			SelectUnits(EntityCategoryFilterDown(categories.ANTIAIR - categories.BOMBER, GetSelectedUnits()))
-
-			SubHotkeys({
-				['A'] = function() SubHotkey('A', function(hotkey)
-					print("All fighters")
-					ConExecute 'UI_SelectByCategory AIR HIGHALTAIR ANTIAIR'
-					SelectUnits(EntityCategoryFilterDown(categories.ANTIAIR - categories.BOMBER, GetSelectedUnits()))
-				end) end,
-			})
+			print("Onscreen fighters")
+			ConExecute 'UI_SelectByCategory AIR HIGHALTAIR ANTIAIR'
+			SelectUnits(EntityCategoryFilterDown(categories.ANTIAIR - categories.BOMBER, GetSelectedUnits() or {}))
 		end
 	end) end,
 	['Shift-A'] = function() Hotkey('Shift-A', function(hotkey)
@@ -654,9 +988,9 @@ local customKeyMap = {
 		elseif not isReplay and AnyUnitCanUpgrade() then
 			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
-			print("All Fighters")
+			print("All fighters")
 			ConExecute 'UI_SelectByCategory AIR HIGHALTAIR ANTIAIR'
-			SelectUnits(EntityCategoryFilterDown(categories.ANTIAIR - categories.BOMBER, GetSelectedUnits()))
+			SelectUnits(EntityCategoryFilterDown(categories.ANTIAIR - categories.BOMBER, GetSelectedUnits() or {}))
 		end
 	end) end,
 	['Ctrl-A'] = function() Hotkey('Ctrl-A', function(hotkey)
@@ -665,6 +999,7 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")'
 		else
+			print("Onscreen air factories")
 			ConExecute 'UI_SelectByCategory +inview FACTORY AIR'
 		end
 	end) end,
@@ -672,11 +1007,12 @@ local customKeyMap = {
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_AirFact")'
 		else
+			print("Onscreen air factories")
 			ConExecute 'UI_SelectByCategory FACTORY AIR'
 		end
 	end) end,
 	['Alt-A'] = function() Hotkey('Alt-A', function(hotkey)
-		print("In-view Similar units")
+		print("Onscreen Similar units")
 		Functions.SelectSimilarUnits("+inview")
 
 		SubHotkeys({
@@ -696,15 +1032,8 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Mex")'
 		else
-			print("In-view intel planes")
+			print("Onscreen intel planes")
             ConExecute 'UI_SelectByCategory +inview AIR INTELLIGENCE'
-
-			SubHotkeys({
-				['S'] = function() SubHotkey('S', function(hotkey)
-					print("All intel planes")
-					ConExecute 'UI_SelectByCategory AIR INTELLIGENCE'
-				end) end,
-			})
 		end
 	end) end,
 	['Shift-S'] = function() Hotkey('Shift-S', function(hotkey)
@@ -723,6 +1052,7 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_5")'
 		else
+			print("Onscreen naval factories")
 			ConExecute 'UI_SelectByCategory +inview FACTORY NAVAL'
 		end
 	end) end,
@@ -730,6 +1060,7 @@ local customKeyMap = {
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_NavalFact")'
 		else
+			print("All naval factories")
 			ConExecute 'UI_SelectByCategory FACTORY NAVAL'
 		end
 	end) end,
@@ -743,15 +1074,8 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Power")'
 		else
-			print("All gunships")
+			print("Onscreen gunships")
 			ConExecute 'UI_SelectByCategory +inview AIR GROUNDATTACK'
-
-			SubHotkeys({
-				['D'] = function() SubHotkey('D', function(hotkey)
-					print("All gunships")
-					ConExecute 'UI_SelectByCategory AIR GROUNDATTACK'
-				end) end,
-			})
 		end
 	end) end,
 	['Shift-D'] = function() Hotkey('Shift-D', function(hotkey)
@@ -760,6 +1084,7 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Power")'
 		else
+			print("All gunships")
 			ConExecute 'UI_SelectByCategory AIR GROUNDATTACK'
 		end
 	end) end,
@@ -769,6 +1094,7 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_6")'
 		else
+			print("Onscreen land factories")
 			ConExecute 'UI_SelectByCategory +inview FACTORY LAND'
 		end
 	end) end,
@@ -776,6 +1102,7 @@ local customKeyMap = {
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_LandFact")'
 		else
+			print("All land factories")
 			ConExecute 'UI_SelectByCategory FACTORY LAND'
 		end
 	end) end,
@@ -791,18 +1118,10 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_3")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Radar")'
-		elseif AllHaveCategory(categories.TRANSPORTATION) then
-			ConExecute 'StartCommandMode order RULEUCC_Ferry'
 		else
-			print("All torpedo bombers")
-			ConExecute 'UI_SelectByCategory +inview AIR ANTINAVY'
-
-			SubHotkeys({
-				['D'] = function() SubHotkey('D', function(hotkey)
-					print("All torpedo bombers")
-					ConExecute 'UI_SelectByCategory AIR ANTINAVY'
-				end) end,
-			})
+			print("Onscreen bombers")
+            ConExecute("UI_SelectByCategory +inview AIR BOMBER")
+			SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits() or {}))
 		end
 	end) end,
 	['Shift-F'] = function() Hotkey('Shift-F', function(hotkey)
@@ -810,10 +1129,10 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_3")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Radar")'
-		elseif AllHaveCategory(categories.TRANSPORTATION) then
-			ConExecute 'StartCommandMode order RULEUCC_Ferry'
 		else
-            ConExecute 'UI_SelectByCategory AIR ANTINAVY'
+			print("All bombers")
+            ConExecute("UI_SelectByCategory AIR BOMBER")
+			SelectUnits(EntityCategoryFilterDown(categories.BOMBER - categories.ANTINAVY, GetSelectedUnits() or {}))
 		end
 	end) end,
 	['Ctrl-F'] = function() Hotkey('Ctrl-F', function(hotkey)
@@ -821,11 +1140,17 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Sonar")'
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_7")'
+		else
+			print("Onscreen factories")
+			ConExecute 'UI_SelectByCategory +inview FACTORY'
 		end
 	end) end,
 	['Ctrl-Shift-F'] = function() Hotkey('Ctrl-Shift-F', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Sonar")'
+		else
+			print("All factories")
+			ConExecute 'UI_SelectByCategory FACTORY'
 		end
 	end) end,
 	['Alt-F'] = function() Hotkey('Alt-F', function(hotkey)
@@ -839,14 +1164,16 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")'
 		else
-			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(true)'
+			print("Onscreen torpedo bombers")
+			ConExecute 'UI_SelectByCategory +inview AIR ANTINAVY'
 		end
 	end) end,
 	['Shift-G'] = function() Hotkey('G', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_4")'
 		else
-			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(false)'
+			print("All torpedo bombers")
+			ConExecute 'UI_SelectByCategory AIR ANTINAVY'
 		end
 	end) end,
 	['Ctrl-G'] = function() Hotkey('Ctrl-G', function(hotkey)
@@ -903,7 +1230,6 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 			Functions.ToggleRepeatBuildOrSetTo(true)
 		elseif AllHaveCategory(categories.ENGINEER) then
-			-- ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
 			ConExecute 'UI_Lua import("/mods/HotkeyTechTabs/modules/UITabs.lua").SelectTab(5, false)'
 			import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
 		end
@@ -926,22 +1252,23 @@ local customKeyMap = {
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
 		else
-			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
-			if AllHaveCategory(categories.ARTILLERY) and AllHaveCategory(categories.TECH2) and AllHaveCategory(categories.STRUCTURE) then
-				CreateOrContinueSelection("closest", "auto")
-				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
-			end
+			print("Onscreen intel units")
+			ConExecute("UI_SelectByCategory +inview LAND INTELLIGENCE, LAND COUNTERINTELLIGENCE")
+
+			SubHotkeys({
+				Z = function() SubHotkey('Z', function(hotkey)
+					print("All intel/shield units")
+					ConExecute("UI_SelectByCategory +inview LAND INTELLIGENCE, LAND COUNTERINTELLIGENCE")
+				end) end,
+			})
 		end
 	end) end,
 	['Shift-Z'] = function() Hotkey('Shift-Z', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ShieldsStealth")'
 		else
-			ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH2'
-			if AllHaveCategory(categories.ARTILLERY) and AllHaveCategory(categories.TECH2) and AllHaveCategory(categories.STRUCTURE) then
-				CreateOrContinueSelection("closest", "auto")
-				ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
-			end
+			print("All intel units")
+			ConExecute("UI_SelectByCategory LAND INTELLIGENCE, LAND COUNTERINTELLIGENCE")
 		end
 	end) end,
 	['Ctrl-Z'] = function() Hotkey('Ctrl-Z', function(hotkey)
@@ -976,15 +1303,20 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_1")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_PD")'
-		elseif AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
-			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
 		elseif AllHaveCategory(categories.NUKE) then
 			ConExecute 'StartCommandMode order RULEUCC_Nuke'
 		else
-			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
-			if AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
-				CreateOrContinueSelection("closest_missile", "auto") -- Manual cycle, tab, doesnt work properly
-			end
+			print("Onscreen direct fire units")
+			ConExecute("UI_SelectByCategory +inview LAND DIRECTFIRE")
+			SelectUnits(EntityCategoryFilterDown(categories.DIRECTFIRE - categories.DIRECTFIRE - categories.EXPERIMENTAL - categories.COMMAND, GetSelectedUnits() or {}))
+
+			SubHotkeys({
+				X = function() SubHotkey('X', function(hotkey)
+					print("All direct fire units")
+					ConExecute("UI_SelectByCategory LAND DIRECTFIRE")
+					SelectUnits(EntityCategoryFilterDown(categories.DIRECTFIRE - categories.DIRECTFIRE - categories.EXPERIMENTAL - categories.COMMAND, GetSelectedUnits() or {}))
+				end) end,
+			})
 		end
 	end) end,
 	['Shift-X'] = function() Hotkey('Shift-X', function(hotkey)
@@ -992,13 +1324,29 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_1")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_PD")'
+		elseif AllHaveCategory(categories.NUKE) then
+			ConExecute 'StartCommandMode order RULEUCC_Nuke'
 		else
-			ConExecute 'UI_Lua import("/mods/MultiHotkeys/modules/selection.lua").SelectTmlFireMissile()'
+			print("Onscreen direct fire units")
+			Functions.AddToSelection(function()
+				ConExecute("UI_SelectByCategory +inview LAND DIRECTFIRE")
+				SelectUnits(EntityCategoryFilterDown(categories.DIRECTFIRE - categories.COMMAND, GetSelectedUnits() or {}))
+			end)
+
+			SubHotkeys({
+				X = function() SubHotkey('X', function(hotkey)
+					print("All direct fire units")
+					Functions.AddToSelection(function()
+						ConExecute("UI_SelectByCategory LAND DIRECTFIRE")
+						SelectUnits(EntityCategoryFilterDown(categories.DIRECTFIRE - categories.COMMAND, GetSelectedUnits() or {}))
+					end)
+				end) end,
+			})
 		end
 	end) end,
 	['Ctrl-X'] = function() Hotkey('Ctrl-X', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ArtyMissiles")'
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimentals")'
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_5")'
 		end
@@ -1006,15 +1354,12 @@ local customKeyMap = {
 	['Ctrl-Shift-X'] = function() Hotkey('Ctrl-Shift-X', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ArtyMissiles")'
+		else
+			print("All indirect fire units")
+			ConExecute("UI_SelectByCategory LAND INDIRECTFIRE")
 		end
 	end) end,
 	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
-		ConExecute "UI_SelectByCategory NUKE"
-		if AllHaveCategory(categories.NUKE) then
-			CreateOrContinueSelection("furthest_missile", "auto")
-		else
-			PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
-		end
 	end) end,
 
 	C = function() Hotkey('C', function(hotkey)
@@ -1022,6 +1367,9 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_2")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_AntiAir")'
+		else
+			print("Onscreen AA units")
+			ConExecute("UI_SelectByCategory +inview LAND ANTIAIR")
 		end
 	end) end,
 	['Shift-C'] = function() Hotkey('Shift-C', function(hotkey)
@@ -1029,6 +1377,9 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_2")'
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_AntiAir")'
+		else
+			print("All AA units")
+			ConExecute("UI_SelectByCategory LAND ANTIAIR")
 		end
 	end) end,
 	['Ctrl-C'] = function() Hotkey('Ctrl-C', function(hotkey)
@@ -1036,29 +1387,44 @@ local customKeyMap = {
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_TorpedoDef")'
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_6")'
+		else
+			print("Onscreen torpedo units")
+			ConExecute("UI_SelectByCategory +inview LAND ANTINAVY")
 		end
 	end) end,
 	['Ctrl-Shift-C'] = function() Hotkey('Ctrl-Shift-C', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_TorpedoDef")'
+		else
+			print("All torpedo units")
+			ConExecute("UI_SelectByCategory LAND ANTINAVY")
 		end
 	end) end,
 	['Alt-C'] = function() Hotkey('Alt-C', function(hotkey)
-		-- TODO
+		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(true)'
+	end) end,
+	['Alt-Shift-C'] = function() Hotkey('Alt-Shift-C', function(hotkey)
+		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(false)'
 	end) end,
 
 	V = function() Hotkey('V', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_3")'
 		elseif AllHaveCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimentals")' -- TODO, doesn't work?
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_ArtyMissiles")'
+		else
+			print("Onscreen indirect fire units")
+			ConExecute("UI_SelectByCategory +inview LAND INDIRECTFIRE")
 		end
 	end) end,
 	['Shift-V'] = function() Hotkey('Shift-V', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_3")'
 		elseif AllHaveCategory(categories.ENGINEER) then
-			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimental")' -- TODO, doesn't work?
+			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_Experimentals")'
+		else
+			print("All indirect fire units")
+			ConExecute("UI_SelectByCategory LAND INDIRECTFIRE")
 		end
 	end) end,
 	['Ctrl-V'] = function() Hotkey('Ctrl-V', function(hotkey)
@@ -1077,15 +1443,11 @@ local customKeyMap = {
 	B = function() Hotkey('B', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_4")'
-		else
-			ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(false)'
 		end
 	end) end,
 	['Shift-B'] = function() Hotkey('Shift-B', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_4")'
-		else
-			ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders()'
 		end
 	end) end,
 
