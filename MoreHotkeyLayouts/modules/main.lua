@@ -698,7 +698,7 @@ local customKeyMap = {
 	['Alt-W'] = function() Hotkey('Alt-W', function(hotkey) end)
 		ConExecute "UI_SelectByCategory NUKE"
 		if AllHaveCategory(categories.NUKE) then
-			CreateOrContinueSelection("furthest_missile", "auto")
+			CreateOrContinueSelection("furthest", "auto", "silo")
 		else
 			PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
 		end
@@ -738,10 +738,8 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-E'] = function() Hotkey('Alt-E', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
 	end) end,
 	['Alt-Shift-E'] = function() Hotkey('Alt-Shift-E', function(hotkey)
-		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 	end) end,
 
 	R = function() Hotkey('R', function(hotkey)
@@ -990,15 +988,17 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-A'] = function() Hotkey('Alt-A', function(hotkey)
-		print("Onscreen Similar units")
-		Functions.SelectSimilarUnits("+inview")
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
 
-		SubHotkeys({
-			['Alt-S'] = function() SubHotkey('Alt-S', function(hotkey)
-				print("All Similar units")
-				Functions.SelectSimilarUnits()
-			end) end,
-		})
+		-- print("Onscreen Similar units")
+		-- Functions.SelectSimilarUnits("+inview")
+
+		-- SubHotkeys({
+		-- 	['Alt-S'] = function() SubHotkey('Alt-S', function(hotkey)
+		-- 		print("All Similar units")
+		-- 		Functions.SelectSimilarUnits()
+		-- 	end) end,
+		-- })
 	end) end,
 	['Alt-Shift-A'] = function() Hotkey('Alt-Shift-A', function(hotkey)
 
@@ -1043,7 +1043,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-S'] = function() Hotkey('Alt-S', function(hotkey)
-
+		ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()'
 	end) end,
 
 	D = function() Hotkey('D', function(hotkey)
@@ -1088,7 +1088,6 @@ local customKeyMap = {
 		CreateOrContinueSelection("damage", "auto")
 	end) end,
 	['Alt-Shift-D'] = function() Hotkey('Alt-Shift-D', function(hotkey)
-		CreateOrContinueSelection("health", "auto")
 	end) end,
 
 	F = function() Hotkey('F', function(hotkey)
@@ -1135,7 +1134,6 @@ local customKeyMap = {
 		CreateOrContinueSelection("furthest", "auto")
 	end) end,
 	['Alt-Shift-F'] = function() Hotkey('Alt-Shift-F', function(hotkey)
-		CreateOrContinueSelection("closest", "auto")
 	end) end,
 
 	G = function() Hotkey('G', function(hotkey)
@@ -1221,9 +1219,13 @@ local customKeyMap = {
 		end
 	end) end,
 	['Ctrl-Chevron'] = function() Hotkey('Ctrl-Chevron', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
+		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(true)'
 	end) end,
 	['Ctrl-Shift-Chevron'] = function() Hotkey('Ctrl-Shift-Chevron', function(hotkey)
+		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(false)'
+	end) end,
+	['Alt-Chevron'] = function() Hotkey('Alt-Chevron', function(hotkey)
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
 	end) end,
 
 	Z = function() Hotkey('Z', function(hotkey)
@@ -1279,18 +1281,50 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-Z'] = function() Hotkey('Alt-Z', function(hotkey)
-        ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
-		if AllHaveCategory(categories.ARTILLERY) and AllHaveCategory(categories.TECH3) and AllHaveCategory(categories.STRUCTURE) then
-			CreateOrContinueSelection("furthest", "auto")
+		-- TODO: remove. Reason: Used to be able to select manually and only cycle those, but just causing confusion. We want to be able to run the hotkey even in the middle of a cycle to reset and see number of silos loaded. 
+		-- SelectUnits(EntityCategoryFilterDown(categories.STRUCTURE + categories.TACTICALMISSILEPLATFORM, GetSelectedUnits() or {}))
+		-- if not AnyUnitSelected() then
+		-- 	ConExecute "UI_SelectByCategory STRUCTURE TACTICALMISSILEPLATFORM"
+		-- end
+
+		ConExecute "UI_SelectByCategory STRUCTURE TACTICALMISSILEPLATFORM"
+
+		local emptySilos = 0
+		local loadedSilos = 0
+		local loadedMissiles = 0
+
+		for key, unit in pairs(GetSelectedUnits() or {}) do
+			local missile_info = unit:GetMissileInfo()
+            local missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
+
+			if missilesCount == 0 then
+				emptySilos = emptySilos + 1
+			else
+				loadedSilos = loadedSilos + 1
+				loadedMissiles = loadedMissiles + missilesCount
+			end
 		end
+
+		print(loadedSilos.. " silos, "..loadedMissiles.." missiles, "..emptySilos.." empty")
+
+		if AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
+			CreateOrContinueSelection("closest", "auto", "silo")
+			ConExecute "StartCommandMode order RULEUCC_Tactical"
+		else
+			PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
+		end
+        -- ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
+		-- if AllHaveCategory(categories.ARTILLERY) and AllHaveCategory(categories.TECH3) and AllHaveCategory(categories.STRUCTURE) then
+		-- 	CreateOrContinueSelection("furthest", "auto")
+		-- end
 	end) end,
 	['Alt-Shift-Z'] = function() Hotkey('Alt-Shift-Z', function(hotkey)
-        ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
-		if AllHaveCategory(categories.ARTILLERY) and AllHaveCategory(categories.TECH3) and AllHaveCategory(categories.STRUCTURE) then
-			CreateOrContinueSelection("furthest", "auto")
-			ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
-			ConExecute 'StartCommandMode order RULEUCC_Attack'
-		end
+        -- ConExecute 'UI_SelectByCategory STRUCTURE ARTILLERY TECH3'
+		-- if AllHaveCategory(categories.ARTILLERY) and AllHaveCategory(categories.TECH3) and AllHaveCategory(categories.STRUCTURE) then
+		-- 	CreateOrContinueSelection("furthest", "auto")
+		-- 	ConExecute 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectAll()'
+		-- 	ConExecute 'StartCommandMode order RULEUCC_Attack'
+		-- end
 	end) end,
 
 	X = function() Hotkey('X', function(hotkey)
@@ -1353,6 +1387,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-X'] = function() Hotkey('Alt-X', function(hotkey)
+		CreateOrContinueSelection("health", "auto")
 	end) end,
 
 	C = function() Hotkey('C', function(hotkey)
@@ -1418,10 +1453,9 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-C'] = function() Hotkey('Alt-C', function(hotkey)
-		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(true)'
+		CreateOrContinueSelection("closest", "auto")
 	end) end,
 	['Alt-Shift-C'] = function() Hotkey('Alt-Shift-C', function(hotkey)
-		ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/copy-queue.lua").CopyOrders(false)'
 	end) end,
 
 	V = function() Hotkey('V', function(hotkey)
@@ -1501,7 +1535,7 @@ local customKeyMap = {
 			end
 
 			if AllHaveCategory(categories.NUKE) then
-				CreateOrContinueSelection("closest_missile", "auto") -- Manual cycle, tab, doesnt work properly
+				CreateOrContinueSelection("closest", "auto", "silo")
 				ConExecute "StartCommandMode order RULEUCC_Nuke"
 			else
 				PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
@@ -1521,18 +1555,7 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T3_6")'
 		else
-			SelectUnits(EntityCategoryFilterDown(categories.STRUCTURE + categories.TACTICALMISSILEPLATFORM, GetSelectedUnits() or {}))
 
-			if not AnyUnitSelected() then
-				ConExecute "UI_SelectByCategory STRUCTURE TACTICALMISSILEPLATFORM"
-			end
-
-			if AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
-				CreateOrContinueSelection("closest_missile", "auto") -- Manual cycle, tab, doesnt work properly
-				ConExecute "StartCommandMode order RULEUCC_Tactical"
-			else
-				PlaySound(Sound { Cue = "UI_Menu_Error_01", Bank = "Interface" })
-			end
 		end
 	end) end,
 	['Shift-M'] = function() Hotkey('Shift-M', function(hotkey)

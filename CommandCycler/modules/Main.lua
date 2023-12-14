@@ -9,6 +9,7 @@ local continious = false
 
 local sortMode = "closest"
 local cycleMode = "auto"
+local specialMode
 
 local currentUnit
 local currentUnitWithoutOrderIndex
@@ -16,8 +17,6 @@ local selectionWithoutOrder
 local selectionWithOrder
 local commandMode
 local commandModeData
--- local preJumpSelection = {}
-local onlyWithMissile = false
 
 KeyMapper.SetUserKeyAction('Cycle next, defaults to closest', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, true)',
@@ -126,38 +125,46 @@ function SelectNext()
     local nextUnitIndex = nil
     local missilesCount = false
 
-    if sortMode == "closest" then
+    if specialMode == "silo" then
+        if sortMode == "closest" then
+            nextOrderValue = 99999999
+            sortMode = "closest"
+        elseif sortMode == "furthest" then
+            nextOrderValue = 0
+            sortMode = "furthest"
+        end
+    elseif sortMode == "closest" then
         nextOrderValue = 99999999
-    elseif sortMode == "closest_missile" then
-        nextOrderValue = 99999999
-        onlyWithMissile = true
-        sortMode = "closest"
     elseif sortMode == "furthest" then
         nextOrderValue = 0
-    elseif sortMode == "furthest_missile" then
-        nextOrderValue = 0
-        onlyWithMissile = true
-        sortMode = "furthest"
     elseif sortMode == "damage" then
         nextOrderValue = 99999999
     elseif sortMode == "health" then
         nextOrderValue = 0
     end
 
-    for key,unit in pairs(selectionWithoutOrder) do
+    LOG("SelectNext")
 
-        if onlyWithMissile then
+    for key, unit in pairs(selectionWithoutOrder) do
+
+        if specialMode == "silo" then
             local missile_info = unit:GetMissileInfo()
             missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
         end
 
+        -- TODO: Sometimes it seems that it wont select when only one silo is loaded, but after adding logs and searching it works. Maybe something random but letting this be for now to see if it is solved.
+        LOG("COUNT: "..missilesCount)
+
         if unit:IsDead() then
+            LOG(1)
             table.remove(selectionWithoutOrder, key)
         else
-            if onlyWithMissile and missilesCount == 0 then
+            if specialMode == "silo" and missilesCount == 0 then
+                LOG(2)
                 table.insert(selectionWithOrder, selectionWithoutOrder[key])
                 table.remove(selectionWithoutOrder, key)
             else
+                LOG(3)
                 local distanceToCursor
                 local unitHealthPercent
                 local bp
@@ -199,7 +206,7 @@ function SelectNext()
     end
 
     if sortMode == "damage" and nextOrderValue == 1 then
-        print("Full health!")
+        print("Remaining units have full health")
         PlaySound(completePartialCycleSound)
     end
 
@@ -233,7 +240,7 @@ function SelectNext()
     end
 end
 
-function CreateSelection(units, sort, cycle)
+function CreateSelection(units, sort, cycle, special)
     if sort ~= nil then
         sortMode = sort
     end
@@ -243,10 +250,15 @@ function CreateSelection(units, sort, cycle)
         cycleMode = cycle
     end
 
+    if special ~= nil then
+        specialMode = special
+    else
+        specialMode = nil
+    end
+
     Reset()
     selectionWithoutOrder = units or {}
     selectionWithOrder = {}
-    onlyWithMissile = false
 end
 
 function MoveCurrentToWithOrder()
@@ -256,18 +268,22 @@ end
 
 -- TODO: Hotkey to get all of the current type of mex to assist, ie t1 upgrading first then t1, then t2 upgrading etc
 
-function CreateOrContinueSelection(sort, cycle)
+function CreateOrContinueSelection(sort, cycle, special)
     local selected = GetSelectedUnits()
+
+    LOG("SELECTED: "..table.getn(selected))
 
     if cycle == "camera_create" then
         CreateSelection(selected, "closest", "camera")
     elseif cycle == "camera" then
         SelectNext()
+    elseif special == "silo" and selected and table.getn(selected) > 0 then
+        LOG("silo")
+        CreateSelection(selected, sort, cycle, "silo")
+        SelectNext()
     elseif selected and table.getn(selected) > 1 then
-        -- Whenever we have more than one unit selected we intend to create that cycle group, unless we are in camera mode
         CreateSelection(selected, sort, cycle)
         SelectNext()
-        -- return
     elseif selected and SelectionIsCurrent(selected) then
         if cycle == "toggle" then
             if cycleMode == "auto" then cycleMode = "manual" elseif cycleMode == "manual" then cycleMode = "manual" end
@@ -276,7 +292,6 @@ function CreateOrContinueSelection(sort, cycle)
             MoveCurrentToWithOrder()
             SelectNext()
         end
-        -- return
     else
         SelectNext()
     end
