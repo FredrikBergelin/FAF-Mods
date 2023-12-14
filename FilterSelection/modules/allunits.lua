@@ -31,9 +31,9 @@ function Reset()
 	local currentlySelected = GetSelectedUnits() or {}
 	SetHiddenSelect(true)
 	isAutoSelection = true
-	--UISelectionByCategory("AIR", false, false, false, false)
+
 	AddSelection()
-	-- TODO
+
 	SelectUnits(currentlySelected)
 	isAutoSelection = false
 	SetHiddenSelect(false)

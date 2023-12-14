@@ -1,6 +1,10 @@
+-- TEMP line
+
 local GetAllUnits = import('/mods/FilterSelection/modules/allunits.lua').GetAllUnits
 local worldView = import('/lua/ui/game/worldview.lua').viewLeft
+local Prefs = import('/lua/user/prefs.lua')
 local Filters = {}
+local savedFilters = {}
 
 local TechCategoryList = {
 	TECH1 = 'T1 ',
@@ -9,16 +13,25 @@ local TechCategoryList = {
 	EXPERIMENTAL = 'EXP ',
 }
 
-function AddFilterSelection(group)
-	local SelectedUnits = GetSelectedUnits()
-	local Names = {}
-	Filters[group] = {}
+function AddFilterSelection(group, add)
+	local selectedUnits = GetSelectedUnits() or {}
 
-	for _,unit in SelectedUnits do
+	if table.getn(selectedUnits) == 0 then
+		print("No units selected")
+		return
+	end
+
+	local Names = {}
+
+	if not add then
+		Filters[group] = {}
+	end
+
+	for _,unit in selectedUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint()
 
-		if not isInTable(Filters[group],bp.BlueprintId) then
+		if not isInTable(Filters[group], bp.BlueprintId) then
 			Filters[group][id] = bp.BlueprintId
 			Names[id] = TechCategoryList[bp.TechCategory]..LOC(bp.Description)
 			--Names[id] = bp.General.UnitName
@@ -29,33 +42,42 @@ function AddFilterSelection(group)
 		message = message..unitName..', '
 	end
 	print(message)
-	--PrintText(message,28,"ff9161ff",1, 'centerbottom')
 end
 
-local lastClickTick = -9999
-
-function FilterSelect(group)
-    local currentTick = GameTick()
+function FilterSelect(group, allOnMap)
 	if Filters[group] == nil then return AddFilterSelection(group) end
 	local allUnits = GetAllUnits()
-	local SelectedUnits = {}
-	local isDoubleClick = currentTick < lastClickTick + 5
+	local selectUnits = {}
 	for _,unit in allUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint().BlueprintId
 
-		if isInTable(Filters[group],bp) and (isDoubleClick or worldView:GetScreenPos(unit)) then
-			table.insert(SelectedUnits,unit)
+		if isInTable(Filters[group], bp) and (allOnMap or worldView:GetScreenPos(unit)) then
+			table.insert(selectUnits, unit)
 		end
 	end
-	-- TODO ?
-	SelectUnits(SelectedUnits)
-	lastClickTick = currentTick
+
+	SelectUnits(selectUnits)
 end
 
-function isInTable(tabl,item)
-	for _,tableItem in tabl do
+function SaveFilterSelection(group)
+	-- print("Save to Filter " .. group)
+	-- local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
+	-- WARN("FilterSelection"..currentFaction)
+    -- -- Prefs.SetToCurrentProfile("FilterSelection"..Factions[currentFaction + 1], Filters)
+    -- Prefs.SetToCurrentProfile("FilterSelection"..currentFaction, Filters)
+end
+
+function isInTable(tabl, item)
+	for _, tableItem in tabl do
 		if tableItem == item then return true end
 	end
 	return false
+end
+
+function LoadPrefs()
+	local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
+	WARN("LoadPrefs FilterSelection"..currentFaction)
+    savedFilters = Prefs.GetFromCurrentProfile("FilterSelection"..currentFaction) or {}
+	-- Filters = savedFilters
 end

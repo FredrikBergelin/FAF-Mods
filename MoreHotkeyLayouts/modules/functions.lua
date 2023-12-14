@@ -7,6 +7,18 @@ function TableContains(table, element)
     return false
 end
 
+function AddToSelection(selectFunction)
+    local selected = GetSelectedUnits() or {}
+
+    selectFunction()
+
+    for k, unit in GetSelectedUnits() or {} do
+        table.insert(selected, unit)
+    end
+
+    SelectUnits(selected)
+end
+
 function SelectedUnitsWithOnlyTheseCommands(commands)
 	local units = GetSelectedUnits() or {}
 	local unitsToSelect = {}
@@ -40,32 +52,18 @@ function FilterAvailableTransports()
 	local unitsToSelect = {}
 
 	for index, unit in units do
-        -- LOG(unit:GetBlueprint().General.UnitName)
-        -- local cargo = unit:GetCargo() -- Error, GetCargo a nil value ??
-
-        -- LOG(cargo)
-        -- LOG("Cargo: "..table.getn(cargo))
-
-        -- if cargo and table.getn(cargo) == 0 then
-
         local comQ = unit:GetCommandQueue()
-
         local addUnit = true
 
-        -- INFO: TransportReverseLoadUnits
-        -- INFO: TransportLoadUnits
-        -- INFO: TransportUnloadUnits
-        -- INFO: Ferry
+        -- TransportReverseLoadUnits TransportLoadUnits TransportUnloadUnits Ferry
 
         for _, command in comQ do
-            LOG(command.type)
+            -- LOG(command.type)
             if (TableContains({"TransportLoadUnits", "TransportUnloadUnits", "TransportReverseLoadUnits", "Ferry"}, command.type)) then
                 addUnit = false
             end
         end
-
-        -- end
-
+        -- LOG(addUnit)
         if addUnit then
             table.insert(unitsToSelect, unit)
         end

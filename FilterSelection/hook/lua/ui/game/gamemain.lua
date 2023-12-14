@@ -1,7 +1,9 @@
-local originalCreateUI = CreateUI 
+local originalCreateUI = CreateUI
 local originalOnSelectionChanged = OnSelectionChanged
 local UpdateAllUnits = import('/mods/FilterSelection/modules/allunits.lua').UpdateAllUnits
+-- local LoadPrefs = import('/mods/FilterSelection/modules/FilterSelection.lua').LoadPrefs
 local KeyMapper = import('/lua/keymap/keymapper.lua')
+
 KeyMapper.SetUserKeyAction('add filter 1', {action = "UI_Lua import('/mods/FilterSelection/modules/FilterSelection.lua').AddFilterSelection(1)", category = 'FilterSelection', order = 421,})
 KeyMapper.SetUserKeyAction('add filter 2', {action = "UI_Lua import('/mods/FilterSelection/modules/FilterSelection.lua').AddFilterSelection(2)", category = 'FilterSelection', order = 422,})
 KeyMapper.SetUserKeyAction('add filter 3', {action = "UI_Lua import('/mods/FilterSelection/modules/FilterSelection.lua').AddFilterSelection(3)", category = 'FilterSelection', order = 423,})
@@ -24,15 +26,14 @@ KeyMapper.SetUserKeyAction('select filter 8', {action = "UI_Lua import('/mods/Fi
 KeyMapper.SetUserKeyAction('select filter 9', {action = "UI_Lua import('/mods/FilterSelection/modules/FilterSelection.lua').FilterSelect(9)", category = 'FilterSelection', order = 430,})
 KeyMapper.SetUserKeyAction('select filter 0', {action = "UI_Lua import('/mods/FilterSelection/modules/FilterSelection.lua').FilterSelect(0)", category = 'FilterSelection', order = 430,})
 
-
 function OnSelectionChanged(oldSelection, newSelection, added, removed)
    if not import('/mods/FilterSelection/modules/allunits.lua').IsAutoSelection() then
       originalOnSelectionChanged(oldSelection, newSelection, added, removed)
    end
 end
 
-function CreateUI(isReplay) 
-  originalCreateUI(isReplay) 
-  AddBeatFunction(UpdateAllUnits)
-
+function CreateUI(isReplay)
+   originalCreateUI(isReplay)
+   AddBeatFunction(UpdateAllUnits)
+   -- LoadPrefs()
 end

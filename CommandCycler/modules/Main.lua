@@ -105,7 +105,7 @@ local selectionChangedSinceLastCycle = true
 -- Select next unit in the saved selection
 function SelectNext()
 
-    if table.getn(selectionWithoutOrder) == 0 then
+    if not selectionWithoutOrder or table.getn(selectionWithoutOrder) == 0 then
         PlaySound(completeCycleSound)
         currentUnitWithoutOrderIndex = nil
         selectionWithoutOrder = selectionWithOrder
