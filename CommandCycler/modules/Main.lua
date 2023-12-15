@@ -150,10 +150,10 @@ function SelectNext()
         if specialMode == "silo" then
             local missile_info = unit:GetMissileInfo()
             missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
+            LOG("COUNT: "..missilesCount)
         end
 
         -- TODO: Sometimes it seems that it wont select when only one silo is loaded, but after adding logs and searching it works. Maybe something random but letting this be for now to see if it is solved.
-        LOG("COUNT: "..missilesCount)
 
         if unit:IsDead() then
             LOG(1)

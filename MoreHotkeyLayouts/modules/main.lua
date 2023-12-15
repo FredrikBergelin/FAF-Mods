@@ -1227,6 +1227,9 @@ local customKeyMap = {
 	['Alt-Chevron'] = function() Hotkey('Alt-Chevron', function(hotkey)
 		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
 	end) end,
+	['Alt-Shift-Chevron'] = function() Hotkey('Alt-Shift-Chevron', function(hotkey)
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
+	end) end,
 
 	Z = function() Hotkey('Z', function(hotkey)
 		if AllHaveCategory(categories.ENGINEER) then
@@ -1305,7 +1308,7 @@ local customKeyMap = {
 			end
 		end
 
-		print(loadedSilos.. " silos, "..loadedMissiles.." missiles, "..emptySilos.." empty")
+		print("TMLs:  "..loadedSilos.." / "..loadedMissiles.." <- "..emptySilos)
 
 		if AllHaveCategory(categories.TACTICALMISSILEPLATFORM) then
 			CreateOrContinueSelection("closest", "auto", "silo")
