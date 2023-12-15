@@ -271,7 +271,7 @@ end
 function CreateOrContinueSelection(sort, cycle, special)
     local selected = GetSelectedUnits()
 
-    LOG("SELECTED: "..table.getn(selected))
+    -- LOG("SELECTED: "..table.getn(selected))
 
     if cycle == "camera_create" then
         CreateSelection(selected, "closest", "camera")
