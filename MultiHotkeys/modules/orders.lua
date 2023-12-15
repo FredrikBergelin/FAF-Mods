@@ -49,8 +49,10 @@ function RemoveLastItem()
 end
 
 function UndoLastQueueOrder()
+    -- LOG("function")
     local units = GetSelectedUnits()
     if (units ~= nil) then
+        -- LOG("GetSelectedUnits not nil")
         local u = units[1]
         local queue = SetCurrentFactoryForQueueDisplay(u);
         if queue ~= nil then
