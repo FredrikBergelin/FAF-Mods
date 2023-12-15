@@ -13,35 +13,60 @@ local currentPreset = "Default"
 local PrioritySettings = {
     category = {},
     priorityTables = {
+        Tech1 = "{categories.TECH1}",
+        Tech2 = "{categories.TECH2}",
+        Tech3 = "{categories.TECH3, categories.TECH2}",
+        Tech4 = "{categories.EXPERIMENTAL, categories.TECH3}",
+
+        Shields = "{categories.SHIELD, categories.COUNTERINTELLIGENCE}",
+        DirectFire = "{categories.AIR * categories.DIRECTFIRE, " ..
+            "categories.SNIPER - categories.EXPERIMENTAL, " ..
+            "categories.DEFENSE * categories.DIRECTFIRE * categories.STRUCTURE, " ..
+            "categories.DIRECTFIRE - categories.COMMAND - categories.ANTIAIR - categories.EXPERIMENTAL}",
+        AA = "{categories.CRUISER, categories.BUILTBYLANDTIER3FACTORY * categories.ANTIAIR, " ..
+            "categories.ANTIAIR - categories.EXPERIMENTAL, categories.ANTIAIR}",
+        IndirectFire = "{categories.BUILTBYLANDTIER3FACTORY * categories.ARTILLERY * categories.TECH3, " ..
+            "categories.BUILTBYLANDTIER3FACTORY * categories.INDIRECTFIRE * categories.TECH2, " ..
+            "categories.ARTILLERY, categories.SNIPER - categories.EXPERIMENTAL, " ..
+            "categories.SNIPER, categories.INDIRECTFIRE}",
+        Torpedo = "categories.ANTINAVY * categories.OVERLAYANTINAVY",
+
         ACU = "{categories.COMMAND}",
-        Snipe = "{categories.STRATEGIC, categories.ANTIMISSILE * categories.TECH3, " ..
-            "categories.MASSEXTRACTION * categories.STRUCTURE * categories.TECH3, " ..
-            "categories.MASSEXTRACTION * categories.STRUCTURE * categories.TECH2, " ..
-            "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH4, " ..
-            "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH3, " ..
-            "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH2, " ..
-            "categories.MASSFABRICATION * categories.STRUCTURE, " ..
-            "categories.SHIELD, " ..
-            "categories.ARTILLERY * categories.TECH3, " ..
-            "categories.ARTILLERY * categories.TECH2}",
-        SMD = "{categories.ANTIMISSILE * categories.TECH3}",
-        Shields = "{categories.SHIELD}",
-        PD = "{categories.DEFENSE * categories.DIRECTFIRE * categories.STRUCTURE}",
-        AA = "{categories.ANTIAIR - categories.EXPERIMENTAL}",
 
         SACU = "{categories.SUBCOMMANDER}",
         Engies = "{categories.ENGINEER * categories.RECLAIMABLE}",
+        Mex = "{categories.MASSFABRICATION * categories.STRUCTURE, categories.MASSEXTRACTION, categories.ENERGYPRODUCTION * categories.STRUCTURE}",
+        Power = "{categories.ENERGYPRODUCTION * categories.STRUCTURE, categories.MASSFABRICATION * categories.STRUCTURE, categories.MASSEXTRACTION}",
         Factory = "{categories.TECH3 * categories.STRUCTURE * categories.RESEARCH, " ..
             "categories.TECH2 * categories.STRUCTURE * categories.RESEARCH, " ..
             "categories.TECH3 * categories.STRUCTURE * categories.FACTORY, " ..
             "categories.TECH2 * categories.STRUCTURE * categories.FACTORY, " ..
             "categories.TECH1 * categories.STRUCTURE * categories.FACTORY}",
-        Mex = "{categories.MASSEXTRACTION}",
-        Power = "{categories.ENERGYPRODUCTION * categories.STRUCTURE}",
+        SMD = "{categories.ANTIMISSILE * categories.TECH3}",
 
-        EXP = "{categories.EXPERIMENTAL}",
+        Naval = "{categories.MOBILE * categories.NAVAL}",
+        Bships = "{categories.BATTLESHIP}",
+        Destros = "{categories.DESTROYER}",
+        Cruiser = "{categories.CRUISER}",
+
+        Snipe = "{categories.INTELLIGENCE * categories.STRUCTURE * categories.TECH3, " ..
+            "categories.STRATEGIC, categories.ANTIMISSILE * categories.TECH3, " ..
+            "categories.MASSEXTRACTION * categories.STRUCTURE * categories.TECH3, " ..
+            "categories.MASSEXTRACTION * categories.STRUCTURE * categories.TECH2, " ..
+            "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH4, " ..
+            "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH3, " ..
+            "categories.ENERGYPRODUCTION * categories.STRUCTURE * categories.TECH2, " ..
+            ", " ..
+            "categories.SHIELD, " ..
+            "categories.ARTILLERY * categories.TECH3, " ..
+            "categories.ARTILLERY * categories.TECH2}",
+
+        PD = "{categories.DEFENSE * categories.DIRECTFIRE * categories.STRUCTURE}",
+
+
         Arty = "{categories.ARTILLERY}",
         Units = "{categories.MOBILE - categories.COMMAND - categories.EXPERIMENTAL - categories.ENGINEER}",
+
 
         TorpBomber = "{categories.AIR * categories.ANTINAVY, " ..
             "categories.AIR * categories.BOMBER, " ..
@@ -50,16 +75,11 @@ local PrioritySettings = {
             "categories.AIR * categories.GROUNDATTACK}",
         Gunship = "{categories.AIR * categories.GROUNDATTACK, " ..
             "categories.AIR * categories.BOMBER}",
-
-        Naval = "{categories.MOBILE * categories.NAVAL}",
-        Bships = "{categories.BATTLESHIP}",
-        Destros = "{categories.DESTROYER}",
-        Cruiser = "{categories.CRUISER}",
     },
-    exclusive = { ACU = false, Power = false, PD = false, Units = false, Shields = false, EXP = false, Engies = false,
+    exclusive = { ACU = false, Power = false, PD = false, Units = false, Shields = false, Tech4 = false, Engies = false,
         Arty = false, AA = false, SMD = false, Gunship = false, Mex = false, Snipe = false },
     buttonLayout = {
-        { "ACU", "Units", "PD", "Engies", "Shields", "EXP" }, --first column. bottom --> top
+        { "ACU", "Units", "PD", "Engies", "Shields", "Tech4" }, --first column. bottom --> top
         { "Mex", "Power", "SMD", "Arty", "Gunship", "AA" }, --second column. bottom --> top
         { "Factory", "SACU", "Cruiser", "Destros", "Bships", "Naval" }, --third column. bottom --> top
     },
