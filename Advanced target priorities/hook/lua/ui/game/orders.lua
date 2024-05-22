@@ -63,10 +63,8 @@ local PrioritySettings = {
 
         PD = "{categories.DEFENSE * categories.DIRECTFIRE * categories.STRUCTURE}",
 
-
         Arty = "{categories.ARTILLERY}",
         Units = "{categories.MOBILE - categories.COMMAND - categories.EXPERIMENTAL - categories.ENGINEER}",
-
 
         TorpBomber = "{categories.AIR * categories.ANTINAVY, " ..
             "categories.AIR * categories.BOMBER, " ..

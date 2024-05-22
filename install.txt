@@ -1,0 +1,11 @@
+How I install Supcom, FAF, all my mods and solve problems arising with my Macbook Pro 16 (2019, base version) running bootcamp.
+
+1. Install Supeme Commander Forged Alliance from Steam
+2. Install FAF: faf_windows-x64_2024_5_0.exe
+3. Start a custom game to test and let FAF download all the necessary files
+4. Move/Delete the two music files from SteamLib\steamapps\common\Supreme Commander Forged Alliance\sounds Music.xsb, Music.xwb. Otherwise my game crashes randomly after about 45 min.
+5. Run the FAF_process.ahk AutoHotkey script (Not sure if it makes any difference)
+6. Run the FAF_WinCtrl.ahk AutoHotkey script. It turns your left windows key (command key on mac) to ctrl, so you dont accidentally tab out and also easier to reach.
+
+Download mods
+
