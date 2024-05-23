@@ -16,10 +16,12 @@ local cached = {}
 
 local prevReset = 0
 local prevCache = 0
+local SetHiddenSelect = import("/mods/UMT/modules/select.lua").SetHiddenSelect
 
 ---Performs hidden unit selection callback
 ---@param callback fun()
 function HiddenSelect(callback)
+    SetHiddenSelect(true)
     local currentCommand = CommandMode.GetCommandMode()
     local oldSelection = GetSelectedUnits()
     SetIgnoreSelection(true)
@@ -27,9 +29,11 @@ function HiddenSelect(callback)
     SelectUnits(oldSelection)
     CommandMode.StartCommandMode(currentCommand[1], currentCommand[2])
     SetIgnoreSelection(false)
+    SetHiddenSelect(false)
 end
 
 local function ProcessAllUnits()
+    -- TODO
     UISelectionByCategory("ALLUNITS", false, false, false, false)
     for _, unit in GetSelectedUnits() or {} do
         units[unit:GetEntityId()] = unit
