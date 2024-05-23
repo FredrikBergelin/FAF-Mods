@@ -4,15 +4,15 @@ local AddBeatFunction = import("/lua/ui/game/gamemain.lua").AddBeatFunction
 local GetUnits = UMT.Units.GetFast
 local Options = import("options.lua")
 
-local engineersOption = Options.engineersOption
-local factoriesOption = Options.factoriesOption
-local siloOption = Options.siloOption
-local massExtractorsOption = Options.massExtractorsOption
+-- local engineersOption = Options.engineersOption
+-- local factoriesOption = Options.factoriesOption
+-- local siloOption = Options.siloOption
+-- local massExtractorsOption = Options.massExtractorsOption
 
-local engineersOverlay = engineersOption()
-local factoriesOverlay = factoriesOption()
-local siloOverlay = siloOption()
-local massExtractorsOverlay = massExtractorsOption()
+-- local engineersOverlay = engineersOption()
+-- local factoriesOverlay = factoriesOption()
+-- local siloOverlay = siloOption()
+-- local massExtractorsOverlay = massExtractorsOption()
 
 local overlays = UMT.Weak.Value {}
 
@@ -45,7 +45,8 @@ local EngineerOverlay = Class(Overlay)
     end,
 
     UpdateState = function(self)
-        if self.unit:IsDead() or not engineersOverlay then
+        -- if self.unit:IsDead() or not engineersOverlay then
+        if self.unit:IsDead() then
             self:Destroy()
             return
         end
@@ -87,7 +88,8 @@ local StationaryFactoryOverlay = Class(Overlay)
     end,
 
     UpdateState = function(self)
-        if self.unit:IsDead() or not factoriesOverlay then
+        -- if self.unit:IsDead() or not factoriesOverlay then
+        if self.unit:IsDead() then
             self:Destroy()
             return
         end
@@ -131,7 +133,8 @@ local MobileFactoryOverlay = Class(Overlay)
     end,
 
     UpdateState = function(self)
-        if self.unit:IsDead() or not factoriesOverlay then
+        -- if self.unit:IsDead() or not factoriesOverlay then
+        if self.unit:IsDead() then
             self:Destroy()
             return
         end
@@ -175,7 +178,8 @@ local MissileSiloOverlay = Class(Overlay)
     end,
 
     UpdateState = function(self)
-        if self.unit:IsDead() or not siloOverlay then
+        -- if self.unit:IsDead() or not siloOverlay then
+        if self.unit:IsDead() then
             self:Destroy()
             return
         end
@@ -226,7 +230,8 @@ local AntiNukeSiloOverlay = Class(Overlay)
     end,
 
     UpdateState = function(self)
-        if self.unit:IsDead() or not siloOverlay then
+        -- if self.unit:IsDead() or not siloOverlay then
+        if self.unit:IsDead() then
             self:Destroy()
             return
         end
@@ -269,7 +274,8 @@ local MexOverlay = Class(Overlay)
     end,
 
     UpdateState = function(self)
-        if self.unit:IsDead() or not massExtractorsOverlay then
+        -- if self.unit:IsDead() or not massExtractorsOverlay then
+        if self.unit:IsDead() then
             self:Destroy()
             return
         end
@@ -291,15 +297,18 @@ local function CreateUnitOverlays()
     local worldView = import("/lua/ui/game/worldview.lua").viewLeft
     for id, unit in allunits do
         if IsDestroyed(overlays[id]) and not unit:IsDead() then
-            if engineersOverlay and unit:IsInCategory("ENGINEER") then
+            if unit:IsInCategory("ENGINEER") then
                 overlays[id] = EngineerOverlay(worldView, unit)
-            elseif factoriesOverlay and unit:IsInCategory("FACTORY") and not unit:IsInCategory("EXTERNALFACTORYUNIT") and not unit:IsInCategory("EXPERIMENTAL") and not unit:IsInCategory("CRABEGG") then
+            elseif unit:IsInCategory("FACTORY") and not unit:IsInCategory("EXTERNALFACTORYUNIT") and
+                not unit:IsInCategory("EXPERIMENTAL") and not unit:IsInCategory("CRABEGG") then
                 overlays[id] = StationaryFactoryOverlay(worldView, unit)
-            elseif siloOverlay and unit:IsInCategory("SILO") and (unit:IsInCategory("TACTICALMISSILEPLATFORM") or unit:IsInCategory("NUKE"))then
+            elseif unit:IsInCategory("SILO") and
+                (unit:IsInCategory("TACTICALMISSILEPLATFORM") or unit:IsInCategory("NUKE")) then
                 overlays[id] = MissileSiloOverlay(worldView, unit)
-            elseif siloOverlay and unit:IsInCategory("SILO") and unit:IsInCategory("ANTIMISSILE") and unit:IsInCategory("TECH3") then
+            elseif unit:IsInCategory("SILO") and unit:IsInCategory("ANTIMISSILE") and
+                unit:IsInCategory("TECH3") then
                 overlays[id] = AntiNukeSiloOverlay(worldView, unit)
-            elseif massExtractorsOverlay and unit:IsInCategory("MASSEXTRACTION") and unit:IsInCategory("STRUCTURE") then
+            elseif unit:IsInCategory("MASSEXTRACTION") and unit:IsInCategory("STRUCTURE") then
                 overlays[id] = MexOverlay(worldView, unit)
             end
         end
@@ -309,16 +318,4 @@ end
 
 function Init(isReplay)
     AddBeatFunction(CreateUnitOverlays, true)
-    engineersOption.OnChange = function(var)
-        engineersOverlay = var()
-    end
-    factoriesOption.OnChange = function(var)
-        factoriesOverlay = var()
-    end
-    siloOption.OnChange = function(var)
-        siloOverlay = var()
-    end
-    massExtractorsOption.OnChange = function(var)
-        massExtractorsOverlay = var()
-    end
 end
