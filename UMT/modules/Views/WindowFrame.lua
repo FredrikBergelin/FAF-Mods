@@ -3,22 +3,21 @@ local Group = UMT.Controls.Group
 local UIUtil = import('/lua/ui/uiutil.lua')
 
 local textures = {
-    tl = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_ul.dds'),
-    tr = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_ur.dds'),
-    tm = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_horz_um.dds'),
-    ml = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_vert_l.dds'),
-    m = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_m.dds'),
-    mr = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_vert_r.dds'),
-    bl = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_ll.dds'),
-    bm = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_lm.dds'),
-    br = UIUtil.SkinnableFile('/game/mini-map-glow-brd/mini-map-glow_brd_lr.dds'),
+    tl = UIUtil.SkinnableFile("/game/panel/panel_brd_ul.dds"),
+    tr = UIUtil.SkinnableFile("/game/panel/panel_brd_ur.dds"),
+    tm = UIUtil.SkinnableFile("/game/panel/panel_brd_horz_um.dds"),
+    ml = UIUtil.SkinnableFile("/game/panel/panel_brd_vert_l.dds"),
+    m = UIUtil.SkinnableFile("/game/panel/panel_brd_m.dds"),
+    mr = UIUtil.SkinnableFile("/game/panel/panel_brd_vert_r.dds"),
+    bl = UIUtil.SkinnableFile("/game/panel/panel_brd_ll.dds"),
+    bm = UIUtil.SkinnableFile("/game/panel/panel_brd_lm.dds"),
+    br = UIUtil.SkinnableFile("/game/panel/panel_brd_lr.dds"),
 }
 
----@class GlowBorder : UMT.Group
-GlowBorder = UMT.Class(Group)
+
+WindowFrame = UMT.Class(Group)
 {
-    ---@param self GlowBorder
-    ---@param parent Control
+
     __init = function(self, parent)
         Group.__init(self, parent)
 
@@ -26,6 +25,8 @@ GlowBorder = UMT.Class(Group)
         self.tr = Bitmap(self, textures.tr)
         self.tm = Bitmap(self, textures.tm)
         self.ml = Bitmap(self, textures.ml)
+
+        self.m = Bitmap(self, textures.m)
 
         self.mr = Bitmap(self, textures.mr)
         self.bl = Bitmap(self, textures.bl)
@@ -54,22 +55,28 @@ GlowBorder = UMT.Class(Group)
         layouter(self.tm)
             :Left(self.tl.Right)
             :Right(self.tr.Left)
-            :AtTopIn(self, 1)
+            :AtTopIn(self)
 
         layouter(self.bm)
             :Left(self.bl.Right)
             :Right(self.br.Left)
-            :AtBottomIn(self, 1)
+            :AtBottomIn(self)
 
         layouter(self.mr)
             :Top(self.tr.Bottom)
             :Bottom(self.br.Top)
-            :AtRightIn(self, 2)
+            :AtRightIn(self)
 
         layouter(self.ml)
             :Top(self.tl.Bottom)
             :Bottom(self.bl.Top)
-            :AtLeftIn(self, 2)
+            :AtLeftIn(self)
+
+        layouter(self.m)
+            :Top(self.tm.Bottom)
+            :Bottom(self.bm.Top)
+            :Left(self.ml.Right)
+            :Right(self.mr.Left)
     end,
 
 }

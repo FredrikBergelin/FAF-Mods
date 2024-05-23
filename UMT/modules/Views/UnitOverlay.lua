@@ -5,7 +5,7 @@ local LazyVar = import('/lua/lazyvar.lua').Create
 ---@field PosX LazyVar<number>
 ---@field PosY LazyVar<number>
 ---@field unit UserUnit
----@field id integer
+---@field string integer
 ---@field offsetX number
 ---@field offsetY number
 UnitOverlay = Class(Bitmap)
@@ -33,20 +33,22 @@ UnitOverlay = Class(Bitmap)
         self:SetNeedsFrameUpdate(true)
     end,
 
+    ---@param self UnitOverlay
+    ---@return Vector2?
+    GetUnitPosition = function (self)
+        return self:GetParent():GetScreenPos(self.unit)
+    end,
+
     ---updates the position of the unit overlay on screen
     ---@param self UnitOverlay
     Update = function(self)
-        if not self or not self.unit or self.unit:IsDead() then
-            self:Hide()
+        local pos = self:GetUnitPosition()
+        if pos then
+            self:Show()
+            self.PosX:Set(pos.x)
+            self.PosY:Set(pos.y)
         else
-            local pos = self:GetParent():GetScreenPos(self.unit)
-            if pos then
-                self:Show()
-                self.PosX:Set(pos.x)
-                self.PosY:Set(pos.y)
-            else
-                self:Hide()
-            end
+            self:Hide()
         end
     end,
 
