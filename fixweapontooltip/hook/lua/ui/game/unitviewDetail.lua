@@ -1,5 +1,4 @@
-
-
+local MathFloor = math.floor
 
 function isWeaponEqual(wp1,wp2)
     -- this function checks a few important keys to see if the weapons are identical
@@ -193,109 +192,195 @@ function WrapAndPlaceText(bp, builder, descID, control)
                         end
                         local weaponDetails2
                         if info.NukeInnerRingDamage then
-                            weaponDetails2 = string.format(LOC('<LOC uvd_0014>Damage: %d - %d, Splash: %d - %d')..', '..LOC('<LOC uvd_Range>'),
+                            weaponDetails2 = string.format(LOC('<LOC uvd_0014>Damage: %d - %d, Splash: %.4g - %.4g')..', '..LOC('<LOC uvd_Range>'),
                                 info.NukeInnerRingDamage + info.NukeOuterRingDamage, info.NukeOuterRingDamage,
                                 info.NukeInnerRingRadius, info.NukeOuterRingRadius, info.MinRadius, info.MaxRadius)
                         else
-                            local MuzzleBones = 0
-                            if info.MuzzleSalvoDelay > 0 then
-                                MuzzleBones = info.MuzzleSalvoSize
-                            elseif info.RackBones then
-                                for _, v in info.RackBones do
-                                    MuzzleBones = MuzzleBones + table.getsize(v.MuzzleBones)
-                                end
-                                if not info.RackFireTogether then
-                                    MuzzleBones = MuzzleBones / table.getsize(info.RackBones)
-                                end
-                            else
-                                MuzzleBones = 1
-                            end
-
+                            --DPS Calculations
                             local Damage = info.Damage
                             if info.DamageToShields then
                                 Damage = math.max(Damage, info.DamageToShields)
                             end
-                            Damage = Damage * (info.DoTPulses or 1)
-                            local ProjectilePhysics = __blueprints[info.ProjectileId].Physics
-                            while ProjectilePhysics do
-                                Damage = Damage * (ProjectilePhysics.Fragments or 1)
-                                ProjectilePhysics = __blueprints[string.lower(ProjectilePhysics.FragmentId or '')].Physics
+                            if info.BeamLifetime > 0 then
+                                Damage = Damage * (1 + MathFloor(MATH_IRound(info.BeamLifetime)/(info.BeamCollisionDelay+0.1)))
+                            else
+                                Damage = Damage * (info.DoTPulses or 1) + (info.InitialDamage or 0)
+                                local ProjectilePhysics = __blueprints[info.ProjectileId].Physics
+                                while ProjectilePhysics do
+                                    Damage = Damage * (ProjectilePhysics.Fragments or 1)
+                                    ProjectilePhysics = __blueprints[string.lower(ProjectilePhysics.FragmentId or '')].Physics
+                                end
+                            end
+                           
+                            --Simulate the firing cycle to get the reload time.
+                            local CycleProjs = 0 --Projectiles fired per cycle
+                            local CycleTime = 0
+
+                            --Various delays need to be adapted to game tick format.
+                            local FiringCooldown = math.max(0.1, MATH_IRound(10 / info.RateOfFire) / 10)
+                            local ChargeTime = info.RackSalvoChargeTime or 0
+                            if ChargeTime > 0 then
+                                ChargeTime = math.max(0.1, MATH_IRound(10 * ChargeTime) / 10)
+                            end
+                            local MuzzleDelays = info.MuzzleSalvoDelay or 0
+                            if MuzzleDelays > 0 then
+                                MuzzleDelays = math.max(0.1, MATH_IRound(10 * MuzzleDelays) / 10)
+                            end
+                            local MuzzleChargeDelay = info.MuzzleChargeDelay or 0
+                            if MuzzleChargeDelay and MuzzleChargeDelay > 0 then
+                                MuzzleDelays = MuzzleDelays + math.max(0.1, MATH_IRound(10 * MuzzleChargeDelay) / 10)
+                            end
+                            local ReloadTime = info.RackSalvoReloadTime or 0
+                            if ReloadTime > 0 then
+                                ReloadTime = math.max(0.1, MATH_IRound(10 * ReloadTime) / 10)
                             end
 
-                            local ReloadTime = math.max((info.RackSalvoChargeTime or 0) + (info.RackSalvoReloadTime or 0) +
-                                (info.MuzzleSalvoDelay or 0) * (info.MuzzleSalvoSize or 1), 1 / info.RateOfFire)
+                            --Upon acquiring a target
+                            CycleTime = CycleTime + ChargeTime
+
+                            -- Keep track that the firing cycle has a constant rate
+                            local singleShot = true
+                            --OnFire is called from FireReadyState at this point, so we need to track time
+                            --to know how much the fire rate cooldown has progressed during our fire cycle.
+                            local SubCycleTime = 0
+                            local RackBones = info.RackBones
+                            if RackBones then --Teleport damage will not have a rack bone
+                                --Save the rack count so we can correctly calculate the final rack's fire cooldown
+                                local RackCount = table.getsize(RackBones)
+                                for index, Rack in RackBones do
+                                    local MuzzleCount = info.MuzzleSalvoSize
+                                    if info.MuzzleSalvoDelay == 0 then
+                                        MuzzleCount = table.getsize(Rack.MuzzleBones)
+                                    end
+                                    if MuzzleCount > 1 or info.RackFireTogether and RackCount > 1 then singleShot = false end
+                                    CycleProjs = CycleProjs + MuzzleCount
+
+                                    SubCycleTime = SubCycleTime + MuzzleCount * MuzzleDelays
+                                    if not info.RackFireTogether and index ~= RackCount then
+                                        if FiringCooldown <= SubCycleTime then
+                                            CycleTime = CycleTime + SubCycleTime + math.max(0.1, FiringCooldown - SubCycleTime)
+                                        else
+                                            CycleTime = CycleTime + FiringCooldown
+                                        end
+                                        SubCycleTime = 0
+                                    end
+                                end
+                            end
+                            if FiringCooldown <= (SubCycleTime + ChargeTime + ReloadTime) then
+                                CycleTime = CycleTime + SubCycleTime + ReloadTime + math.max(0.1, FiringCooldown - SubCycleTime - ChargeTime - ReloadTime)
+                            else
+                                CycleTime = CycleTime + FiringCooldown
+                            end
 
                             if not info.ManualFire and info.WeaponCategory ~= 'Kamikaze' then
-                                local DPS = Damage * MuzzleBones
-                                if info.BeamLifetime > 0 then
-                                    DPS = DPS * info.BeamLifetime * 10
-                                end
-                                DPS = DPS / ReloadTime + (info.InitialDamage or 0)
+                                local DPS = Damage * CycleProjs / CycleTime
 
                                 -- Calculate total DPS
 
                                 if DPS > 0 then
-	                                local WeaponCount = weapon.count or 1
-	                                local Category = info.WeaponCategory or ""
-	                                local MaxRadius = info.MaxRadius or 0
+                                    local WeaponCount = weapon.count or 1
+                                    local Category = info.WeaponCategory or ""
+                                    local MaxRadius = info.MaxRadius or 0
 
-	                                local WeaponDPS = DPS * WeaponCount
-	                                if Category == "Anti Air" then
-	                                	totalAirDPS = totalAirDPS + WeaponDPS
-	                                	airWeapons = airWeapons + WeaponCount
-	                                elseif Category == "Anti Navy" then
-	                                	totalNavyDPS = totalNavyDPS + WeaponDPS
-	                                	navyWeapons = navyWeapons + WeaponCount
-	                                else
-	                                	totalGroundDPS = totalGroundDPS + WeaponDPS
+                                    local WeaponDPS = DPS * WeaponCount
+                                    if Category == "Anti Air" then
+                                        totalAirDPS = totalAirDPS + WeaponDPS
+                                        airWeapons = airWeapons + WeaponCount
+                                    elseif Category == "Anti Navy" then
+                                        totalNavyDPS = totalNavyDPS + WeaponDPS
+                                        navyWeapons = navyWeapons + WeaponCount
+                                    else
+                                        totalGroundDPS = totalGroundDPS + WeaponDPS
 
-	                                	-- ranges
-	                                	if MaxRadius <= shortRange then
-	                                		totalShortRangeDPS = totalShortRangeDPS + WeaponDPS
-	                                		shortRangeWeapons = shortRangeWeapons + WeaponCount
-	                                	elseif MaxRadius <= longRange then
-	                                		totalMediumRangeDPS = totalMediumRangeDPS + WeaponDPS
-	                                		mediumRangeWeapons = mediumRangeWeapons + WeaponCount
-	                                	elseif MaxRadius > longRange then
-	                                		totalLongRangeDPS = totalLongRangeDPS + WeaponDPS
-	                                		longRangeWeapons = longRangeWeapons + WeaponCount
-	                                	end
-	                                end
+                                        -- ranges
+                                        if MaxRadius <= shortRange then
+                                            totalShortRangeDPS = totalShortRangeDPS + WeaponDPS
+                                            shortRangeWeapons = shortRangeWeapons + WeaponCount
+                                        elseif MaxRadius <= longRange then
+                                            totalMediumRangeDPS = totalMediumRangeDPS + WeaponDPS
+                                            mediumRangeWeapons = mediumRangeWeapons + WeaponCount
+                                        elseif MaxRadius > longRange then
+                                            totalLongRangeDPS = totalLongRangeDPS + WeaponDPS
+                                            longRangeWeapons = longRangeWeapons + WeaponCount
+                                        end
+                                    end
 
-	                                if totalGroundDPS + totalAirDPS + totalNavyDPS > DPS then
-	                                	-- only display DPS if we have more than one weapon, this is a very efficient way to check for that.
-	                                	displayDPS = true
-	                                end
-	                            end
+                                    if totalGroundDPS + totalAirDPS + totalNavyDPS > DPS then
+                                        -- only display DPS if we have more than one weapon, this is a very efficient way to check for that.
+                                        displayDPS = true
+                                    end
+                                end
 
-                                weaponDetails1 = weaponDetails1..LOCF('<LOC uvd_DPS>', DPS or -1)
+                                if not info.ManualFire and info.WeaponCategory ~= 'Kamikaze' and info.WeaponCategory ~= 'Defense' then
+                                    --Round DPS, or else it gets floored in string.format.
+                                    local DPS = MATH_IRound(Damage * CycleProjs / CycleTime)
+                                    weaponDetails1 = weaponDetails1..LOCF('<LOC uvd_DPS>', DPS)
+                                end
+                            end
+                            
+                            -- Avoid saying a unit fires a salvo when it in fact has a constant rate of fire
+                            if singleShot and ReloadTime == 0 then
+                                CycleTime = CycleTime / CycleProjs
+                                CycleProjs = 1
                             end
 
-                            weaponDetails2 = string.format(LOC('<LOC uvd_0010>Damage: %d, Splash: %d')..', '..LOC('<LOC uvd_Range>')..', '..LOC('<LOC uvd_Reload>'),
-                                Damage, info.DamageRadius, info.MinRadius, info.MaxRadius, ReloadTime)
+                            if CycleProjs > 1 then
+                                weaponDetails2 = string.format(LOC('<LOC uvd_0015>Damage: %.9g x%d, Splash: %.7g')..', '..LOC('<LOC uvd_Range>')..', '..LOC('<LOC uvd_Reload>'),
+                                Damage, CycleProjs, info.DamageRadius, info.MinRadius, info.MaxRadius, CycleTime)
+                            -- Do not display Reload stats for Kamikaze weapons
+                            elseif info.WeaponCategory == 'Kamikaze' then
+                                weaponDetails2 = string.format(LOC('<LOC uvd_0010>Damage: %.9g, Splash: %.7g')..', '..LOC('<LOC uvd_Range>'),
+                                Damage, info.DamageRadius, info.MinRadius, info.MaxRadius)
+                            -- Do not display 'Range' and Reload stats for 'Teleport in' weapons
+                            elseif info.WeaponCategory == 'Teleport' then
+                                weaponDetails2 = string.format(LOC('<LOC uvd_0010>Damage: %.9g, Splash: %.7g'),
+                                Damage, info.DamageRadius)
+                            else
+                                weaponDetails2 = string.format(LOC('<LOC uvd_0010>Damage: %.9g, Splash: %.7g')..', '..LOC('<LOC uvd_Range>')..', '..LOC('<LOC uvd_Reload>'),
+                                Damage, info.DamageRadius, info.MinRadius, info.MaxRadius, CycleTime)
+                            end
                         end
                         if weapon.count > 1 then
                             weaponDetails1 = weaponDetails1..' x'..weapon.count
                         end
                         table.insert(blocks, {color = UIUtil.fontColor, lines = {weaponDetails1}})
-                        table.insert(blocks, {color = 'FFFFB0B0', lines = {weaponDetails2}})
+
+                        if info.DamageType == 'Overcharge' then
+                            table.insert(blocks, {color = 'FF5AB34B', lines = {weaponDetails2}}) -- Same color as auto-overcharge highlight (autocast_green.dds)
+                        elseif info.WeaponCategory == 'Kamikaze' then
+                            table.insert(blocks, {color = 'FFFF2C2C', lines = {weaponDetails2}})
+                        else
+                            table.insert(blocks, {color = 'FFFFB0B0', lines = {weaponDetails2}})
+                        end
+
+                        if info.EnergyRequired > 0 and info.EnergyDrainPerSecond > 0 then
+                            local weaponDetails3 = string.format('Charge Cost: -%d E (-%d E/s)', info.EnergyRequired, info.EnergyDrainPerSecond)
+                            table.insert(blocks, {color = 'FFFF9595', lines = {weaponDetails3}})
+
+                        end
+
+                        local ProjectileEco = __blueprints[info.ProjectileId].Economy
+                        if ProjectileEco and (ProjectileEco.BuildCostMass > 0 or ProjectileEco.BuildCostEnergy > 0) and ProjectileEco.BuildTime > 0 then
+                            local weaponDetails4 = string.format('Missile Cost: %d M, %d E, %d BT', ProjectileEco.BuildCostMass, ProjectileEco.BuildCostEnergy, ProjectileEco.BuildTime)
+                            table.insert(blocks, {color = 'FFFF9595', lines = {weaponDetails4}})
+                        end
                     end
 
                     if displayDPS then
-                    	lines = {''}
-                    	if totalGroundDPS > 0 then
-                    		table.insert(lines,string.format("Direct Fire: %s weapons, %s DPS",shortRangeWeapons+mediumRangeWeapons+longRangeWeapons,math.round(totalGroundDPS)))
-                    		if totalShortRangeDPS > 0 then table.insert(lines,string.format("    Short (<=%s): %s weapons, %s DPS",shortRange,shortRangeWeapons,math.round(totalShortRangeDPS))) end
-                    		if totalMediumRangeDPS > 0 then table.insert(lines,string.format("    Medium (<=%s): %s weapons, %s DPS",longRange,mediumRangeWeapons,math.round(totalMediumRangeDPS))) end
-                    		if totalLongRangeDPS > 0 then table.insert(lines,string.format("    Long (>%s): %s weapons, %s DPS",longRange,longRangeWeapons,math.round(totalLongRangeDPS))) end
-                    	end
-                    	if totalAirDPS > 0 then
-                    		table.insert(lines,string.format("Anti Air: %s weapons, %s DPS",airWeapons,math.round(totalAirDPS)))
-                    	end
-                    	if totalNavyDPS > 0 then
-                    		table.insert(lines,string.format("Anti Navy: %s weapons, %s DPS",airWeapons,math.round(totalNavyDPS)))
-                    	end
-                		table.insert(blocks, {color = UIUtil.fontColor, lines = lines})
+                        lines = {''}
+                        if totalGroundDPS > 0 then
+                            table.insert(lines,string.format("Direct Fire: %s weapons, %s DPS",shortRangeWeapons+mediumRangeWeapons+longRangeWeapons,math.round(totalGroundDPS)))
+                            if totalShortRangeDPS > 0 then table.insert(lines,string.format("    Short (<=%s): %s weapons, %s DPS",shortRange,shortRangeWeapons,math.round(totalShortRangeDPS))) end
+                            if totalMediumRangeDPS > 0 then table.insert(lines,string.format("    Medium (<=%s): %s weapons, %s DPS",longRange,mediumRangeWeapons,math.round(totalMediumRangeDPS))) end
+                            if totalLongRangeDPS > 0 then table.insert(lines,string.format("    Long (>%s): %s weapons, %s DPS",longRange,longRangeWeapons,math.round(totalLongRangeDPS))) end
+                        end
+                        if totalAirDPS > 0 then
+                            table.insert(lines,string.format("Anti Air: %s weapons, %s DPS",airWeapons,math.round(totalAirDPS)))
+                        end
+                        if totalNavyDPS > 0 then
+                            table.insert(lines,string.format("Anti Navy: %s weapons, %s DPS",airWeapons,math.round(totalNavyDPS)))
+                        end
+                        table.insert(blocks, {color = UIUtil.fontColor, lines = lines})
                     end
 
                     lines = {}
@@ -303,11 +388,11 @@ function WrapAndPlaceText(bp, builder, descID, control)
                         local info = weapon.info
                         local weaponDetails = LOCStr(name)..' ('..LOCStr(info.WeaponCategory)..') '
                         if info.NukeInnerRingDamage then
-                            weaponDetails = weaponDetails..LOCF('<LOC uvd_0014>Damage: %d - %d, Splash: %d - %d',
+                            weaponDetails = weaponDetails..LOCF('<LOC uvd_0014>Damage: %d - %d, Splash: %.4g - %.4g',
                                 (info.NukeInnerRingDamage or -1) + (info.NukeOuterRingDamage or -1), info.NukeOuterRingDamage or -1,
                                 info.NukeInnerRingRadius or -1, info.NukeOuterRingRadius or -1)
                         else
-                            weaponDetails = weaponDetails..LOCF('<LOC uvd_0010>Damage: %d, Splash: %d',
+                            weaponDetails = weaponDetails..LOCF('<LOC uvd_0010>Damage: %d, Splash: %.4g',
                                 info.Damage, info.DamageRadius)
                         end
                         if weapon.count > 1 then
