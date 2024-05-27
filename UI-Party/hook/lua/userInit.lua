@@ -1,5 +1,0 @@
---LOG("XXXX")
---UserUnit.GetEconData = function(self)
---	LOG("hi")
---	return nil;
---end
