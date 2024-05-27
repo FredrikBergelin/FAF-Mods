@@ -1,0 +1,17 @@
+name = "ChatBeep"
+uid = "24959F44-sdfw-3656-0212-C703E489A257"
+version = 2
+copyright = "2018 Uveso"
+description = "Gives an Audable Beep in chat whenever a message is sent can be configured helps with game ingame communication. All credit goes to Uveso"
+author = "Uveso"
+url = "http://"
+icon = "/mods/ChatBeep/bugfix.png"
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
+requires = { }
+requiresNames = { }
+conflicts = { }
+before = { }
+after = { }
