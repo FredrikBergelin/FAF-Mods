@@ -1,7 +1,7 @@
 local Options = UMT.Options
 local OptionVar = UMT.OptionVar.Create
 
-local modName = "4SB"
+local modName = "4SBFF"
 ---@param option string
 ---@return OptionVar
 local function ArialFontOptionVar(option)

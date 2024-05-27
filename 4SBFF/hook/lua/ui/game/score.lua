@@ -4,21 +4,21 @@ end
 
 if ExistGlobal "UMT" and UMT.Version >= 8 then
 
-    local ScoreBoards = import("/mods/4SB/modules/ScoreBoard.lua")
+    local ScoreBoards = import("/mods/4SBFF/modules/ScoreBoard.lua")
 
     local LayoutFor = UMT.Layouter.ReusedLayoutFor
 
     local layouts = {
         ["default"] = false,
-        ["semi glow border"] = import("/mods/4SB/modules/Layouts/SemiGlowBorder.lua").Layout,
-        ["glow border"] = import("/mods/4SB/modules/Layouts/GameGlowBorder.lua").Layout,
-        ["window border"] = import("/mods/4SB/modules/Layouts/GameWindowFrame.lua").Layout
+        ["semi glow border"] = import("/mods/4SBFF/modules/Layouts/SemiGlowBorder.lua").Layout,
+        ["glow border"] = import("/mods/4SBFF/modules/Layouts/GameGlowBorder.lua").Layout,
+        ["window border"] = import("/mods/4SBFF/modules/Layouts/GameWindowFrame.lua").Layout
     }
 
     local replayLayouts = {
         ["default"] = false,
-        ["glow border"] = import("/mods/4SB/modules/Layouts/ReplayGlowBorder.lua").Layout,
-        ["window border"] = import("/mods/4SB/modules/Layouts/ReplayWindowFrame.lua").Layout
+        ["glow border"] = import("/mods/4SBFF/modules/Layouts/ReplayGlowBorder.lua").Layout,
+        ["window border"] = import("/mods/4SBFF/modules/Layouts/ReplayWindowFrame.lua").Layout
     }
     function CreateScoreUI()
         if not IsDestroyed(controls.scoreBoard) then return end
@@ -27,7 +27,7 @@ if ExistGlobal "UMT" and UMT.Version >= 8 then
         local isCampaign = import('/lua/ui/campaign/campaignmanager.lua').campaignMode
         local isReplay   = import("/lua/ui/game/gamemain.lua").GetReplayState()
 
-        local Options = import("/mods/4SB/modules/Options.lua")
+        local Options = import("/mods/4SBFF/modules/Options.lua")
         Options.Init(isReplay or IsObserver())
 
         local scoreboard
