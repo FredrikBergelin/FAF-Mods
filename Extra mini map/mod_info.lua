@@ -1,0 +1,11 @@
+name = "Extra mini map"
+version = 3
+copyright = "Eternal-"
+description = "New look of mini-map. No borders"
+icon = "/mods/Extra mini map/logo.png"
+author = "Eternal-"
+url = ""
+uid = "b0d9ac94-cetet-11e5-9912-ba1s3e4"
+exclusive = false
+ui_only = true
+conflicts = {}
