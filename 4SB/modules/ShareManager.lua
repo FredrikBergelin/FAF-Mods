@@ -16,7 +16,7 @@ end
 
 local function GiveResourcesToPlayer(resourceType, id, ratio)
     if GetFocusArmy() == id then return end
-    
+
     ratio = ratio or 0.5
     local scoresCache = import("/lua/ui/game/score.lua").GetScoreCache()
     local armyScore = scoresCache[id]

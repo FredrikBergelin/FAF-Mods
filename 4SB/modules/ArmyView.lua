@@ -8,6 +8,8 @@ local ColorUtils = UMT.ColorUtils
 
 local Options = import("Options.lua")
 
+local compactView = true
+
 local Functions = UMT.Layouter.Functions
 local alphaAnimator = UMT.Animation.Animator(GetFrame(0))
 local animationFactory = UMT.Animation.Factory.Base
@@ -196,7 +198,7 @@ ArmyView = UMT.Class(Group)
             math.max(
                 nameWidth(),
                 TextWidth(self._name, self._name:GetText(), font(), armyViewTextPointSize)
-            ))
+            ) + (compactView and 125 or 0))
     end,
 
     ---@type Color
@@ -393,7 +395,7 @@ AllyView = UMT.Class(ArmyView)
         layouter(self._energyBtn)
             :Right(self._energy.Right)
             :AtVerticalCenterIn(self)
-            :Width(35)
+            :Width(compactView and 100 or 35)
             :Height(self.Height)
             :Over(self, 15)
             :EnableHitTest()
@@ -412,7 +414,7 @@ AllyView = UMT.Class(ArmyView)
         layouter(self._massBtn)
             :Right(self._mass.Right)
             :AtVerticalCenterIn(self)
-            :Width(35)
+            :Width(compactView and 100 or 35)
             :Height(self.Height)
             :Over(self, 15)
             :EnableHitTest()
@@ -439,7 +441,7 @@ AllyView = UMT.Class(ArmyView)
 
 
         layouter(self._mass)
-            :AtRightIn(self, 50)
+            :AtRightIn(self, compactView and 125 or 50)
             :AtVerticalCenterIn(self)
             :Color('ffb7e75f')
             :Over(self, 10)
@@ -471,7 +473,12 @@ AllyView = UMT.Class(ArmyView)
         local resources = data.resources
         if not resources then return end
 
-        if mode == "income" then
+        if compactView then
+            self._energy:SetText(FormatNumber(resources.storage.storedEnergy) ..
+                " / " .. FormatNumber(resources.storage.maxEnergy) .. " +" .. FormatNumber(resources.energyin.rate * 10))
+            self._mass:SetText(FormatNumber(resources.storage.storedMass) ..
+                " / " .. FormatNumber(resources.storage.maxMass) .. " +" .. FormatNumber(resources.massin.rate * 10))
+        elseif mode == "income" then
             self._energy:SetText(FormatNumber(resources.energyin.rate * 10))
             self._mass:SetText(FormatNumber(resources.massin.rate * 10))
         elseif mode == "storage" then

@@ -52,6 +52,9 @@ InfoPanel = UMT.Class(Group)
         self._mapName:SetFont(Options.title.font.mapName:Raw(), textSize)
         layouter(self._mapName)
             :AtCenterIn(self)
+        -- :AtVerticalCenterIn(self)
+        --     :AtCenterIn(self, 10)
+        --     :DisableHitTest()
 
 
         self._mapSize:SetFont(Options.title.font.mapSize:Raw(), textSize)
