@@ -1,5 +1,5 @@
-local passthroughCondition = function(k,v) return true end
-local passthroughSelector = function(k,v) return v end
+local passthroughCondition = function(k, v) return true end
+local passthroughSelector = function(k, v) return v end
 
 _G.from = function(t)
 	local self = {}
@@ -8,9 +8,9 @@ _G.from = function(t)
 
 	self.select = function(p)
 		local result = {}
-		for k,v in self.t do
-			if p(k,v) then
-				result[k] = p(k,v)
+		for k, v in self.t do
+			if p(k, v) then
+				result[k] = p(k, v)
 			end
 		end
 		return from(result)
@@ -18,8 +18,8 @@ _G.from = function(t)
 
 	self.where = function(p)
 		local result = from({})
-		for k,v in self.t do
-			if p(k,v) then
+		for k, v in self.t do
+			if p(k, v) then
 				result.addValue(v)
 			end
 		end
@@ -28,7 +28,7 @@ _G.from = function(t)
 
 	self.distinct = function()
 		local result = from({})
-		for k,v in self.t do
+		for k, v in self.t do
 			if not result.contains(v) then
 				result.addValue(v)
 			end
@@ -38,8 +38,8 @@ _G.from = function(t)
 
 
 	self.all = function(p)
-		for k,v in self.t do
-			if not p(k,v) then
+		for k, v in self.t do
+			if not p(k, v) then
 				return false
 			end
 		end
@@ -48,7 +48,7 @@ _G.from = function(t)
 
 	self.values = function()
 		local result = {}
-		for k,v in self.t do
+		for k, v in self.t do
 			table.insert(result, v)
 		end
 		return from(result)
@@ -56,29 +56,29 @@ _G.from = function(t)
 
 	self.keys = function()
 		local result = {}
-		for k,v in self.t do
+		for k, v in self.t do
 			table.insert(result, k)
 		end
 		return from(result)
 	end
 
 	self.first = function(condition)
-		for k,v in self.t do
-			if not condition or condition(k,v) then return v end
+		for k, v in self.t do
+			if not condition or condition(k, v) then return v end
 		end
 		return nil
 	end
 
 	self.last = function(condition)
 		local l = nil
-		for k,v in self.t do
-			if not condition or condition(k,v) then l=v end
+		for k, v in self.t do
+			if not condition or condition(k, v) then l = v end
 		end
 		return l
 	end
 
 	self.contains = function(value)
-		for k,v in self.t do
+		for k, v in self.t do
 			if v == value then return true end
 		end
 		return false
@@ -86,7 +86,7 @@ _G.from = function(t)
 
 	self.max = function(selector)
 		local best = nil
-		for k,v in self.t do
+		for k, v in self.t do
 			if selector then v = selector(k, v) end
 			if v > best then best = v end
 		end
@@ -94,8 +94,8 @@ _G.from = function(t)
 	end
 
 	self.any = function(condition)
-		for k,v in self.t do
-			if not condition or condition(k,v) then return true end
+		for k, v in self.t do
+			if not condition or condition(k, v) then return true end
 		end
 		return false
 	end
@@ -105,24 +105,24 @@ _G.from = function(t)
 		return table.getn(self.where(condition).toArray())
 	end
 
-	self.foreach = function (action)
-		for k,v in self.t do
-			action(k,v)
+	self.foreach = function(action)
+		for k, v in self.t do
+			action(k, v)
 		end
 		return self --?
 	end
-	
+
 	self.dump = function()
 		LOG("-----")
-		for k,v in self.t do
-			LOG(k,v)
-		end	
+		for k, v in self.t do
+			LOG(k, v)
+		end
 		LOG("-----")
 		return self --?
 	end
 
 	self.sum = function(selector)
-		local query = self	
+		local query = self
 		if selector then query = query.select(selector) end
 		local result = 0
 		query.foreach(function(k, v) result = result + v end)
@@ -130,7 +130,7 @@ _G.from = function(t)
 	end
 
 	self.avg = function(selector)
-		local query = self	
+		local query = self
 		if selector then query = query.select(selector) end
 		local result = 0
 		query.foreach(function(k, v) result = result + v end)
@@ -139,7 +139,7 @@ _G.from = function(t)
 
 	self.copy = function()
 		local result = {}
-		self.foreach(function(k,v) result[k] = v end)
+		self.foreach(function(k, v) result[k] = v end)
 		return from(result)
 	end
 
@@ -157,7 +157,7 @@ _G.from = function(t)
 
 	self.toArray = function()
 		local result = {}
-		for k,v in self.t do
+		for k, v in self.t do
 			table.insert(result, v)
 		end
 		return result

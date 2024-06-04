@@ -11,7 +11,7 @@ local unitToggleRules = {
 }
 
 function GetOnValueForScriptBit(i)
-	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
+	if i == 0 then return false end -- shield is weird and reversed...
 	return true
 end
 
