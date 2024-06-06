@@ -12,27 +12,3 @@ How I install Supcom/FAF + all my mods (and solve problems with my Macbook Pro 1
 10. Double check the game.prefs file if you want to be sure, before terminating.
 11. Take backups of your game.prefs file from time to time. Initializing a git repo at the file location is an easy way.
 
-
-Mods todo:
-
-- Color Coded Strategic Icons
-    - Finish structures
-    - Set common middle parts, for example splash damage is horizontal line, missiles are vertical line
-    - Add more individual icons wherever necessary. Lightning tank? 
-- ECOntrol
-    - Update icons
-        - "nuke_category" is used for all missiles, split or merge?
-    - Subcategories? Expandable?
-    - Show all from start, so they can be configured during early game as well
-    - Add more modes: Pause, AutoPause, AutoActivate (for example all new ASF should activate stealth), Prioritize (AutoPause others), ...
-    - Exenditure should scale with the highest one filling the bar, others sized based on how they differ from that one.
-- 
-
-New mod ideas:
-
-- ResourceControl
-    - Hotkeys to pause and unpause everything that drains energy. Construction, abilities, and weapon fire stance when requiring energy.
-
-    - Pausing / Auto-pausing artillery should put them into no fire stance, its the only way to halt their energy use. Both CapsLock and UI-party ECOntrol
-
-    - Shields deactivates on CapsLock AND on shift-CapsLock and must be manually activated.
