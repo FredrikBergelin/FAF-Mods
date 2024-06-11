@@ -37,6 +37,7 @@ local EngineerOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
+        -- TODO: if not is destroyed
         if self.isIdle then
             self:Update()
         else
