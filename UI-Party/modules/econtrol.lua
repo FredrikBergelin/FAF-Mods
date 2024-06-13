@@ -141,11 +141,13 @@ function PauseProduction(unitType, spendType)
 	for k, v in workers do
 		local econData = GetEconData(v)
 		if v.econtrol == nil then v.econtrol = {} end
-		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
-		v.econtrol.pausedMassConsumed = econData["massConsumed"]
-		table.insert(unitType.pausedProductionUnits, v)
+		if not GetIsPaused { v } then
+			v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
+			v.econtrol.pausedMassConsumed = econData["massConsumed"]
+			table.insert(unitType.pausedProductionUnits, v)
+		end
 	end
-	SetPaused(workers, true)
+	SetPaused(unitType.pausedProductionUnits, true)
 	unitType.productionUnits = {}
 end
 
