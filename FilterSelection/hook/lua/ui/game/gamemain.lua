@@ -1,7 +1,7 @@
 local originalCreateUI = CreateUI
 local originalOnSelectionChanged = OnSelectionChanged
 local UpdateAllUnits = import('/mods/FilterSelection/modules/allunits.lua').UpdateAllUnits
--- local LoadPrefs = import('/mods/FilterSelection/modules/FilterSelection.lua').LoadPrefs
+local LoadPrefs = import('/mods/FilterSelection/modules/FilterSelection.lua').LoadPrefs
 local KeyMapper = import('/lua/keymap/keymapper.lua')
 
 KeyMapper.SetUserKeyAction('add filter 1', {action = "UI_Lua import('/mods/FilterSelection/modules/FilterSelection.lua').AddFilterSelection(1)", category = 'FilterSelection', order = 421,})
@@ -35,5 +35,5 @@ end
 function CreateUI(isReplay)
    originalCreateUI(isReplay)
    AddBeatFunction(UpdateAllUnits)
-   -- LoadPrefs()
+   LoadPrefs()
 end

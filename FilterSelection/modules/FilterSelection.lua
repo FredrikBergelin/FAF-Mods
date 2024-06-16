@@ -1,7 +1,4 @@
--- TEMP line
-
 local GetAllUnits = import('/mods/FilterSelection/modules/allunits.lua').GetAllUnits
-local worldView = import('/lua/ui/game/worldview.lua').viewLeft
 local Prefs = import('/lua/user/prefs.lua')
 local Filters = {}
 local savedFilters = {}
@@ -27,32 +24,38 @@ function AddFilterSelection(group, add)
 		Filters[group] = {}
 	end
 
-	for _,unit in selectedUnits do
+	for _, unit in selectedUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint()
 
 		if not isInTable(Filters[group], bp.BlueprintId) then
 			Filters[group][id] = bp.BlueprintId
-			Names[id] = TechCategoryList[bp.TechCategory]..LOC(bp.Description)
+			Names[id] = TechCategoryList[bp.TechCategory] .. LOC(bp.Description)
 			--Names[id] = bp.General.UnitName
 		end
 	end
 	message = 'Filter contains: '
-	for _,unitName in Names do
-		message = message..unitName..', '
+	for _, unitName in Names do
+		message = message .. unitName .. ', '
 	end
 	print(message)
 end
 
 function FilterSelect(group, allOnMap)
+
+	-- LOG("FilterSelect")
+	-- LOG("Group")
+	-- LOG(group)
+
 	if Filters[group] == nil then return AddFilterSelection(group) end
 	local allUnits = GetAllUnits()
 	local selectUnits = {}
-	for _,unit in allUnits do
+	for _, unit in allUnits do
 		local id = unit:GetEntityId()
 		local bp = unit:GetBlueprint().BlueprintId
 
-		if isInTable(Filters[group], bp) and (allOnMap or worldView:GetScreenPos(unit)) then
+		local worldview = import("/lua/ui/game/worldview.lua").viewLeft
+		if isInTable(Filters[group], bp) and (allOnMap or worldview:GetScreenPos(unit)) then
 			table.insert(selectUnits, unit)
 		end
 	end
@@ -61,11 +64,24 @@ function FilterSelect(group, allOnMap)
 end
 
 function SaveFilterSelection(group)
-	-- print("Save to Filter " .. group)
-	-- local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
-	-- WARN("FilterSelection"..currentFaction)
-    -- -- Prefs.SetToCurrentProfile("FilterSelection"..Factions[currentFaction + 1], Filters)
-    -- Prefs.SetToCurrentProfile("FilterSelection"..currentFaction, Filters)
+	print("Save to Filter " .. group)
+
+	local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
+
+	WARN("FilterSelection" .. currentFaction)
+
+	if Filters[group] == nil then
+		AddFilterSelection(group)
+	end
+
+	if savedFilters[currentFaction] == nil then
+		savedFilters[currentFaction] = {}
+	end
+
+	savedFilters[currentFaction][group] = Filters[group]
+
+	-- Prefs.SetToCurrentProfile("FilterSelection"..Factions[currentFaction + 1], Filters)
+	Prefs.SetToCurrentProfile("FilterSelection", savedFilters)
 end
 
 function isInTable(tabl, item)
@@ -77,7 +93,12 @@ end
 
 function LoadPrefs()
 	local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
-	WARN("LoadPrefs FilterSelection"..currentFaction)
-    savedFilters = Prefs.GetFromCurrentProfile("FilterSelection"..currentFaction) or {}
-	-- Filters = savedFilters
+
+	WARN("LoadPrefs FilterSelection" .. currentFaction)
+
+	savedFilters = Prefs.GetFromCurrentProfile("FilterSelection") or {}
+
+	if savedFilters[currentFaction] == nil then return end
+
+	Filters = savedFilters[currentFaction] or {}
 end
