@@ -31,8 +31,9 @@ local EngineerOverlay = Class(Overlay)
             self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t2_idle.dds", 0)
         elseif unit:IsInCategory("TECH3") and not unit:IsInCategory("SUBCOMMANDER") then
             self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t3_idle.dds", 0)
-        elseif unit:IsInCategory("SUBCOMMANDER") then
-            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/sacu_idle.dds", 0)
+        -- Hides color coding underneath, and not really necessary anyway for sacu
+        -- elseif unit:IsInCategory("SUBCOMMANDER") then
+        --     self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/sacu_idle.dds", 0)
         end
     end,
 
