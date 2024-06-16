@@ -85,7 +85,11 @@ local StationaryFactoryOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
+        if not self.unit:IsDead() and self.isIdle then
         self:Update()
+        else
+            self:Hide()
+        end
     end,
 
     UpdateState = function(self)
@@ -267,7 +271,7 @@ local MexOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
-        if self.isUpgrading then
+        if not self.unit:IsDead() and self.isUpgrading then
             self:Update()
         else
             self:Hide()
