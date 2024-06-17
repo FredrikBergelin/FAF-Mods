@@ -93,7 +93,7 @@ end
 function ReduceIndex(index)
     if index > 1 then
         return (index - 1)
-    -- To select the first the next function needs nil not 0
+        -- To select the first the next function needs nil not 0
     else
         return nil
     end
@@ -103,7 +103,6 @@ local selectionChangedSinceLastCycle = true
 
 -- Select next unit in the saved selection
 function SelectNext()
-
     if not selectionWithoutOrder or table.getn(selectionWithoutOrder) == 0 then
         PlaySound(completeCycleSound)
         currentUnitWithoutOrderIndex = nil
@@ -124,6 +123,7 @@ function SelectNext()
     local nextUnit = nil
     local nextUnitIndex = nil
     local missilesCount = false
+    local unitsToRemove = {}
 
     if specialMode == "silo" then
         if sortMode == "closest" then
@@ -143,28 +143,19 @@ function SelectNext()
         nextOrderValue = 0
     end
 
-    LOG("SelectNext")
-
     for key, unit in pairs(selectionWithoutOrder) do
-
         if specialMode == "silo" then
             local missile_info = unit:GetMissileInfo()
             missilesCount = missile_info.nukeSiloStorageCount + missile_info.tacticalSiloStorageCount
-            LOG("COUNT: "..missilesCount)
         end
 
-        -- TODO: Sometimes it seems that it wont select when only one silo is loaded, but after adding logs and searching it works. Maybe something random but letting this be for now to see if it is solved.
-
         if unit:IsDead() then
-            LOG(1)
-            table.remove(selectionWithoutOrder, key)
+            table.insert(unitsToRemove, key)
         else
             if specialMode == "silo" and missilesCount == 0 then
-                LOG(2)
-                table.insert(selectionWithOrder, selectionWithoutOrder[key])
-                table.remove(selectionWithoutOrder, key)
+                table.insert(selectionWithOrder, unit)
+                table.insert(unitsToRemove, key)
             else
-                LOG(3)
                 local distanceToCursor
                 local unitHealthPercent
                 local bp
@@ -205,6 +196,11 @@ function SelectNext()
         end
     end
 
+    -- Remove units that were marked for removal
+    for _, key in ipairs(unitsToRemove) do
+        table.remove(selectionWithoutOrder, key)
+    end
+
     if sortMode == "damage" and nextOrderValue == 1 then
         print("Remaining units have full health")
         PlaySound(completePartialCycleSound)
@@ -223,6 +219,7 @@ function SelectNext()
         local unitPos = nextUnit:GetPosition()
 
         MoveCurrentToWithOrder()
+
         -- if currentCamSettings.Focus == unitPos then
         --     LOG("SAME position")
         --     MoveCurrentToWithOrder()
@@ -271,14 +268,11 @@ end
 function CreateOrContinueSelection(sort, cycle, special)
     local selected = GetSelectedUnits()
 
-    -- LOG("SELECTED: "..table.getn(selected))
-
     if cycle == "camera_create" then
         CreateSelection(selected, "closest", "camera")
     elseif cycle == "camera" then
         SelectNext()
     elseif special == "silo" and selected and table.getn(selected) > 0 then
-        LOG("silo")
         CreateSelection(selected, sort, cycle, "silo")
         SelectNext()
     elseif selected and table.getn(selected) > 1 then
@@ -287,8 +281,8 @@ function CreateOrContinueSelection(sort, cycle, special)
     elseif selected and SelectionIsCurrent(selected) then
         if cycle == "toggle" then
             if cycleMode == "auto" then cycleMode = "manual" elseif cycleMode == "manual" then cycleMode = "manual" end
-                -- PrintAutoCycle(cycleMode)
-            else
+            -- PrintAutoCycle(cycleMode)
+        else
             MoveCurrentToWithOrder()
             SelectNext()
         end
