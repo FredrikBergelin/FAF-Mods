@@ -92,13 +92,18 @@ function isInTable(tabl, item)
 end
 
 function LoadPrefs()
-	local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
 
-	WARN("LoadPrefs FilterSelection" .. currentFaction)
+	local isReplay = import("/lua/ui/game/gamemain.lua").GetReplayState()
 
-	savedFilters = Prefs.GetFromCurrentProfile("FilterSelection") or {}
+	if not isReplay then
+		local currentFaction = GetArmiesTable().armiesTable[GetFocusArmy()].faction
 
-	if savedFilters[currentFaction] == nil then return end
+		savedFilters = Prefs.GetFromCurrentProfile("FilterSelection") or {}
 
-	Filters = savedFilters[currentFaction] or {}
+		if savedFilters[currentFaction] == nil then
+			return
+		end
+
+		Filters = savedFilters[currentFaction] or {}
+	end
 end
