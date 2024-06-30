@@ -42,7 +42,9 @@ UnitIconAssignments = {
     {BlueprintId = "XSL0301_AdvancedCombat", IconSet = "icon_subcommander_advancedcombat"},
     {BlueprintId = "XSL0301_Missile", IconSet = "icon_subcommander_missile"},
 
-	{BlueprintId = "XEA3204", IconSet = "icon_drone_engineer"},
+	{BlueprintId = "UEA0001", IconSet = "icon_drone1_shoulder"},
+	{BlueprintId = "UEA0003", IconSet = "icon_drone3_shoulder"},
+	{BlueprintId = "XEA3204", IconSet = "icon_drone_station"},
 	{BlueprintId = "XEL0209", IconSet = "icon_land2_sparky"},
 
 	{BlueprintId = "UEB1102", IconSet = "icon_structure1_hydro"},
