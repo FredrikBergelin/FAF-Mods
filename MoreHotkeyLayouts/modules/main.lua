@@ -139,7 +139,7 @@ local function CategoryFilterAdd(hotkey, printString, categoriesString, entityCa
 		[printString] = function() SubHotkey(printString, function(hotkey)
 			print("Add all " .. printString)
 			Functions.AddToSelection(function()
-				ConExecute("UI_SelectByCategory LAND ANTIAIR")
+				ConExecute("UI_SelectByCategory " .. categoriesString)
 				SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
 			end)
 		end) end,
@@ -455,14 +455,14 @@ local customKeyMap = {
     -- ['Ctrl-Alt-T']          = 'track_unit_second_mon',
 
 	['1'] = function() Hotkey('1', function(hotkey)
-		CategoryFilterSelect("1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1)
+		CategoryFilterSelect("1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1 - categories.engineer, "T1", categories.TECH1)
 	end) end,
 	['Shift-1'] = function() Hotkey('Shift-1', function(hotkey)
 		CategoryFilterAdd("Shift-1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1)
 	end) end,
 
 	['2'] = function() Hotkey('2', function(hotkey)
-		CategoryFilterSelect("2", "T2 units", "BUILTBYTIER3FACTORY TECH2 ALLUNITS", categories.TECH2)
+		CategoryFilterSelect("2", "T2 units", "BUILTBYTIER3FACTORY TECH2 ALLUNITS", categories.TECH2 - categories.engineer, "T2", categories.TECH2)
 	end) end,
 
 	['Shift-2'] = function() Hotkey('Shift-2', function(hotkey)
@@ -470,7 +470,7 @@ local customKeyMap = {
 	end) end,
 
 	['3'] = function() Hotkey('3', function(hotkey)
-		CategoryFilterSelect("3", "T3 units", "BUILTBYTIER3FACTORY TECH3 ALLUNITS", categories.TECH3)
+		CategoryFilterSelect("3", "T3 units", "BUILTBYTIER3FACTORY TECH3 ALLUNITS", categories.TECH3 - categories.engineer, "T3", categories.TECH3)
 	end) end,
 
 	['Shift-3'] = function() Hotkey('Shift-3', function(hotkey)
@@ -617,7 +617,7 @@ local customKeyMap = {
 		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
 	end) end,
 	['Alt-Shift-W'] = function() Hotkey('Alt-Shift-W', function(hotkey)
-		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(true)'
+		ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/distribute-queue.lua").DistributeOrders(false)'
 	end) end,
 
 	E = function() Hotkey('E', function(hotkey)
@@ -668,16 +668,12 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
-		elseif AnyHasCategory(categories.TRANSPORTATION) then
-			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(true)'
 		end
 	end) end,
 	['Alt-Shift-E'] = function() Hotkey('Alt-Shift-E', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 		elseif AllHaveCategory(categories.ENGINEER) then
 			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/filter-engineers.lua").SelectHighestEngineerAndAssist()'
-		elseif AnyHasCategory(categories.TRANSPORTATION) then
-			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(false)'
 		end
 	end) end,
 
@@ -685,33 +681,14 @@ local customKeyMap = {
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
 		else
-			print("Onscreen transports")
-			ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
-
-			SubHotkeys({
-				R = function() SubHotkey('R', function(hotkey)
-					print("All transports")
-					DAConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
-				end) end,
-			})
+			CategoryFilterSelect("R", "transports", "AIR TRANSPORTATION", categories.AIR * categories.TRANSPORTATION)
 		end
 	end) end,
 	['Shift-R'] = function() Hotkey('Shift-R', function(hotkey)
 		if AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_3")'
 		else
-			print("Add onscreen transports")
-			Functions.AddToSelection(function()
-				ConExecute 'UI_SelectByCategory +inview AIR TRANSPORTATION'
-			end)
-			SubHotkeys({
-				['Shift-R'] = function() SubHotkey('Shift-R', function(hotkey)
-					print("Add all transports")
-					Functions.AddToSelection(function()
-						ConExecute 'UI_SelectByCategory AIR TRANSPORTATION'
-					end)
-				end) end,
-			})
+			CategoryFilterAdd("Shift-R", "transports", "AIR TRANSPORTATION", categories.AIR * categories.TRANSPORTATION)
 		end
 	end) end,
 	['Ctrl-R'] = function() Hotkey('Ctrl-R', function(hotkey)
@@ -741,10 +718,14 @@ local customKeyMap = {
 		end
 	end) end,
 	['Alt-R'] = function() Hotkey('Alt-R', function(hotkey)
-		
+		if AnyHasCategory(categories.TRANSPORTATION) then
+			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(true)'
+		end
 	end) end,
 	['Alt-Shift-R'] = function() Hotkey('Alt-Shift-R', function(hotkey)
-
+		if AnyHasCategory(categories.TRANSPORTATION) then
+			ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports(false)'
+		end
 	end) end,
 
 	T = function() Hotkey('T', function(hotkey)
@@ -959,7 +940,7 @@ local customKeyMap = {
 		elseif AllHaveCategory(categories.FACTORY) then
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T2_6")'
 		else
-			CategoryFilterSelect("Ctrl-D", "land factories", "FACTORY LAND", categories.FACTORY * categories.LAND - categories.EXPERIMENTAL, "land", categories.LAND)
+			CategoryFilterSelect("Ctrl-D", "land factories", "FACTORY LAND", (categories.FACTORY * categories.LAND) - categories.EXPERIMENTAL, "land", categories.LAND)
 		end
 	end) end,
 	['Ctrl-Shift-D'] = function() Hotkey('Ctrl-Shift-D', function(hotkey)
