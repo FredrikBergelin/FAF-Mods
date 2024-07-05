@@ -817,9 +817,7 @@ local customKeyMap = {
 	end) end,
 
 	A = function() Hotkey('A', function(hotkey)
-		if not isReplay and AnyUnitCanUpgrade() then
-			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
-		elseif AllHaveCategory(categories.ENGINEER) then
+		if AllHaveCategory(categories.ENGINEER) and not AnyHasCategory(categories.ENGINEERSTATION) then
 			local hoveredUnit = GetRolloverInfo().userUnit
 			if hoveredUnit and not IsDestroyed(hoveredUnit) and hoveredUnit:IsInCategory('STRUCTURE') and
 				(hoveredUnit:IsInCategory('MASSEXTRACTION') or hoveredUnit:IsInCategory('ARTILLERY') or hoveredUnit:IsInCategory('RADAR')  or hoveredUnit:IsInCategory('OMNI')) then
@@ -827,20 +825,22 @@ local customKeyMap = {
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
 			end
+		elseif not isReplay and AnyUnitCanUpgrade() then
+			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
 			CategoryFilterSelect("A", "fighters", "AIR HIGHALTAIR ANTIAIR", ((categories.AIR * categories.HIGHALTAIR * categories.ANTIAIR) - categories.BOMBER))
 		end
 	end) end,
 	['Shift-A'] = function() Hotkey('Shift-A', function(hotkey)
-		if not isReplay and AnyUnitCanUpgrade() then
-			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
-		elseif AllHaveCategory(categories.ENGINEER) then
+		if AllHaveCategory(categories.ENGINEER) and not AnyHasCategory(categories.ENGINEERSTATION) then
 			local hoveredUnit = GetRolloverInfo().userUnit
 			if hoveredUnit and not IsDestroyed(hoveredUnit) and hoveredUnit:IsInCategory('STRUCTURE') then
 				ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/capping.lua").HotkeyToCap(true, false)'
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
 			end
+		elseif not isReplay and AnyUnitCanUpgrade() then
+			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
 			CategoryFilterAdd("Shift-A", "fighters", "AIR HIGHALTAIR ANTIAIR", ((categories.AIR * categories.HIGHALTAIR * categories.ANTIAIR) - categories.BOMBER))
 		end
