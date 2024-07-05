@@ -111,12 +111,12 @@ end
 local function CategoryFilterSelect(hotkey, printString, categoriesString, entityCategories, filterPrintString, filterEntityCategories)
 	if AnyHasCategory(filterEntityCategories or entityCategories) then
 		print("Filter " .. (filterPrintString or printString))
+		SelectUnits(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
 	else
 		print("Onscreen " .. printString)
 		ConExecute("UI_SelectByCategory +inview " .. categoriesString)
+		SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
 	end
-
-	SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
 
 	SubHotkeys({
 		[hotkey] = function() SubHotkey(hotkey, function(hotkey)
@@ -151,13 +151,13 @@ end
 -- ConExecute 'UI_Lua import("/lua/ui/game/connectivity.lua").CreateUI()'
 
 -- Unimplemented, but idea is to have a number of subhotkeys that can further filter down after selecting for example direct fire units, then say: Of those last selected, only T2 - so that it works with adding with shift without removing already selected units of other tech levels.
-local selectionCategoriesSubHotkeys = {
-	['1'] = function() SubHotkey('1', function(hotkey)
-		print("All T1 units")
-		ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH1 ALLUNITS")
-		SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
-	end) end,
-}
+-- local selectionCategoriesSubHotkeys = {
+-- 	['1'] = function() SubHotkey('1', function(hotkey)
+-- 		print("All T1 units")
+-- 		ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH1 ALLUNITS")
+-- 		SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
+-- 	end) end,
+-- }
 
 
 local customKeyMap = {
@@ -455,26 +455,26 @@ local customKeyMap = {
     -- ['Ctrl-Alt-T']          = 'track_unit_second_mon',
 
 	['1'] = function() Hotkey('1', function(hotkey)
-		CategoryFilterSelect("1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1 - categories.engineer, "T1", categories.TECH1)
+		CategoryFilterSelect("1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1 - categories.ENGINEER, "T1", categories.TECH1)
 	end) end,
 	['Shift-1'] = function() Hotkey('Shift-1', function(hotkey)
-		CategoryFilterAdd("Shift-1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1)
+		CategoryFilterAdd("Shift-1", "T1 units", "BUILTBYTIER3FACTORY TECH1 ALLUNITS", categories.TECH1 - categories.ENGINEER)
 	end) end,
 
 	['2'] = function() Hotkey('2', function(hotkey)
-		CategoryFilterSelect("2", "T2 units", "BUILTBYTIER3FACTORY TECH2 ALLUNITS", categories.TECH2 - categories.engineer, "T2", categories.TECH2)
+		CategoryFilterSelect("2", "T2 units", "BUILTBYTIER3FACTORY TECH2 ALLUNITS", categories.TECH2 - categories.ENGINEER, "T2", categories.TECH2)
 	end) end,
 
 	['Shift-2'] = function() Hotkey('Shift-2', function(hotkey)
-		CategoryFilterAdd("Shift-2", "T2 units", "BUILTBYTIER3FACTORY TECH2 ALLUNITS", categories.TECH2)
+		CategoryFilterAdd("Shift-2", "T2 units", "BUILTBYTIER3FACTORY TECH2 ALLUNITS", categories.TECH2 - categories.ENGINEER)
 	end) end,
 
 	['3'] = function() Hotkey('3', function(hotkey)
-		CategoryFilterSelect("3", "T3 units", "BUILTBYTIER3FACTORY TECH3 ALLUNITS", categories.TECH3 - categories.engineer, "T3", categories.TECH3)
+		CategoryFilterSelect("3", "T3 units", "BUILTBYTIER3FACTORY TECH3 ALLUNITS", categories.TECH3 - categories.ENGINEER, "T3", categories.TECH3)
 	end) end,
 
 	['Shift-3'] = function() Hotkey('Shift-3', function(hotkey)
-		CategoryFilterAdd("shift-3", "T3 units", "BUILTBYTIER3FACTORY TECH3 ALLUNITS", categories.TECH3)
+		CategoryFilterAdd("shift-3", "T3 units", "BUILTBYTIER3FACTORY TECH3 ALLUNITS", categories.TECH3 - categories.ENGINEER)
 	end) end,
 
 	['4'] = function() Hotkey('4', function(hotkey)
@@ -817,7 +817,9 @@ local customKeyMap = {
 	end) end,
 
 	A = function() Hotkey('A', function(hotkey)
-		if AllHaveCategory(categories.ENGINEER) then
+		if not isReplay and AnyUnitCanUpgrade() then
+			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
+		elseif AllHaveCategory(categories.ENGINEER) then
 			local hoveredUnit = GetRolloverInfo().userUnit
 			if hoveredUnit and not IsDestroyed(hoveredUnit) and hoveredUnit:IsInCategory('STRUCTURE') and
 				(hoveredUnit:IsInCategory('MASSEXTRACTION') or hoveredUnit:IsInCategory('ARTILLERY') or hoveredUnit:IsInCategory('RADAR')  or hoveredUnit:IsInCategory('OMNI')) then
@@ -825,24 +827,22 @@ local customKeyMap = {
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
 			end
-		elseif not isReplay and AnyUnitCanUpgrade() then
-			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
-			CategoryFilterSelect("A", "fighters", "AIR HIGHALTAIR ANTIAIR", categories.ANTIAIR - categories.BOMBER)
+			CategoryFilterSelect("A", "fighters", "AIR HIGHALTAIR ANTIAIR", ((categories.AIR * categories.HIGHALTAIR * categories.ANTIAIR) - categories.BOMBER))
 		end
 	end) end,
 	['Shift-A'] = function() Hotkey('Shift-A', function(hotkey)
-		if AllHaveCategory(categories.ENGINEER) then
+		if not isReplay and AnyUnitCanUpgrade() then
+			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
+		elseif AllHaveCategory(categories.ENGINEER) then
 			local hoveredUnit = GetRolloverInfo().userUnit
 			if hoveredUnit and not IsDestroyed(hoveredUnit) and hoveredUnit:IsInCategory('STRUCTURE') then
 				ConExecute 'UI_LUA import("/lua/ui/game/hotkeys/capping.lua").HotkeyToCap(true, false)'
 			else
 				ConExecute 'UI_Lua import("/lua/ui/game/hotkeys/context-based-templates.lua").Cycle()'
 			end
-		elseif not isReplay and AnyUnitCanUpgrade() then
-			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
-			CategoryFilterAdd("Shift-A", "fighters", "AIR HIGHALTAIR ANTIAIR", categories.ANTIAIR - categories.BOMBER)
+			CategoryFilterAdd("Shift-A", "fighters", "AIR HIGHALTAIR ANTIAIR", ((categories.AIR * categories.HIGHALTAIR * categories.ANTIAIR) - categories.BOMBER))
 		end
 	end) end,
 	['Ctrl-A'] = function() Hotkey('Ctrl-A', function(hotkey)
