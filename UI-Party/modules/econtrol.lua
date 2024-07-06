@@ -424,6 +424,7 @@ function UpdateResourcesUi()
 
 	-- Set unittype resource usages to 0
 	resourceTypes.foreach(function(k, resourceType)
+		resourceType.currentMaxUsageByAnyCategory = 0
 		resourceType.productionUsage = 0
 		resourceType.upkeepUsage = 0
 		unitTypes.foreach(function(k, unitType)
@@ -468,6 +469,12 @@ function UpdateResourcesUi()
 			local combinedUsage = usage + pausedUsage
 
 			if (combinedUsage > 0) then
+				-- if usage > resourceType.currentMaxUsageByAnyCategory then
+				-- 	resourceType.currentMaxUsageByAnyCategory = usage
+				-- end
+				-- if pausedUsage > resourceType.currentMaxUsageByAnyCategory then
+				-- 	resourceType.currentMaxUsageByAnyCategory = pausedUsage
+				-- end
 				local unitTypeUsage = unitType.usage[resourceType.name]
 				if (isUpkeep) then
 					resourceType.upkeepUsage = resourceType.upkeepUsage + combinedUsage
@@ -496,6 +503,20 @@ function UpdateResourcesUi()
 		end
 	end)
 
+	-- Max resource usage, used for setting width
+	resourceTypes.foreach(function(k, resourceType)
+		unitTypes.foreach(function(k, unitType)
+			local unitTypeUsage = unitType.usage[resourceType.name]
+
+			if unitTypeUsage.productionUsage > resourceType.currentMaxUsageByAnyCategory then
+				resourceType.currentMaxUsageByAnyCategory = unitTypeUsage.productionUsage
+			end
+			if unitTypeUsage.upkeepUsage > resourceType.currentMaxUsageByAnyCategory then
+				resourceType.currentMaxUsageByAnyCategory = unitTypeUsage.upkeepUsage
+			end
+		end)
+	end)
+
 	-- update ui
 	local relayoutRequired = false
 	unitTypes.foreach(function(k, unitType)
@@ -511,11 +532,20 @@ function UpdateResourcesUi()
 				local upkeepValue = unitTypeUsage.upkeepUsage
 
 				-- Percentify
-				productionValue = productionValue / resourceTypeUsageTotal * usageContainerWidth
-				upkeepValue = upkeepValue / resourceTypeUsageTotal * usageContainerWidth
+				productionValue = productionValue / resourceType.currentMaxUsageByAnyCategory * usageContainerWidth
+				upkeepValue = upkeepValue / resourceType.currentMaxUsageByAnyCategory * usageContainerWidth
+
+
+				-- productionValue = usageContainerWidth * 100 / resourceType.currentMaxUsageByAnyCategory * productionValue / resourceTypeUsageTotal
+				-- upkeepValue = usageContainerWidth * 100 / resourceType.currentMaxUsageByAnyCategory * upkeepValue / resourceTypeUsageTotal
+
+				-- resourceType.currentMaxUsageByAnyCategory
 
 				productionValue = math.ceil(productionValue)
 				upkeepValue = math.ceil(upkeepValue)
+
+				-- upkeepValue = upkeepValue * resourceType.currentMaxUsageByAnyCategory / usageContainerWidth
+				-- productionValue = productionValue * resourceType.currentMaxUsageByAnyCategory / usageContainerWidth
 
 				if (productionValue > 0 and productionValue < 1) then productionValue = 1 end
 				if (upkeepValue > 0 and upkeepValue < 1) then upkeepValue = 1 end
