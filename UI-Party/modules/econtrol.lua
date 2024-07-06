@@ -141,13 +141,20 @@ function PauseProduction(unitType, spendType)
 	for k, v in workers do
 		local econData = GetEconData(v)
 		if v.econtrol == nil then v.econtrol = {} end
-		if not GetIsPaused { v } then
+		if not v:IsDead() and not GetIsPaused { v } then
 			v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 			v.econtrol.pausedMassConsumed = econData["massConsumed"]
 			table.insert(unitType.pausedProductionUnits, v)
 		end
 	end
-	SetPaused(unitType.pausedProductionUnits, true)
+	SetPaused(unitType.pausedProductionUnits, true) -- TODO CRASH, trying v:IsDead
+	-- warning: Error running lua script: ...r forged alliance\mods\ui-party\modules\econtrol.lua(150): Game object has been destroyed
+	--          stack traceback:
+	--          	[C]: in function `SetPaused'
+	--          	...r forged alliance\mods\ui-party\modules\econtrol.lua(150): in function `PauseProduction'
+	--          	...r forged alliance\mods\ui-party\modules\econtrol.lua(188): in function `DisableWorkers'
+	--          	...r forged alliance\mods\ui-party\modules\econtrol.lua(246): in function <...r forged alliance\mods\ui-party\modules\econtrol.lua:244>
+
 	unitType.productionUnits = {}
 end
 
@@ -169,7 +176,10 @@ function DisableUpkeep(unitType, spendType)
 		if v.econtrol == nil then v.econtrol = {} end
 		v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
+
+		if not v:IsDead() then
 		table.insert(unitType.pausedUpkeepUnits, v)
+		end
 	end
 
 	DisableUnitsAbility(workers)
