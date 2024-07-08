@@ -5,4 +5,5 @@ description = "Expands hotkey menu with context specific commands and key combos
 author = "FreadyFish"
 exclusive = false
 ui_only = true
+after = { "ui-mod-tools-4z0t-v12-FF", "Common-Mod-Tools-v1-FF" }
 icon = "/mods/AdvancedHotkeys/icon.png"
