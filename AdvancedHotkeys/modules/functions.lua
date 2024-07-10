@@ -7,76 +7,45 @@ function TableContains(table, element)
     return false
 end
 
-local function AnyHasCategory(category)
-    local units = GetSelectedUnits()
-
-    if units == nil then
-        return false
+function CategoryFilterSelect(hotkey, printString, categoriesString, entityCategories, filterPrintString, filterEntityCategories)
+    if Functions.AnyHasCategory(filterEntityCategories or entityCategories) then
+        print("Filter " .. (filterPrintString or printString))
+        SelectUnits(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
+    else
+        print("Onscreen " .. printString)
+        ConExecute("UI_SelectByCategory +inview " .. categoriesString)
+        SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
     end
 
-    for id, unit in units do
-        if EntityCategoryContains(category, unit) then
-            return true
-        end
-    end
-
-    return false
+    SubHotkeys({
+        [hotkey] = function() SubHotkey(hotkey, function(hotkey)
+                print("All " .. printString)
+                ConExecute("UI_SelectByCategory " .. categoriesString)
+                SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+            end)
+        end,
+    })
 end
 
-local function AllHaveCategory(category)
-    local units = GetSelectedUnits()
+function CategoryFilterAdd(hotkey, printString, categoriesString, entityCategories)
+    print("Add onscreen " .. printString)
 
-    if units == nil then
-        return false
-    end
+    Functions.AddToSelection(function()
+        ConExecute("UI_SelectByCategory +inview " .. categoriesString)
+        SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+    end)
 
-    for id, unit in units do
-        if not EntityCategoryContains(category, unit) then
-            return false
-        end
-    end
-
-    return true
+    SubHotkeys({
+        [printString] = function() SubHotkey(printString, function(hotkey)
+                print("Add all " .. printString)
+                Functions.AddToSelection(function()
+                    ConExecute("UI_SelectByCategory " .. categoriesString)
+                    SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+                end)
+            end)
+        end,
+    })
 end
-
-local isReplay = import("/lua/ui/game/gamemain.lua").GetReplayState()
-
-local GetUpgradesOfUnit = false
-if not isReplay then
-    GetUpgradesOfUnit = import("/lua/ui/game/hotkeys/upgrade-structure.lua").GetUpgradesOfUnit
-end
-
-local TablEmpty = table.empty
-
-local function AnyUnitCanUpgrade()
-    local units = GetSelectedUnits()
-
-    if isReplay then
-        return false
-    end
-
-    if units == nil then
-        return false
-    end
-
-    for id, unit in units do
-        local buildableStructures = GetUpgradesOfUnit(unit)
-        if buildableStructures and not TablEmpty(buildableStructures) then
-            return true
-        end
-    end
-
-    return false
-end
-
--- Unimplemented, but idea is to have a number of subhotkeys that can further filter down after selecting for example direct fire units, then say: Of those last selected, only T2 - so that it works with adding with shift without removing already selected units of other tech levels.
--- local selectionCategoriesSubHotkeys = {
--- 	['1'] = function() SubHotkey('1', function(hotkey)
--- 		print("All T1 units")
--- 		ConExecute("UI_SelectByCategory BUILTBYTIER3FACTORY TECH1 ALLUNITS")
--- 		SelectUnits(EntityCategoryFilterDown(categories.TECH1 - categories.ENGINEER, GetSelectedUnits() or {}))
--- 	end) end,
--- }
 
 function AddToSelection(selectFunction)
     local selected = GetSelectedUnits() or {}
@@ -116,7 +85,6 @@ function SelectedUnitsWithOnlyTheseCommands(commands)
     return unitsToSelect
 end
 
--- TransportUnloadSpecificUnits (only 3 search results in faf fa and didnt lead anywhere but apparently command [25])
 function FilterAvailableTransports()
     -- local units = EntityCategoryFilterDown(categories.TRANSPORTATION, GetSelectedUnits())
     local units = GetSelectedUnits()
