@@ -63,12 +63,13 @@ local keyMap = {
 	},
 }
 
+-- An advanced hotkey has been pressed, we determine if it should fetch the action from the regular keymap or from a stored subkey
 function RouteHotkey(key)
 	local currentTime = GetSystemTimeSeconds()
 	local diffTime = currentTime - lastClickTime
-
 	lastClickTime = currentTime
 
+	-- Try to get any stored subkey from last press
 	subKeyAction = currentSubKeys[key]
 
 	if subKeyAction ~= nil then
@@ -76,17 +77,15 @@ function RouteHotkey(key)
 		local inTime = diffTime < decay
 
 		if inTime then
+			-- Run the stored subkey action for this hotkey
 			ExecuteRecursively(subKeyAction)
 			return
 		end
 	end
 
+	-- Run the default action for this hotkey
 	currentSubKeys = nil
 	if keyMap[key] ~= nil then ExecuteRecursively(keyMap[key]) end
-end
-
-function SetSubKeys(subkeys)
-	currentSubKeys = subkeys
 end
 
 function CheckConditionals(conditionals)
@@ -124,7 +123,7 @@ function ExecuteRecursively(entries)
 
 		if entry["finally"] ~= nil then ExecuteRecursively(entry["finally"]) end
 
-		SetSubKeys(entry["subkeys"])
+		currentSubKeys = entry["subkeys"]
 	end
 end
 
