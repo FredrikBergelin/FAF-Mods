@@ -65,6 +65,8 @@ local keyMap = {
 
 -- An advanced hotkey has been pressed, we determine if it should fetch the action from the regular keymap or from a stored subkey
 function RouteHotkey(key)
+	LOG("RouteHotkey(" .. key .. ")")
+
 	local currentTime = GetSystemTimeSeconds()
 	local diffTime = currentTime - lastClickTime
 	lastClickTime = currentTime
@@ -83,7 +85,7 @@ function RouteHotkey(key)
 		end
 	end
 
-	-- Run the default action for this hotkey
+	-- Run the reguar action for this hotkey
 	currentSubKeys = nil
 	if keyMap[key] ~= nil then ExecuteRecursively(keyMap[key]) end
 end
@@ -92,7 +94,7 @@ function CheckConditionals(conditionals)
 	local valid = true
 
 	for conditionalKey, conditional in pairs(conditionals) do if not valid then break end
-		local executable = GetExecutable(conditional)
+		local executable = GetConditionalExecutable(conditional)
 
 		print(executable)
 
@@ -107,8 +109,14 @@ end
 function ExecuteRecursively(entries)
 	for entryKey, entry in entries do
 
+		LOG("ExecuteRecursively " .. entryKey)
+
 		if entry["print"] ~= nil then print(entry["print"]) end
-		if entry["executable"] ~= nil then ConExecute(entry["executable"]) end
+		if entry["executable"] ~= nil then 
+			ConExecute(entry["executable"]) 
+			print(entry["executable"])
+			LOG("executable = " .. entry["executable"])
+		end
 		if entry["immediate"] ~= nil then ExecuteRecursively(entry["immediate"]) end
 
 		if entry["conditionals"] ~= nil then
@@ -127,23 +135,7 @@ function ExecuteRecursively(entries)
 	end
 end
 
-function Init()
-	local keys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keys
-
-	for k, v in keys do
-		local name = string.gsub(k, "-", "_")
-		userKeyActions['SHK ' .. name] = {
-			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. k .. '")',
-			category = 'SHK'
-		}
-		userKeyMap[k] = 'SHK ' .. name
-	end
-
-	Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
-	Prefs.SetToCurrentProfile('UserKeyMap', userKeyMap)
-end
-
-function GetExecutable(entry)
+function GetConditionalExecutable(entry)
 	return entry.executable or 'UI_Lua import("' .. (entry.path or
 		conditionalsPath) .. '").' .. entry.func .. '(' .. entry.args .. ')'
 end
@@ -152,4 +144,24 @@ function ConditionalConExecute(executable)
 	ConExecute(executable)
 
 	return ConExecuteGlobalReturnValue
+end
+
+function InitAdvancedKeys()
+	local keys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keys
+
+	for k, v in keys do
+		local name = string.gsub(k, "-", "_")
+		userKeyActions['AHK ' .. name] = {
+			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. k .. '")',
+			category = 'AHK'
+		}
+		userKeyMap[k] = 'AHK ' .. name
+	end
+
+	Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
+	Prefs.SetToCurrentProfile('UserKeyMap', userKeyMap)
+end
+
+function LoadKeyMap()
+	keyMap = GetPreference('AdvancedHotkeysKeyMap')
 end
