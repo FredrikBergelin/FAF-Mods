@@ -5,60 +5,17 @@ local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap') -- Eg: Tab = 'Cycle
 modPath = '/mods/AdvancedHotkeys'
 conditionalsPath = modPath .. '/modules/conditionals.lua'
 
-local subHotkeys = nil
+local currentSubKeys = nil
 local subKeyAction = nil
 
-local storedUniqueIdentifier
 local lastClickTime = -9999
 
-local function Hotkey(hotkey, func)
-	subKeyAction = subHotkeys[hotkey]
-	local currentTime = GetSystemTimeSeconds()
-	local diffTime = currentTime - lastClickTime
-	local decay = 0.002 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
-	local inTime = diffTime < decay
-	lastClickTime = currentTime
-
-	if subKeyAction ~= nil and inTime then
-		ForkThread(subKeyAction)
-	else
-		subHotkeys = nil
-		func(hotkey)
-	end
-end
-
-local function SubHotkeys(obj)
-	subHotkeys = obj
-end
-
-local function SubHotkey(hotkey, func)
-	local currentTime = GetSystemTimeSeconds()
-	local diffTime = currentTime - lastClickTime
-	local decay = 0.001 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
-
-	if storedUniqueIdentifier == hotkey and diffTime < decay then
-		subKeyAction = subHotkeys[hotkey]
-	end
-
-	storedUniqueIdentifier = hotkey
-
-	func(hotkey)
-end
-
-local customKeyMap = {
+local keyMap = {
 	['0'] = {
 		{
-			print = 'pre',
-		},
-		{
-			print = '0',
 			immediate = {
 				{
-					print = 'immediate',
-					executable = 'StartCommandMode order RULEUCC_Patrol'
-				},
-				{
-					print = 'immediate, double print test',
+					print = '0',
 				},
 			},
 			conditionals = {
@@ -66,28 +23,40 @@ local customKeyMap = {
 					func = 'AllHaveCategory',
 					args = 'categories.ENGINEER',
 					checkFor = true,
+				},
+				{
+					func = 'AllHaveCategory',
+					args = 'categories.COMMAND',
+					checkFor = true,
 				}
 			},
-			valid = {
-				{
-					print = "valid",
-				}
-			},
-			invalid = {
-				{
-					print = "invalid"
-				}
-			},
-			finally = {
-				{
-					print = "finally"
-				}
-			},
-			subHotkeys = {
-				{
-					['0'] = {
+			valid = {},
+			invalid = {},
+			finally = {},
+			subkeys = {
+				['0'] = {
+					{
+						print = 's 0',
+						subkeys = {
+							['0'] = {
+								{
+									executable = 'StartCommandMode order RULEUCC_Patrol',
+									print = 's 0 2',
+								},
 
-					}
+							},
+							['9'] = {
+								{
+									print = 's 9 2',
+								},
+							}
+						}
+					},
+				},
+				['9'] = {
+					{
+						print = 's9',
+					},
 				}
 			}
 		}
@@ -95,53 +64,56 @@ local customKeyMap = {
 }
 
 function RouteHotkey(key)
-	local keyAction = customKeyMap[key]
+	local currentTime = GetSystemTimeSeconds()
+	local diffTime = currentTime - lastClickTime
 
-	ExecuteRecursively(keyAction)
+	lastClickTime = currentTime
 
+	subKeyAction = currentSubKeys[key]
 
-	-- subKeyAction = subHotkeys[key]
-	-- local currentTime = GetSystemTimeSeconds()
-	-- lastClickTime = currentTime
+	if subKeyAction ~= nil then
+		local decay = 0.002 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
+		local inTime = diffTime < decay
 
-	-- if subKeyAction ~= nil then
-	-- 	local diffTime = currentTime - lastClickTime
-	-- 	local decay = 0.002 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
-	-- 	local inTime = diffTime < decay
-
-	-- 	if inTime then
-	-- 		ExecuteRecursively(subKeyAction)
-	-- 	end
-	-- else
-	-- 	subHotkeys = nil
-	-- 	ExecuteRecursively(keyAction)
-	-- end
-end
-
-function SetSubKeys(table)
-	for k, v in table do
-		--
+		if inTime then
+			ExecuteRecursively(subKeyAction)
+			return
+		end
 	end
+
+	currentSubKeys = nil
+	if keyMap[key] ~= nil then ExecuteRecursively(keyMap[key]) end
 end
 
-function ExecuteRecursively(table)
-	for eKey, entry in table do
+function SetSubKeys(subkeys)
+	currentSubKeys = subkeys
+end
+
+function CheckConditionals(conditionals)
+	local valid = true
+
+	for conditionalKey, conditional in pairs(conditionals) do if not valid then break end
+		local executable = GetExecutable(conditional)
+
+		print(executable)
+
+		valid = conditional.checkFor == ConditionalConExecute(executable)
+
+		print(valid)
+	end
+
+	return valid
+end
+
+function ExecuteRecursively(entries)
+	for entryKey, entry in entries do
 
 		if entry["print"] ~= nil then print(entry["print"]) end
 		if entry["executable"] ~= nil then ConExecute(entry["executable"]) end
 		if entry["immediate"] ~= nil then ExecuteRecursively(entry["immediate"]) end
 
 		if entry["conditionals"] ~= nil then
-			local valid = true
-			for cKey, conditional in pairs(entry["conditionals"]) do if not valid then break end
-				local executable = GetExecutable(conditional)
-
-				print(executable)
-
-				valid = conditional.checkFor == ConditionalConExecute(executable)
-
-				print(valid)
-			end
+			local valid = CheckConditionals(entry["conditionals"])
 
 			if valid then
 				if entry["valid"] ~= nil then ExecuteRecursively(entry["valid"]) end
@@ -151,12 +123,15 @@ function ExecuteRecursively(table)
 		end
 
 		if entry["finally"] ~= nil then ExecuteRecursively(entry["finally"]) end
-		if entry["subkeys"] ~= nil then SetSubKeys(entry["subkeys"]) end
+
+		SetSubKeys(entry["subkeys"])
 	end
 end
 
 function Init()
-	for k, v in customKeyMap do
+	local keys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keys
+
+	for k, v in keys do
 		local name = string.gsub(k, "-", "_")
 		userKeyActions['SHK ' .. name] = {
 			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. k .. '")',
@@ -164,13 +139,14 @@ function Init()
 		}
 		userKeyMap[k] = 'SHK ' .. name
 	end
+
 	Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
 	Prefs.SetToCurrentProfile('UserKeyMap', userKeyMap)
 end
 
-function GetExecutable(table)
-	return table.executable or 'UI_Lua import("' .. (table.path or
-		conditionalsPath) .. '").' .. table.func .. '(' .. table.args .. ')'
+function GetExecutable(entry)
+	return entry.executable or 'UI_Lua import("' .. (entry.path or
+		conditionalsPath) .. '").' .. entry.func .. '(' .. entry.args .. ')'
 end
 
 function ConditionalConExecute(executable)
