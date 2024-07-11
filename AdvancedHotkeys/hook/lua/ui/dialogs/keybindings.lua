@@ -334,7 +334,7 @@ function CreateLine()
     local line = Bitmap(keyContainer)
     line.Left:Set(keyContainer.Left)
     line.Right:Set(keyContainer.Right)
-    LayoutHelpers.SetHeight(line, 20)
+    LayoutHelpers.SetHeight(line, 24)
 
     line.description = UIUtil.CreateText(line, '', 16, "Arial")
     line.description:DisableHitTest()
@@ -342,7 +342,7 @@ function CreateLine()
     line.description.Width:Set(function() return line.Width() - 50 end)
     line.description:SetAlpha(0.9)
 
-    line.Height:Set(function() return line.description.Height() + 4 end)
+    line.Height:Set(24)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
     line.statistics = UIUtil.CreateText(line, '', 16, "Arial")
@@ -471,7 +471,7 @@ function CreateLine()
             else
                 self.toggle.txt:SetText('-')
             end
-            local stats = keyGroups[data.category].bindings .. ' / ' .. keyGroups[data.category].visible
+            local stats = keyGroups[data.category].visible
             line.toggle:Show()
             line.assignKeyButton:Hide()
             line.wikiButton:Hide()
@@ -479,15 +479,17 @@ function CreateLine()
             line.description:SetFont(UIUtil.titleFont, 16)
             line.description:SetColor(UIUtil.factionTextColor)
             line.statistics:SetText(stats)
+            LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
         elseif data.type == 'spacer' then
             line.toggle:Hide()
             line.assignKeyButton:Hide()
             line.wikiButton:Hide()
             line.description:SetText('')
             line.statistics:SetText('')
-        elseif data.type == 'entry' then line.toggle:Hide()
+        elseif data.type == 'entry' then
+            line.toggle:Hide()
             line.description:SetText(data.text)
-            line.description:SetFont('Arial', 16)
+            line.description:SetFont('Arial', 14)
             line.description:SetColor(UIUtil.fontColor)
             line.statistics:SetText('')
             line.assignKeyButton:Show()
@@ -549,82 +551,12 @@ function CreateUI()
         ConfirmNewKeyMap()
     end
 
-    local defaultButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-        "<LOC key_binding_0004>Default Preset")
-    LayoutHelpers.SetWidth(defaultButton, 200)
-    LayoutHelpers.AtBottomIn(defaultButton, dialogContent, 10)
-    LayoutHelpers.AtLeftIn(defaultButton, dialogContent,
-        (offset - (defaultButton.Width() * 3 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    defaultButton.OnClick = function(self, modifiers)
-        UIUtil.QuickDialog(popup,
-            "<LOC key_binding_0005>Are you sure you want to reset all key bindings to the default (GPG) preset?",
-            "<LOC _Yes>", ResetBindingToDefaultKeyMap,
-            "<LOC _No>", nil, nil, nil, true,
-            { escapeButton = 2, enterButton = 1, worldCover = false })
-    end
-    Tooltip.AddControlTooltip(defaultButton,
-        {
-            text = "<LOC key_binding_0004>Default Preset",
-            body = '<LOC key_binding_0022>Reset all key bindings to the default (GPG) preset'
-        })
 
-    local hotbuildButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-        "<LOC key_binding_0009>Hotbuild Preset")
-    LayoutHelpers.SetWidth(hotbuildButton, 200)
-    LayoutHelpers.AtBottomIn(hotbuildButton, dialogContent, 10)
-    LayoutHelpers.AtLeftIn(hotbuildButton, defaultButton,
-        (offset + (defaultButton.Width() * 1 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    hotbuildButton.OnClick = function(self, modifiers)
-        UIUtil.QuickDialog(popup,
-            "<LOC key_binding_0008>Are you sure you want to reset all key bindings to the hotbuild (FAF) preset?",
-            "<LOC _Yes>", ResetBindingToHotbuildKeyMap,
-            "<LOC _No>", nil, nil, nil, true,
-            { escapeButton = 2, enterButton = 1, worldCover = false })
-    end
-    Tooltip.AddControlTooltip(hotbuildButton,
-        {
-            text = "<LOC key_binding_0009>Hotbuild Preset",
-            body = '<LOC key_binding_0020>Reset all key bindings to the hotbuild (FAF) preset'
-        })
-
-    local alternativeButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-        "<LOC key_binding_0025>Alternative Preset")
-    LayoutHelpers.SetWidth(alternativeButton, 200)
-    LayoutHelpers.AtBottomIn(alternativeButton, dialogContent, 10)
-    LayoutHelpers.AtLeftIn(alternativeButton, hotbuildButton,
-        (offset + (defaultButton.Width() * 1 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    alternativeButton.OnClick = function(self, modifiers)
-        UIUtil.QuickDialog(popup,
-            "<LOC key_binding_0024>Are you sure you want to reset all key bindings to the alternative (FAF) preset?",
-            "<LOC _Yes>", ResetBindingToalternativeKeyMap,
-            "<LOC _No>", nil, nil, nil, true,
-            { escapeButton = 2, enterButton = 1, worldCover = false })
-    end
-    Tooltip.AddControlTooltip(alternativeButton,
-        {
-            text = "<LOC key_binding_0025>Alternative Preset",
-            body = '<LOC key_binding_0026>Reset all key bindings to the alternative (FAF) preset'
-        })
-
-    local closeButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/", LOC("<LOC _Close>"))
-    LayoutHelpers.SetWidth(closeButton, 200)
-    LayoutHelpers.AtBottomIn(closeButton, dialogContent, 10)
-    LayoutHelpers.AtLeftIn(closeButton, alternativeButton,
-        (offset + (defaultButton.Width() * 1 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    Tooltip.AddControlTooltip(closeButton,
-        {
-            text = '<LOC _Close>Close',
-            body = '<LOC key_binding_0021>Closes this dialog and confirms assignments of key bindings'
-        })
-    closeButton.OnClick = function(self, modifiers)
-        -- confirmation of changes will occur on OnClosed of this UI
-        CloseUI()
-    end
 
     dialogContent.HandleEvent = function(self, event)
         if event.Type == 'KeyDown' then
             if event.KeyCode == UIUtil.VK_ESCAPE or event.KeyCode == UIUtil.VK_ENTER or event.KeyCode == 342 then
-                closeButton:OnClick()
+                CloseUI()
             end
         end
     end
@@ -634,7 +566,7 @@ function CreateUI()
     keyFilter.label:SetColor('FF929191') -- --FF929191
     keyFilter.label:SetFont(UIUtil.titleFont, 17)
     LayoutHelpers.AtVerticalCenterIn(keyFilter.label, keyFilter, 2)
-    LayoutHelpers.AtLeftIn(keyFilter.label, dialogContent, 9)
+    LayoutHelpers.AtLeftIn(keyFilter.label, dialogContent, 15)
 
     keyFilter:SetSolidColor('FF282828')
     LayoutHelpers.AnchorToRight(keyFilter, keyFilter.label, 5)
@@ -661,7 +593,7 @@ function CreateUI()
     keyFilter.info = UIUtil.CreateText(keyFilter, text, 17, UIUtil.titleFont)
     keyFilter.info:SetColor('FF727171') -- --FF727171
     keyFilter.info:DisableHitTest()
-    LayoutHelpers.AtHorizontalCenterIn(keyFilter.info, keyFilter, -7)
+    LayoutHelpers.AtLeftIn(keyFilter.info, keyFilter, 10)
     LayoutHelpers.AtVerticalCenterIn(keyFilter.info, keyFilter, 2)
 
     keyFilter.text = Edit(keyFilter)
@@ -717,12 +649,11 @@ function CreateUI()
             body = '<LOC key_binding_0017>Clears text that was typed in the filter field.'
         })
 
-
     keyContainer = Group(dialogContent)
     LayoutHelpers.AtLeftIn(keyContainer, dialogContent, 10)
     LayoutHelpers.SetWidth(keyContainer, 500)
     LayoutHelpers.AnchorToBottom(keyContainer, keyFilter, 10)
-    LayoutHelpers.AnchorToTop(keyContainer, defaultButton, 10)
+    LayoutHelpers.AtBottomIn(keyContainer, dialogContent, 10)
     keyContainer.Height:Set(function() return keyContainer.Bottom() - keyContainer.Top() - LayoutHelpers.ScaleNumber(10) end)
     keyContainer.top = 0
     UIUtil.CreateLobbyVertScrollbar(keyContainer)
