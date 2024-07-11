@@ -10,7 +10,7 @@ local subKeyAction = nil
 
 local lastClickTime = -9999
 
-local keyMap = {
+keyMap = {
 	['0'] = {
 		{
 			immediate = {

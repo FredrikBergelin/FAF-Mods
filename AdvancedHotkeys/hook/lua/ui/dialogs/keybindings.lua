@@ -636,27 +636,6 @@ function CreateUI()
             body = '<LOC key_binding_0026>Reset all key bindings to the alternative (FAF) preset'
         })
 
-    -- Button to open the advanded menu
-    local advancedButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-        "<LOC key_binding_0004>Advanced")
-    LayoutHelpers.SetWidth(advancedButton, 200)
-    LayoutHelpers.AtBottomIn(advancedButton, dialogContent, 10)
-    LayoutHelpers.AtLeftIn(advancedButton, alternativeButton,
-        (offset - (advancedButton.Width() * 3 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    advancedButton.OnClick = function(self, modifiers)
-        UIUtil.QuickDialog(popup,
-            "<LOC key_binding_0005>This will expand the menu and show you a graphical interface of your hotkeys, with context options and key combos.",
-            "<LOC _Yes>", function () end,
-            "<LOC _No>", nil, nil, nil, true,
-            { escapeButton = 2, enterButton = 1, worldCover = false })
-    end
-    Tooltip.AddControlTooltip(advancedButton,
-        {
-            text = "<LOC key_binding_0004>Advanced mode",
-            body = '<LOC key_binding_0022>Activate the advanced mode'
-        })
-    -- Button to open the advanded menu
-
     local closeButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/", LOC("<LOC _Close>"))
     LayoutHelpers.SetWidth(closeButton, 200)
     LayoutHelpers.AtBottomIn(closeButton, dialogContent, 10)
