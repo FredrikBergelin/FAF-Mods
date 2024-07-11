@@ -1,13 +1,12 @@
 local Prefs = import('/lua/user/prefs.lua')
-local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions') -- Eg: ['Cycle next, defaults to closest'] = { action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()', ... },
-local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap') -- Eg: Tab = 'Cycle next, defaults to closest',
+local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions')
+local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap')
+
 
 modPath = '/mods/AdvancedHotkeys'
 conditionalsPath = modPath .. '/modules/conditionals.lua'
 
 local currentSubKeys = nil
-local subKeyAction = nil
-
 local lastClickTime = -9999
 
 keyMap = {
@@ -72,7 +71,7 @@ function RouteHotkey(key)
 	lastClickTime = currentTime
 
 	-- Try to get any stored subkey from last press
-	subKeyAction = currentSubKeys[key]
+	local subKeyAction = currentSubKeys[key]
 
 	if subKeyAction ~= nil then
 		local decay = 0.002 * Prefs.GetFromCurrentProfile('options.selection_sets_double_tap_decay')
@@ -108,15 +107,10 @@ end
 
 function ExecuteRecursively(entries)
 	for entryKey, entry in entries do
-
-		LOG("ExecuteRecursively " .. entryKey)
-
 		if entry["print"] ~= nil then print(entry["print"]) end
-		if entry["executable"] ~= nil then 
-			ConExecute(entry["executable"]) 
-			print(entry["executable"])
-			LOG("executable = " .. entry["executable"])
-		end
+
+		if entry["executable"] ~= nil then ConExecute(entry["executable"]) end
+
 		if entry["immediate"] ~= nil then ExecuteRecursively(entry["immediate"]) end
 
 		if entry["conditionals"] ~= nil then

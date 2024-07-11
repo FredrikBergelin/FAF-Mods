@@ -331,28 +331,23 @@ end
 
 -- create a line with dynamically updating UI elements based on type of data line
 function CreateLine()
-    local keyBindingWidth = 210
     local line = Bitmap(keyContainer)
     line.Left:Set(keyContainer.Left)
     line.Right:Set(keyContainer.Right)
     LayoutHelpers.SetHeight(line, 20)
 
-    line.key = UIUtil.CreateText(line, '', 16, "Arial")
-    line.key:DisableHitTest()
-    line.key:SetAlpha(0.9)
-
     line.description = UIUtil.CreateText(line, '', 16, "Arial")
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
-    line.description.Width:Set(line.Right() - line.Left() - keyBindingWidth)
+    line.description.Width:Set(function() return line.Width() - 50 end)
     line.description:SetAlpha(0.9)
 
-    line.Height:Set(function() return line.key.Height() + 4 end)
+    line.Height:Set(function() return line.description.Height() + 4 end)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
     line.statistics = UIUtil.CreateText(line, '', 16, "Arial")
     line.statistics:EnableHitTest()
-    line.statistics:SetColor('FF9A9A9A') ----FF9A9A9A'
+    line.statistics:SetColor('FF9A9A9A')
     line.statistics:SetAlpha(0.9)
 
     Tooltip.AddControlTooltip(line.statistics,
@@ -361,23 +356,21 @@ function CreateLine()
             body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
         })
 
-    LayoutHelpers.AtLeftIn(line.description, line, keyBindingWidth)
+    LayoutHelpers.AtLeftIn(line.description, line, 40)
     LayoutHelpers.AtVerticalCenterIn(line.description, line)
-    LayoutHelpers.LeftOf(line.key, line.description, 30)
-    LayoutHelpers.AtVerticalCenterIn(line.key, line)
     LayoutHelpers.AtRightIn(line.statistics, line, 10)
     LayoutHelpers.AtVerticalCenterIn(line.statistics, line)
+
+    -- Remove line.key and adjust HandleEvent function accordingly
 
     line.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
             line:SetAlpha(0.9)
-            line.key:SetAlpha(1.0)
             line.description:SetAlpha(1.0)
             line.statistics:SetAlpha(1.0)
             PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
         elseif event.Type == 'MouseExit' then
             line:SetAlpha(1.0)
-            line.key:SetAlpha(0.9)
             line.description:SetAlpha(0.9)
             line.statistics:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
@@ -420,10 +413,10 @@ function CreateLine()
     end
 
     line.toggle = CreateToggle(line,
-        'FF1B1A1A', ----FF1B1A1A'
+        'FF1B1A1A',
         UIUtil.factionTextColor,
-        line.key.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(line.toggle, line, keyBindingWidth - 30)
+        line.description.Height() + 4, 18, '+')
+    LayoutHelpers.AtLeftIn(line.toggle, line)
     LayoutHelpers.AtVerticalCenterIn(line.toggle, line)
     Tooltip.AddControlTooltip(line.toggle,
         {
@@ -433,10 +426,8 @@ function CreateLine()
 
     line.wikiButton = UIUtil.CreateBitmap(line, '/textures/ui/common/mods/mod_url_website.dds')
     LayoutHelpers.SetDimensions(line.wikiButton, 20, 20)
-
-    -- LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
-    LayoutHelpers.RightOf(line.wikiButton, line.key, 4)
-    LayoutHelpers.AtVerticalCenterIn(line.wikiButton, line.key)
+    LayoutHelpers.AtRightIn(line.wikiButton, line, 10)
+    LayoutHelpers.AtVerticalCenterIn(line.wikiButton, line)
     line.wikiButton:SetAlpha(0.5)
     line.wikiButton.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
@@ -449,13 +440,14 @@ function CreateLine()
         end
         return true
     end
-    
-    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', '', 0, 140, 6, 14, 14, 'left')
+
+    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', ''
+        , 0, 140, 6, 14, 14, 'left')
 
     line.assignKeyButton = CreateToggle(line,
-        '645F5E5E', ----735F5E5E'
-        'FFAEACAC', ----FFAEACAC'
-        line.key.Height() + 4, 18, '+')
+        '645F5E5E',
+        'FFAEACAC',
+        line.description.Height() + 4, 18, '+')
     LayoutHelpers.AtLeftIn(line.assignKeyButton, line)
     LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
     Tooltip.AddControlTooltip(line.assignKeyButton,
@@ -468,22 +460,6 @@ function CreateLine()
         return true
     end
 
-    line.unbindKeyButton = CreateToggle(line,
-        '645F5E5E', ----645F5E5E'
-        'FFAEACAC', ----FFAEACAC'
-        line.key.Height() + 4, 18, 'x')
-    LayoutHelpers.AtRightIn(line.unbindKeyButton, line)
-    LayoutHelpers.AtVerticalCenterIn(line.unbindKeyButton, line)
-    Tooltip.AddControlTooltip(line.unbindKeyButton,
-        {
-            text = "<LOC key_binding_0007>Unbind Key",
-            body = '<LOC key_binding_0013>Removes currently assigned key binding for a given action'
-        })
-
-    line.unbindKeyButton.OnMouseClick = function(self)
-        line:UnbindKeyBinding()
-        return true
-    end
 
     line.Update = function(self, data, lineID)
         line:SetSolidColor(GetLineColor(lineID, data))
@@ -495,35 +471,25 @@ function CreateLine()
             else
                 self.toggle.txt:SetText('-')
             end
-            local stats = keyGroups[data.category].bindings .. ' / ' ..
-                keyGroups[data.category].visible
+            local stats = keyGroups[data.category].bindings .. ' / ' .. keyGroups[data.category].visible
             line.toggle:Show()
             line.assignKeyButton:Hide()
-            line.unbindKeyButton:Hide()
             line.wikiButton:Hide()
             line.description:SetText(data.text)
             line.description:SetFont(UIUtil.titleFont, 16)
             line.description:SetColor(UIUtil.factionTextColor)
-            line.key:SetText('')
             line.statistics:SetText(stats)
         elseif data.type == 'spacer' then
             line.toggle:Hide()
             line.assignKeyButton:Hide()
-            line.unbindKeyButton:Hide()
             line.wikiButton:Hide()
-            line.key:SetText('')
             line.description:SetText('')
             line.statistics:SetText('')
-        elseif data.type == 'entry' then
-            line.toggle:Hide()
-            line.key:SetText(data.keyText)
-            line.key:SetColor('ffffffff') ----ffffffff'
-            line.key:SetFont('Arial', 16)
+        elseif data.type == 'entry' then line.toggle:Hide()
             line.description:SetText(data.text)
             line.description:SetFont('Arial', 16)
             line.description:SetColor(UIUtil.fontColor)
             line.statistics:SetText('')
-            line.unbindKeyButton:Show()
             line.assignKeyButton:Show()
 
             if (data.wikiURL) then
@@ -559,8 +525,12 @@ function CreateUI()
     keyword = ''
     keyTable = FormatData()
 
+    local screenWidth, screenHeight = GetFrame(0).Width(), GetFrame(0).Height()
+    local dialogWidth, dialogHeight = screenWidth - 100, screenHeight - 100
+
     local dialogContent = Group(GetFrame(0))
-    LayoutHelpers.SetDimensions(dialogContent, 980, 730)
+    LayoutHelpers.SetDimensions(dialogContent, dialogWidth, dialogHeight)
+    LayoutHelpers.AtLeftTopIn(dialogContent, GetFrame(0), 50, 50)
 
     popup = Popup(GetFrame(0), dialogContent)
     popup.OnShadowClicked = CloseUI
@@ -747,9 +717,10 @@ function CreateUI()
             body = '<LOC key_binding_0017>Clears text that was typed in the filter field.'
         })
 
+
     keyContainer = Group(dialogContent)
     LayoutHelpers.AtLeftIn(keyContainer, dialogContent, 10)
-    LayoutHelpers.AtRightIn(keyContainer, dialogContent, 20)
+    LayoutHelpers.SetWidth(keyContainer, 500)
     LayoutHelpers.AnchorToBottom(keyContainer, keyFilter, 10)
     LayoutHelpers.AnchorToTop(keyContainer, defaultButton, 10)
     keyContainer.Height:Set(function() return keyContainer.Bottom() - keyContainer.Top() - LayoutHelpers.ScaleNumber(10) end)
@@ -823,13 +794,11 @@ function CreateUI()
             if data then
                 line:Update(data, id)
             else
-                line:SetSolidColor('00000000') ----00000000
-                line.key:SetText('')
+                line:SetSolidColor('00000000')
                 line.description:SetText('')
                 line.statistics:SetText('')
                 line.toggle:Hide()
                 line.assignKeyButton:Hide()
-                line.unbindKeyButton:Hide()
                 line.wikiButton:Hide()
             end
         end

@@ -4,35 +4,36 @@ local Prefs = import('/lua/user/prefs.lua')
 
 function BackupKeyMap()
 	if not GetPreference('AdvancedHotkeysUserKeyMapBackupCreated') then
-		local UserKeyMap = Prefs.GetFromCurrentProfile("UserKeyMap")
-		local UserKeyActions = Prefs.GetFromCurrentProfile("UserKeyActions")
+		local userKeyMap = Prefs.GetFromCurrentProfile("UserKeyMap")
+		local userDebugKeyMap = Prefs.GetFromCurrentProfile("UserDebugKeyMap")
+		local userKeyActions = Prefs.GetFromCurrentProfile("UserKeyActions")
 
-		SetPreference('AdvancedHotkeysUserKeyMapBackup', UserKeyMap)
-		SetPreference('AdvancedHotkeysUserKeyActionsBackup', UserKeyActions)
+		SetPreference('AdvancedHotkeysUserKeyMapBackup', userKeyMap)
+		SetPreference('AdvancedHotkeysUserDebugKeyMapBackup', userDebugKeyMap)
+		SetPreference('AdvancedHotkeysUserKeyActionsBackup', userKeyActions)
 
-		-- local keyActions = import('/lua/keymap/keyactions.lua').keyActions
+		Prefs.SetToCurrentProfile("UserDebugKeyMap", {})
+
 		local keyActions = table.combine(
 			import('/lua/keymap/keyactions.lua').keyActions,
-			UserKeyActions
+			import('/lua/keymap/debugKeyActions.lua').debugKeyActions,
+			userKeyActions
 		)
 
+		local userKeyMaps = table.combine(userKeyMap, userDebugKeyMap)
 		local keymap = {}
 
-		if UserKeyMap ~= nil then
-			for k, v in pairs(UserKeyMap) do
-				LOG(k)
-				keymap[k] = {
-					{
-						immediate = {
-							{
-								['executable'] = keyActions[v].action,
-							}
-						},
-					}
+		for k, v in pairs(userKeyMaps) do
+			LOG(k)
+			keymap[k] = {
+				{
+					immediate = {
+						{
+							['executable'] = keyActions[v].action,
+						}
+					},
 				}
-			end
-		else
-			LOG("UserKeyMap == nil")
+			}
 		end
 
 		SetPreference('AdvancedHotkeysKeyMap', keymap)
