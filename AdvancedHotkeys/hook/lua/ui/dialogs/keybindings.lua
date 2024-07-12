@@ -589,19 +589,32 @@ function CreateKeyBindingLine()
     keyBindingLine.Height:Set(24)
     keyBindingLine.Width:Set(function() return keyBindingLine.Right() - keyBindingLine.Left() end)
 
+    keyBindingLine.statistics = UIUtil.CreateText(keyBindingLine, '', 16, "Arial")
+    keyBindingLine.statistics:EnableHitTest()
+    keyBindingLine.statistics:SetColor('FF9A9A9A')
+    keyBindingLine.statistics:SetAlpha(0.9)
+
+    Tooltip.AddControlTooltip(keyBindingLine.statistics,
+        {
+            text = '<LOC key_binding_0014>Category Statistics',
+            body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
+        })
+
     LayoutHelpers.AtLeftIn(keyBindingLine.description, keyBindingLine, 40)
     LayoutHelpers.AtVerticalCenterIn(keyBindingLine.description, keyBindingLine)
-
-    -- Remove keyBindingLine.key and adjust HandleEvent function accordingly
+    LayoutHelpers.AtRightIn(keyBindingLine.statistics, keyBindingLine, 10)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.statistics, keyBindingLine)
 
     keyBindingLine.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
             keyBindingLine:SetAlpha(0.9)
             keyBindingLine.description:SetAlpha(1.0)
+            keyBindingLine.statistics:SetAlpha(1.0)
             PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
         elseif event.Type == 'MouseExit' then
             keyBindingLine:SetAlpha(1.0)
             keyBindingLine.description:SetAlpha(0.9)
+            keyBindingLine.statistics:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
                 SelectKeyBindingLine(self.data.index)
@@ -653,18 +666,18 @@ function CreateKeyBindingLine()
             body = '<LOC key_binding_0011>Toggle visibility of all actions for this category of keys'
         })
 
-    keyBindingLine.assignActionButton = CreateToggle(keyBindingLine,
+    keyBindingLine.assignKeyButton = CreateToggle(keyBindingLine,
         '645F5E5E',
         'FFAEACAC',
         keyBindingLine.description.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(keyBindingLine.assignActionButton, keyBindingLine)
-    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.assignActionButton, keyBindingLine)
-    Tooltip.AddControlTooltip(keyBindingLine.assignActionButton,
+    LayoutHelpers.AtLeftIn(keyBindingLine.assignKeyButton, keyBindingLine)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.assignKeyButton, keyBindingLine)
+    Tooltip.AddControlTooltip(keyBindingLine.assignKeyButton,
         {
             text = "<LOC key_binding_0003>Assign Key",
             body = '<LOC key_binding_0012>Opens a dialog that allows assigning key binding for a given action'
         })
-    keyBindingLine.assignActionButton.OnMouseClick = function(self)
+    keyBindingLine.assignKeyButton.OnMouseClick = function(self)
         keyBindingLine:AssignKeyBinding()
         return true
     end
@@ -679,22 +692,26 @@ function CreateKeyBindingLine()
             else
                 self.toggle.txt:SetText('-')
             end
+            local stats = keyBindingGroups[data.category].visible
             keyBindingLine.toggle:Show()
-            keyBindingLine.assignActionButton:Hide()
+            keyBindingLine.assignKeyButton:Hide()
             keyBindingLine.description:SetText(data.text)
             keyBindingLine.description:SetFont(UIUtil.titleFont, 16)
             keyBindingLine.description:SetColor(UIUtil.factionTextColor)
+            keyBindingLine.statistics:SetText(stats)
             LayoutHelpers.AtVerticalCenterIn(keyBindingLine.description, keyBindingLine, 2)
         elseif data.type == 'spacer' then
             keyBindingLine.toggle:Hide()
-            keyBindingLine.assignActionButton:Hide()
+            keyBindingLine.assignKeyButton:Hide()
             keyBindingLine.description:SetText('')
+            keyBindingLine.statistics:SetText('')
         elseif data.type == 'entry' then
             keyBindingLine.toggle:Hide()
             keyBindingLine.description:SetText(data.text)
             keyBindingLine.description:SetFont('Arial', 14)
             keyBindingLine.description:SetColor(UIUtil.fontColor)
-            keyBindingLine.assignActionButton:Show()
+            keyBindingLine.statistics:SetText('')
+            keyBindingLine.assignKeyButton:Show()
         end
     end
     return keyBindingLine
@@ -1403,24 +1420,17 @@ function FormatKeyActionData()
     return keyData
 end
 function FormatKeyBindingData()
-
-    LOG("1 FormatKeyBindingData")
-
     local keyData = {}
     local keyLookup = KeyMapper.GetKeyLookup()
     local keyActions = KeyMapper.GetKeyActions()
 
-    LOG("2")
-
-    -- reset previously formated key actions in all groups because they might have been re-mapped
+    -- reset previously formatted key actions in all groups because they might have been re-mapped
     for category, group in keyBindingGroups do
         group.actions = {}
     end
 
-    -- group game keys and key defined in mods by their key category
+    -- group game keys and keys defined in mods by their key category
     for k, v in keyActions do
-        -- LOG("k " .. k)
-
         local category = string.lower(v.category or 'none')
         local keyForAction = keyLookup[k]
 
@@ -1445,6 +1455,7 @@ function FormatKeyBindingData()
         }
         table.insert(keyBindingGroups[category].actions, data)
     end
+
     -- flatten all key actions to a list separated by a header with info about key category
     local index = 1
     for category, group in keyBindingGroups do
