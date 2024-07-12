@@ -24,37 +24,47 @@ local KeyMapper = import("/lua/keymap/keymapper.lua")
 local popup = nil
 
 local FormatKeyActionData
-
+local keyActionKeyword = ''
 local keyActionTable
 local keyActionsSection
 local keyActionsContainer
 local keyActionsFilter
 local keyActionEntries = {}
 local keyActionLinesVisible = {} -- store indexes of visible keyActionLines including headers and key entries
-
 local keyActionLinesCollapsed = true
 
+local FormatKeyBindingData
+local keyBindingKeyword = ''
 local keyBindingTable
 local keyBindingsSection
 local keyBindingsContainer
 local keyBindingsFilter
 local keyBindingsEntries = {}
 local keyBindingsLinesVisible = {}
-
-local keyword = ''
+local keyBindingsLinesCollapsed = true
 
 local keyActionsSectionWidth = 500
 
-
 -- store info about current state of key categories and preserve their state between FormatData() calls
-local keyGroups = {}
+local keyActionGroups = {}
 for order, category in keyCategoryOrder do
     local name = string.lower(category)
-    keyGroups[name] = {}
-    keyGroups[name].order = order
-    keyGroups[name].name = name
-    keyGroups[name].text = LOC(keyCategories[category])
-    keyGroups[name].collapsed = keyActionLinesCollapsed
+    keyActionGroups[name] = {}
+    keyActionGroups[name].order = order
+    keyActionGroups[name].name = name
+    keyActionGroups[name].text = LOC(keyCategories[category])
+    keyActionGroups[name].collapsed = keyActionLinesCollapsed
+end
+
+-- store info about current state of key categories and preserve their state between FormatData() calls
+local keyBindingGroups = {}
+for order, category in keyCategoryOrder do
+    local name = string.lower(category)
+    keyBindingGroups[name] = {}
+    keyBindingGroups[name].order = order
+    keyBindingGroups[name].name = name
+    keyBindingGroups[name].text = LOC(keyCategories[category])
+    keyBindingGroups[name].collapsed = keyBindingsLinesCollapsed
 end
 
 local function ConfirmNewKeyMap()
@@ -185,7 +195,9 @@ local function EditActionKey(parent, action, currentKey)
                 end
             end
             keyActionTable = FormatKeyActionData()
-            keyActionsContainer:Filter(keyword)
+            keyBindingTable = FormatKeyBindingData()
+            keyActionsContainer:Filter(keyActionKeyword)
+            keyBindingsContainer:Filter(keyBindingKeyword)
         end
 
         -- checks if this key is already assigned to some other action
@@ -209,7 +221,7 @@ local function EditActionKey(parent, action, currentKey)
     end
 end
 
-local function AssignCurrentSelection()
+local function KeyActionAssignCurrentSelection()
     for k, v in keyActionTable do
         if v.selected then
             EditActionKey(popup, v.action, v.key)
@@ -217,8 +229,16 @@ local function AssignCurrentSelection()
         end
     end
 end
+local function KeyBindingAssignCurrentSelection()
+    for k, v in keyBindingTable do
+        if v.selected then
+            EditActionKey(popup, v.action, v.key)
+            break
+        end
+    end
+end
 
-local function UnbindCurrentSelection()
+local function KeyActionUnbindCurrentSelection()
     for k, v in keyActionTable do
         if v.selected then
             ClearActionKey(v.action, v.key)
@@ -226,10 +246,20 @@ local function UnbindCurrentSelection()
         end
     end
     keyActionTable = FormatKeyActionData()
-    keyActionsContainer:Filter(keyword)
+    keyActionsContainer:Filter(keyActionKeyword)
+end
+local function KeyBindingUnbindCurrentSelection()
+    for k, v in keyBindingTable do
+        if v.selected then
+            ClearActionKey(v.action, v.key)
+            break
+        end
+    end
+    keyBindingTable = FormatKeyBindingData()
+    keyBindingsContainer:Filter(keyBindingKeyword)
 end
 
-local function GetLineColor(keyActionLineID, data)
+local function GetKeyActionLineColor(keyActionLineID, data)
     if data.type == 'header' then
         return 'FF282828' ----FF282828
     elseif data.type == 'spacer' then
@@ -247,9 +277,27 @@ local function GetLineColor(keyActionLineID, data)
     end
 end
 
+local function GetKeyBindingLineColor(keyBindingLineID, data)
+    if data.type == 'header' then
+        return 'FF282828' ----FF282828
+    elseif data.type == 'spacer' then
+        return '00000000' ----00000000
+    elseif data.type == 'entry' then
+        if data.selected then
+            return UIUtil.factionBackColor
+        elseif math.mod(keyBindingLineID, 2) == 1 then
+            return 'ff202020'
+        else
+            return 'FF343333'
+        end
+    else
+        return 'FF6B0088'
+    end
+end
+
 -- toggles expansion or collapse of keyActionLines with specified key category only if searching is not active
 local function ToggleKeyActionLines(category)
-    if keyword and string.len(keyword) > 0 then return end
+    if keyActionKeyword and string.len(keyActionKeyword) > 0 then return end
 
     for k, v in keyActionTable do
         if v.category == category then
@@ -260,15 +308,36 @@ local function ToggleKeyActionLines(category)
             end
         end
     end
-    if keyGroups[category].collapsed then
-        keyGroups[category].collapsed = false
+    if keyActionGroups[category].collapsed then
+        keyActionGroups[category].collapsed = false
     else
-        keyGroups[category].collapsed = true
+        keyActionGroups[category].collapsed = true
     end
-    keyActionsContainer:Filter(keyword)
+    keyActionsContainer:Filter(keyActionKeyword)
 end
 
-local function SelectLine(dataIndex)
+-- toggles expansion or collapse of keyActionLines with specified key category only if searching is not active
+local function ToggleKeyBindingLines(category)
+    if keyBindingKeyword and string.len(keyBindingKeyword) > 0 then return end
+
+    for k, v in keyBindingTable do
+        if v.category == category then
+            if v.collapsed then
+                v.collapsed = false
+            else
+                v.collapsed = true
+            end
+        end
+    end
+    if keyBindingGroups[category].collapsed then
+        keyBindingGroups[category].collapsed = false
+    else
+        keyBindingGroups[category].collapsed = true
+    end
+    keyBindingsContainer:Filter(keyBindingKeyword)
+end
+
+local function SelectKeyActionLine(dataIndex)
     for k, v in keyActionTable do
         v.selected = false
     end
@@ -276,7 +345,17 @@ local function SelectLine(dataIndex)
     if keyActionTable[dataIndex].type == 'entry' then
         keyActionTable[dataIndex].selected = true
     end
-    keyActionsContainer:Filter(keyword)
+    keyActionsContainer:Filter(keyActionKeyword)
+end
+local function SelectKeyBindingLine(dataIndex)
+    for k, v in keyBindingTable do
+        v.selected = false
+    end
+
+    if keyBindingTable[dataIndex].type == 'entry' then
+        keyBindingTable[dataIndex].selected = true
+    end
+    keyBindingsContainer:Filter(keyBindingKeyword)
 end
 
 function CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
@@ -365,20 +444,20 @@ function CreateKeyActionLine()
             keyActionLine.statistics:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
-                SelectLine(self.data.index)
+                SelectKeyActionLine(self.data.index)
                 keyActionsFilter.text:AcquireFocus()
                 return true
             elseif event.Type == 'ButtonDClick' then
-                SelectLine(self.data.index)
-                AssignCurrentSelection()
+                SelectKeyActionLine(self.data.index)
+                KeyActionAssignCurrentSelection()
                 return true
             end
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
-            if string.len(keyword) == 0 then
+            if string.len(keyActionKeyword) == 0 then
                 ToggleKeyActionLines(self.data.category)
                 keyActionsFilter.text:AcquireFocus()
 
-                if keyGroups[self.data.category].collapsed then
+                if keyActionGroups[self.data.category].collapsed then
                     self.toggle.txt:SetText('+')
                 else
                     self.toggle.txt:SetText('-')
@@ -391,14 +470,14 @@ function CreateKeyActionLine()
     end
 
     keyActionLine.AssignKeyBinding = function(self)
-        SelectLine(self.data.index)
-        AssignCurrentSelection()
+        SelectKeyActionLine(self.data.index)
+        KeyActionAssignCurrentSelection()
     end
 
     keyActionLine.UnbindKeyBinding = function(self)
         if keyActionTable[self.data.index].key then
-            SelectLine(self.data.index)
-            UnbindCurrentSelection()
+            SelectKeyActionLine(self.data.index)
+            KeyActionUnbindCurrentSelection()
         end
     end
 
@@ -451,18 +530,17 @@ function CreateKeyActionLine()
         return true
     end
 
-
     keyActionLine.Update = function(self, data, keyActionLineID)
-        keyActionLine:SetSolidColor(GetLineColor(keyActionLineID, data))
+        keyActionLine:SetSolidColor(GetKeyActionLineColor(keyActionLineID, data))
         keyActionLine.data = table.copy(data)
 
         if data.type == 'header' then
-            if keyGroups[self.data.category].collapsed then
+            if keyActionGroups[self.data.category].collapsed then
                 self.toggle.txt:SetText('+')
             else
                 self.toggle.txt:SetText('-')
             end
-            local stats = keyGroups[data.category].visible
+            local stats = keyActionGroups[data.category].visible
             keyActionLine.toggle:Show()
             keyActionLine.assignKeyButton:Hide()
             keyActionLine.wikiButton:Hide()
@@ -496,7 +574,6 @@ function CreateKeyActionLine()
     end
     return keyActionLine
 end
-
 function CreateKeyBindingLine()
     local keyBindingLine = Bitmap(keyBindingsContainer)
     keyBindingLine.Left:Set(keyBindingsContainer.Left)
@@ -527,20 +604,20 @@ function CreateKeyBindingLine()
             keyBindingLine.description:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
-                SelectLine(self.data.index)
+                SelectKeyBindingLine(self.data.index)
                 keyBindingsFilter.text:AcquireFocus()
                 return true
             elseif event.Type == 'ButtonDClick' then
-                SelectLine(self.data.index)
-                AssignCurrentSelection()
+                SelectKeyBindingLine(self.data.index)
+                KeyBindingAssignCurrentSelection()
                 return true
             end
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
-            if string.len(keyword) == 0 then
+            if string.len(keyBindingKeyword) == 0 then
                 ToggleKeyBindingLines(self.data.category)
                 keyBindingsFilter.text:AcquireFocus()
 
-                if keyGroups[self.data.category].collapsed then
+                if keyBindingGroups[self.data.category].collapsed then
                     self.toggle.txt:SetText('+')
                 else
                     self.toggle.txt:SetText('-')
@@ -553,14 +630,14 @@ function CreateKeyBindingLine()
     end
 
     keyBindingLine.AssignKeyBinding = function(self)
-        SelectLine(self.data.index)
-        AssignCurrentSelection()
+        SelectKeyBindingLine(self.data.index)
+        KeyBindingAssignCurrentSelection()
     end
 
     keyBindingLine.UnbindKeyBinding = function(self)
         if keyBindingTable[self.data.index].key then
-            SelectLine(self.data.index)
-            UnbindCurrentSelection()
+            SelectKeyBindingLine(self.data.index)
+            KeyBindingUnbindCurrentSelection()
         end
     end
 
@@ -592,18 +669,16 @@ function CreateKeyBindingLine()
         return true
     end
 
-
     keyBindingLine.Update = function(self, data, keyBindingLineID)
-        keyBindingLine:SetSolidColor(GetLineColor(keyBindingLineID, data))
+        keyBindingLine:SetSolidColor(GetKeyBindingLineColor(keyBindingLineID, data))
         keyBindingLine.data = table.copy(data)
 
         if data.type == 'header' then
-            if keyGroups[self.data.category].collapsed then
+            if keyBindingGroups[self.data.category].collapsed then
                 self.toggle.txt:SetText('+')
             else
                 self.toggle.txt:SetText('-')
             end
-            local stats = keyGroups[data.category].visible
             keyBindingLine.toggle:Show()
             keyBindingLine.assignActionButton:Hide()
             keyBindingLine.description:SetText(data.text)
@@ -643,8 +718,10 @@ function CreateUI()
         CloseUI()
         return
     end
-    keyword = ''
+    keyActionKeyword = ''
+    keyBindingKeyword = ''
     keyActionTable = FormatKeyActionData()
+    keyBindingTable = FormatKeyBindingData()
 
     local screenWidth, screenHeight = GetFrame(0).Width(), GetFrame(0).Height()
     local dialogWidth, dialogHeight = screenWidth - 100, screenHeight - 100
@@ -726,18 +803,18 @@ function CreateUI()
     keyActionsFilter.text:SetMaxChars(20)
     keyActionsFilter.text.OnTextChanged = function(self, newText, oldText)
         -- interpret plus chars as spaces for easier key filtering
-        keyword = string.gsub(string.lower(newText), '+', ' ')
-        keyword = string.gsub(string.lower(keyword), '  ', ' ')
-        keyword = string.gsub(string.lower(keyword), '  ', ' ')
-        if string.len(keyword) == 0 then
-            for k, v in keyGroups do
+        keyActionKeyword = string.gsub(string.lower(newText), '+', ' ')
+        keyActionKeyword = string.gsub(string.lower(keyActionKeyword), '  ', ' ')
+        keyActionKeyword = string.gsub(string.lower(keyActionKeyword), '  ', ' ')
+        if string.len(keyActionKeyword) == 0 then
+            for k, v in keyActionGroups do
                 v.collapsed = true
             end
             for k, v in keyActionTable do
                 v.collapsed = true
             end
         end
-        keyActionsContainer:Filter(keyword)
+        keyActionsContainer:Filter(keyActionKeyword)
         keyActionsContainer:ScrollSetTop(nil, 0)
     end
 
@@ -864,6 +941,7 @@ function CreateUI()
             control:ScrollLines(nil, keyActionLines)
         end
     end
+
     -- filter all key-bindings by checking if either text, action, or a key contains target string
     keyActionsContainer.Filter = function(self, target)
         local headersVisible = {}
@@ -874,14 +952,14 @@ function CreateUI()
             for k, v in keyActionTable do
                 if v.type == 'header' then
                     table.insert(keyActionLinesVisible, k)
-                    keyGroups[v.category].visible = v.count
-                    keyGroups[v.category].bindings = 0
+                    keyActionGroups[v.category].visible = v.count
+                    keyActionGroups[v.category].bindings = 0
                 elseif v.type == 'entry' then
                     if not v.collapsed then
                         table.insert(keyActionLinesVisible, k)
                     end
                     if v.key then
-                        keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                        keyActionGroups[v.category].bindings = keyActionGroups[v.category].bindings + 1
                     end
                 end
             end
@@ -890,12 +968,12 @@ function CreateUI()
             for k, v in keyActionTable do
                 local match = false
                 if v.type == 'header' then
-                    keyGroups[v.category].visible = 0
-                    keyGroups[v.category].bindings = 0
+                    keyActionGroups[v.category].visible = 0
+                    keyActionGroups[v.category].bindings = 0
                     if not headersVisible[k] then
                         headersVisible[k] = true
                         table.insert(keyActionLinesVisible, k)
-                        keyGroups[v.category].collapsed = true
+                        keyActionGroups[v.category].collapsed = true
                     end
                 elseif v.type == 'entry' and v.filters then
                     if string.find(v.filters.text, target) then
@@ -919,11 +997,11 @@ function CreateUI()
                             headersVisible[v.header] = true
                             table.insert(keyActionLinesVisible, v.header)
                         end
-                        keyGroups[v.category].collapsed = false
-                        keyGroups[v.category].visible = keyGroups[v.category].visible + 1
+                        keyActionGroups[v.category].collapsed = false
+                        keyActionGroups[v.category].visible = keyActionGroups[v.category].visible + 1
                         table.insert(keyActionLinesVisible, k)
                         if v.key then
-                            keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                            keyActionGroups[v.category].bindings = keyActionGroups[v.category].bindings + 1
                         end
                     end
                 end
@@ -982,18 +1060,18 @@ function CreateUI()
     keyBindingsFilter.text:SetMaxChars(20)
     keyBindingsFilter.text.OnTextChanged = function(self, newText, oldText)
         -- interpret plus chars as spaces for easier key filtering
-        keyword = string.gsub(string.lower(newText), '+', ' ')
-        keyword = string.gsub(string.lower(keyword), '  ', ' ')
-        keyword = string.gsub(string.lower(keyword), '  ', ' ')
-        if string.len(keyword) == 0 then
-            for k, v in keyGroups do
+        keyBindingKeyword = string.gsub(string.lower(newText), '+', ' ')
+        keyBindingKeyword = string.gsub(string.lower(keyBindingKeyword), '  ', ' ')
+        keyBindingKeyword = string.gsub(string.lower(keyBindingKeyword), '  ', ' ')
+        if string.len(keyBindingKeyword) == 0 then
+            for k, v in keyBindingGroups do
                 v.collapsed = true
             end
             for k, v in keyBindingTable do
                 v.collapsed = true
             end
         end
-        keyBindingsContainer:Filter(keyword)
+        keyBindingsContainer:Filter(keyBindingKeyword)
         keyBindingsContainer:ScrollSetTop(nil, 0)
     end
 
@@ -1048,11 +1126,11 @@ function CreateUI()
     -- local height = keyBindingsContainer.Height()
     -- local items = math.floor(keyBindingsContainer.Height() / keyBindingEntries[1].Height())
 
-    local GetKeyActionLinesTotal = function()
+    local GetkeyBindingLinesTotal = function()
         return table.getsize(keyBindingsEntries)
     end
 
-    local function GetKeyActionLinesVisible()
+    local function GetkeyBindingLinesVisible()
         return table.getsize(keyBindingsLinesVisible)
     end
 
@@ -1061,8 +1139,8 @@ function CreateUI()
     -- rangeMin, rangeMax, visibleMin, visibleMax
     -- axis can be "Vert" or "Horz"
     keyBindingsContainer.GetScrollValues = function(self, axis)
-        local size = GetKeyActionLinesVisible()
-        local visibleMax = math.min(self.top + GetKeyActionLinesTotal(), size)
+        local size = GetkeyBindingLinesVisible()
+        local visibleMax = math.min(self.top + GetkeyBindingLinesTotal(), size)
         return 0, size, self.top, visibleMax
     end
 
@@ -1073,15 +1151,15 @@ function CreateUI()
 
     -- Called when the scrollbar wants to scroll a specific number of pages (negative indicates scroll up)
     keyBindingsContainer.ScrollPages = function(self, axis, delta)
-        self:ScrollSetTop(axis, self.top + math.floor(delta) * GetKeyActionLinesTotal())
+        self:ScrollSetTop(axis, self.top + math.floor(delta) * GetkeyBindingLinesTotal())
     end
 
     -- Called when the scrollbar wants to set a new visible top keyBindingLine
     keyBindingsContainer.ScrollSetTop = function(self, axis, top)
         top = math.floor(top)
         if top == self.top then return end
-        local size = GetKeyActionLinesVisible()
-        self.top = math.max(math.min(size - GetKeyActionLinesTotal(), top), 0)
+        local size = GetkeyBindingLinesVisible()
+        self.top = math.max(math.min(size - GetkeyBindingLinesTotal(), top), 0)
         self:CalcVisible()
     end
 
@@ -1102,10 +1180,8 @@ function CreateUI()
             else
                 keyBindingLine:SetSolidColor('00000000')
                 keyBindingLine.description:SetText('')
-                keyBindingLine.statistics:SetText('')
                 keyBindingLine.toggle:Hide()
-                keyBindingLine.assignKeyButton:Hide()
-                keyBindingLine.wikiButton:Hide()
+                keyBindingLine.assignActionButton:Hide()
             end
         end
         keyBindingsFilter.text:AcquireFocus()
@@ -1120,6 +1196,7 @@ function CreateUI()
             control:ScrollLines(nil, keyBindingLines)
         end
     end
+
     -- filter all key-bindings by checking if either text, action, or a key contains target string
     keyBindingsContainer.Filter = function(self, target)
         local headersVisible = {}
@@ -1130,14 +1207,14 @@ function CreateUI()
             for k, v in keyBindingTable do
                 if v.type == 'header' then
                     table.insert(keyBindingsLinesVisible, k)
-                    keyGroups[v.category].visible = v.count
-                    keyGroups[v.category].bindings = 0
+                    keyBindingGroups[v.category].visible = v.count
+                    keyBindingGroups[v.category].bindings = 0
                 elseif v.type == 'entry' then
                     if not v.collapsed then
                         table.insert(keyBindingsLinesVisible, k)
                     end
                     if v.key then
-                        keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                        keyBindingGroups[v.category].bindings = keyBindingGroups[v.category].bindings + 1
                     end
                 end
             end
@@ -1146,12 +1223,12 @@ function CreateUI()
             for k, v in keyBindingTable do
                 local match = false
                 if v.type == 'header' then
-                    keyGroups[v.category].visible = 0
-                    keyGroups[v.category].bindings = 0
+                    keyBindingGroups[v.category].visible = 0
+                    keyBindingGroups[v.category].bindings = 0
                     if not headersVisible[k] then
                         headersVisible[k] = true
                         table.insert(keyBindingsLinesVisible, k)
-                        keyGroups[v.category].collapsed = true
+                        keyBindingGroups[v.category].collapsed = true
                     end
                 elseif v.type == 'entry' and v.filters then
                     if string.find(v.filters.text, target) then
@@ -1175,11 +1252,11 @@ function CreateUI()
                             headersVisible[v.header] = true
                             table.insert(keyBindingsLinesVisible, v.header)
                         end
-                        keyGroups[v.category].collapsed = false
-                        keyGroups[v.category].visible = keyGroups[v.category].visible + 1
+                        keyBindingGroups[v.category].collapsed = false
+                        keyBindingGroups[v.category].visible = keyBindingGroups[v.category].visible + 1
                         table.insert(keyBindingsLinesVisible, k)
                         if v.key then
-                            keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                            keyBindingGroups[v.category].bindings = keyBindingGroups[v.category].bindings + 1
                         end
                     end
                 end
@@ -1214,6 +1291,27 @@ function SortKeyActionData(dataTable)
         end
     end)
 end
+function SortKeyBindingData(dataTable)
+    table.sort(dataTable, function(a, b)
+        if a.order ~= b.order then
+            return a.order < b.order
+        else
+            if a.category ~= b.category then
+                return string.lower(a.category) < string.lower(b.category)
+            else
+                if a.type == 'entry' and b.type == 'entry' then
+                    if string.lower(a.text) ~= string.lower(b.text) then
+                        return string.lower(a.text) < string.lower(b.text)
+                    else
+                        return a.action < b.action
+                    end
+                else
+                    return a.id < b.id
+                end
+            end
+        end
+    end)
+end
 
 -- format all key data, group them based on key category or default to none category and finally sort all keys
 function FormatKeyActionData()
@@ -1222,7 +1320,7 @@ function FormatKeyActionData()
     local keyActions = KeyMapper.GetKeyActions()
 
     -- reset previously formated key actions in all groups because they might have been re-mapped
-    for category, group in keyGroups do
+    for category, group in keyActionGroups do
         group.actions = {}
     end
     -- group game keys and key defined in mods by their key category
@@ -1231,13 +1329,13 @@ function FormatKeyActionData()
         local keyForAction = keyLookup[k]
 
         -- create header if it doesn't exist
-        if not keyGroups[category] then
-            keyGroups[category] = {}
-            keyGroups[category].actions = {}
-            keyGroups[category].name = category
-            keyGroups[category].collapsed = keyActionLinesCollapsed
-            keyGroups[category].order = table.getsize(keyGroups) - 1
-            keyGroups[category].text = v.category or keyCategories['none'].text
+        if not keyActionGroups[category] then
+            keyActionGroups[category] = {}
+            keyActionGroups[category].actions = {}
+            keyActionGroups[category].name = category
+            keyActionGroups[category].collapsed = keyActionLinesCollapsed
+            keyActionGroups[category].order = table.getsize(keyActionGroups) - 1
+            keyActionGroups[category].text = v.category or keyCategories['none'].text
         end
 
         local data = {
@@ -1245,24 +1343,24 @@ function FormatKeyActionData()
             key = keyForAction,
             keyText = FormatKeyName(keyForAction),
             category = category,
-            order = keyGroups[category].order,
+            order = keyActionGroups[category].order,
             text = KeyMapper.GetActionName(k),
             wikiURL = v.wikiURL
         }
-        table.insert(keyGroups[category].actions, data)
+        table.insert(keyActionGroups[category].actions, data)
     end
     -- flatten all key actions to a list separated by a header with info about key category
     local index = 1
-    for category, group in keyGroups do
+    for category, group in keyActionGroups do
         if not table.empty(group.actions) then
             keyData[index] = {
                 type = 'header',
                 id = index,
-                order = keyGroups[category].order,
+                order = keyActionGroups[category].order,
                 count = table.getsize(group.actions),
                 category = category,
-                text = keyGroups[category].text,
-                collapsed = keyGroups[category].collapsed
+                text = keyActionGroups[category].text,
+                collapsed = keyActionGroups[category].collapsed
             }
             index = index + 1
             for _, data in group.actions do
@@ -1273,8 +1371,8 @@ function FormatKeyActionData()
                     key = data.key,
                     keyText = LOC(data.keyText),
                     category = category,
-                    order = keyGroups[category].order,
-                    collapsed = keyGroups[category].collapsed,
+                    order = keyActionGroups[category].order,
+                    collapsed = keyActionGroups[category].collapsed,
                     id = index,
                     wikiURL = data.wikiURL,
                     filters = { -- create filter parameters for quick searching of keys
@@ -1290,6 +1388,104 @@ function FormatKeyActionData()
     end
 
     SortKeyActionData(keyData)
+
+    -- store index of a header keyActionLine for each key keyActionLine
+    local header = 1
+    for i, data in keyData do
+        if data.type == 'header' then
+            header = i
+        elseif data.type == 'entry' then
+            data.header = header
+        end
+        data.index = i
+    end
+
+    return keyData
+end
+function FormatKeyBindingData()
+
+    LOG("1 FormatKeyBindingData")
+
+    local keyData = {}
+    local keyLookup = KeyMapper.GetKeyLookup()
+    local keyActions = KeyMapper.GetKeyActions()
+
+    LOG("2")
+
+    -- reset previously formated key actions in all groups because they might have been re-mapped
+    for category, group in keyBindingGroups do
+        group.actions = {}
+    end
+
+    -- group game keys and key defined in mods by their key category
+    for k, v in keyActions do
+        -- LOG("k " .. k)
+
+        local category = string.lower(v.category or 'none')
+        local keyForAction = keyLookup[k]
+
+        -- create header if it doesn't exist
+        if not keyBindingGroups[category] then
+            keyBindingGroups[category] = {}
+            keyBindingGroups[category].actions = {}
+            keyBindingGroups[category].name = category
+            keyBindingGroups[category].collapsed = keyBindingsLinesCollapsed
+            keyBindingGroups[category].order = table.getsize(keyBindingGroups) - 1
+            keyBindingGroups[category].text = v.category or keyCategories['none'].text
+        end
+
+        local data = {
+            action = k,
+            key = keyForAction,
+            keyText = FormatKeyName(keyForAction),
+            category = category,
+            order = keyBindingGroups[category].order,
+            text = KeyMapper.GetActionName(k),
+            wikiURL = v.wikiURL
+        }
+        table.insert(keyBindingGroups[category].actions, data)
+    end
+    -- flatten all key actions to a list separated by a header with info about key category
+    local index = 1
+    for category, group in keyBindingGroups do
+        if not table.empty(group.actions) then
+            LOG(index .. " CATEGORY " .. category)
+            keyData[index] = {
+                type = 'header',
+                id = index,
+                order = keyBindingGroups[category].order,
+                count = table.getsize(group.actions),
+                category = category,
+                text = keyBindingGroups[category].text,
+                collapsed = keyBindingGroups[category].collapsed
+            }
+            index = index + 1
+            for _, data in group.actions do
+                LOG(index .. "data.text " .. data.text)
+                keyData[index] = {
+                    type = 'entry',
+                    text = data.text,
+                    action = data.action,
+                    key = data.key,
+                    keyText = LOC(data.keyText),
+                    category = category,
+                    order = keyBindingGroups[category].order,
+                    collapsed = keyBindingGroups[category].collapsed,
+                    id = index,
+                    wikiURL = data.wikiURL,
+                    filters = { -- create filter parameters for quick searching of keys
+                        key = string.gsub(string.lower(data.keyText), ' %+ ', ' '),
+                        text = string.lower(data.text or ''),
+                        action = string.lower(data.action or ''),
+                        category = string.lower(data.category or ''),
+                    }
+                }
+                index = index + 1
+            end
+        end
+    end
+
+    SortKeyBindingData(keyData)
 
     -- store index of a header keyActionLine for each key keyActionLine
     local header = 1
