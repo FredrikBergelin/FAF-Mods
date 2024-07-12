@@ -1,5 +1,4 @@
 local _CreateUI = CreateUI
-local CreateBackupKeyMap = import('/mods/AdvancedHotkeys/modules/BackupKeyMap.lua').BackupKeyMap
 local Prefs = import('/lua/user/prefs.lua')
 
 function BackupKeyMap()
