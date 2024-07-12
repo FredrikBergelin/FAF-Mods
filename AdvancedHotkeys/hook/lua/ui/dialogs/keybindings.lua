@@ -512,21 +512,8 @@ function CreateKeyBindingLine()
     keyBindingLine.Height:Set(24)
     keyBindingLine.Width:Set(function() return keyBindingLine.Right() - keyBindingLine.Left() end)
 
-    keyBindingLine.statistics = UIUtil.CreateText(keyBindingLine, '', 16, "Arial")
-    keyBindingLine.statistics:EnableHitTest()
-    keyBindingLine.statistics:SetColor('FF9A9A9A')
-    keyBindingLine.statistics:SetAlpha(0.9)
-
-    Tooltip.AddControlTooltip(keyBindingLine.statistics,
-        {
-            text = '<LOC key_binding_0014>Category Statistics',
-            body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
-        })
-
     LayoutHelpers.AtLeftIn(keyBindingLine.description, keyBindingLine, 40)
     LayoutHelpers.AtVerticalCenterIn(keyBindingLine.description, keyBindingLine)
-    LayoutHelpers.AtRightIn(keyBindingLine.statistics, keyBindingLine, 10)
-    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.statistics, keyBindingLine)
 
     -- Remove keyBindingLine.key and adjust HandleEvent function accordingly
 
@@ -534,12 +521,10 @@ function CreateKeyBindingLine()
         if event.Type == 'MouseEnter' then
             keyBindingLine:SetAlpha(0.9)
             keyBindingLine.description:SetAlpha(1.0)
-            keyBindingLine.statistics:SetAlpha(1.0)
             PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
         elseif event.Type == 'MouseExit' then
             keyBindingLine:SetAlpha(1.0)
             keyBindingLine.description:SetAlpha(0.9)
-            keyBindingLine.statistics:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
                 SelectLine(self.data.index)
@@ -591,39 +576,18 @@ function CreateKeyBindingLine()
             body = '<LOC key_binding_0011>Toggle visibility of all actions for this category of keys'
         })
 
-    keyBindingLine.wikiButton = UIUtil.CreateBitmap(keyBindingLine, '/textures/ui/common/mods/mod_url_website.dds')
-    LayoutHelpers.SetDimensions(keyBindingLine.wikiButton, 20, 20)
-    LayoutHelpers.AtRightIn(keyBindingLine.wikiButton, keyBindingLine, 10)
-    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.wikiButton, keyBindingLine)
-    keyBindingLine.wikiButton:SetAlpha(0.5)
-    keyBindingLine.wikiButton.HandleEvent = function(self, event)
-        if event.Type == 'MouseEnter' then
-            self:SetAlpha(1.0, false)
-        elseif event.Type == 'MouseExit' then
-            self:SetAlpha(0.5, false)
-        elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            local url = "http://wiki.faforever.com/" .. tostring(self.url)
-            OpenURL(url)
-        end
-        return true
-    end
-
-    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(keyBindingLine.wikiButton,
-        'Learn more on the Wiki of FAForever', ''
-        , 0, 140, 6, 14, 14, 'left')
-
-    keyBindingLine.assignKeyButton = CreateToggle(keyBindingLine,
+    keyBindingLine.assignActionButton = CreateToggle(keyBindingLine,
         '645F5E5E',
         'FFAEACAC',
         keyBindingLine.description.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(keyBindingLine.assignKeyButton, keyBindingLine)
-    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.assignKeyButton, keyBindingLine)
-    Tooltip.AddControlTooltip(keyBindingLine.assignKeyButton,
+    LayoutHelpers.AtLeftIn(keyBindingLine.assignActionButton, keyBindingLine)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.assignActionButton, keyBindingLine)
+    Tooltip.AddControlTooltip(keyBindingLine.assignActionButton,
         {
             text = "<LOC key_binding_0003>Assign Key",
             body = '<LOC key_binding_0012>Opens a dialog that allows assigning key binding for a given action'
         })
-    keyBindingLine.assignKeyButton.OnMouseClick = function(self)
+    keyBindingLine.assignActionButton.OnMouseClick = function(self)
         keyBindingLine:AssignKeyBinding()
         return true
     end
@@ -641,34 +605,21 @@ function CreateKeyBindingLine()
             end
             local stats = keyGroups[data.category].visible
             keyBindingLine.toggle:Show()
-            keyBindingLine.assignKeyButton:Hide()
-            keyBindingLine.wikiButton:Hide()
+            keyBindingLine.assignActionButton:Hide()
             keyBindingLine.description:SetText(data.text)
             keyBindingLine.description:SetFont(UIUtil.titleFont, 16)
             keyBindingLine.description:SetColor(UIUtil.factionTextColor)
-            keyBindingLine.statistics:SetText(stats)
             LayoutHelpers.AtVerticalCenterIn(keyBindingLine.description, keyBindingLine, 2)
         elseif data.type == 'spacer' then
             keyBindingLine.toggle:Hide()
-            keyBindingLine.assignKeyButton:Hide()
-            keyBindingLine.wikiButton:Hide()
+            keyBindingLine.assignActionButton:Hide()
             keyBindingLine.description:SetText('')
-            keyBindingLine.statistics:SetText('')
         elseif data.type == 'entry' then
             keyBindingLine.toggle:Hide()
             keyBindingLine.description:SetText(data.text)
             keyBindingLine.description:SetFont('Arial', 14)
             keyBindingLine.description:SetColor(UIUtil.fontColor)
-            keyBindingLine.statistics:SetText('')
-            keyBindingLine.assignKeyButton:Show()
-
-            if (data.wikiURL) then
-                keyBindingLine.wikiButton.url = tostring(data.wikiURL)
-                keyBindingLine.wikiButton:Show()
-            else
-                keyBindingLine.wikiButton.url = ""
-                keyBindingLine.wikiButton:Hide()
-            end
+            keyBindingLine.assignActionButton:Show()
         end
     end
     return keyBindingLine
