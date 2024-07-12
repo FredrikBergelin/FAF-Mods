@@ -22,23 +22,29 @@ local keyCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrde
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
 local popup = nil
-local FormatData
 
+local FormatKeyActionData
+
+local keyActionTable
+local keyActionsSection
 local keyActionsContainer
-local keyTable
-local keyActionFilter
+local keyActionsFilter
 local keyActionEntries = {}
+local keyActionLinesVisible = {} -- store indexes of visible keyActionLines including headers and key entries
 
+local keyActionLinesCollapsed = true
+
+local keyBindingTable
+local keyBindingsSection
 local keyBindingsContainer
-
+local keyBindingsFilter
+local keyBindingsEntries = {}
+local keyBindingsLinesVisible = {}
 
 local keyword = ''
 
-local keyActionsContainerWidth = 500
+local keyActionsSectionWidth = 500
 
--- store indexes of visible keyActionLines including headers and key entries
-local keyActionLinesVisible = {}
-local keyActionLinesCollapsed = true
 
 -- store info about current state of key categories and preserve their state between FormatData() calls
 local keyGroups = {}
@@ -178,7 +184,7 @@ local function EditActionKey(parent, action, currentKey)
                         { escapeButton = 2, enterButton = 1, worldCover = false })
                 end
             end
-            keyTable = FormatData()
+            keyActionTable = FormatKeyActionData()
             keyActionsContainer:Filter(keyword)
         end
 
@@ -204,7 +210,7 @@ local function EditActionKey(parent, action, currentKey)
 end
 
 local function AssignCurrentSelection()
-    for k, v in keyTable do
+    for k, v in keyActionTable do
         if v.selected then
             EditActionKey(popup, v.action, v.key)
             break
@@ -213,13 +219,13 @@ local function AssignCurrentSelection()
 end
 
 local function UnbindCurrentSelection()
-    for k, v in keyTable do
+    for k, v in keyActionTable do
         if v.selected then
             ClearActionKey(v.action, v.key)
             break
         end
     end
-    keyTable = FormatData()
+    keyActionTable = FormatKeyActionData()
     keyActionsContainer:Filter(keyword)
 end
 
@@ -242,10 +248,10 @@ local function GetLineColor(keyActionLineID, data)
 end
 
 -- toggles expansion or collapse of keyActionLines with specified key category only if searching is not active
-local function ToggleLines(category)
+local function ToggleKeyActionLines(category)
     if keyword and string.len(keyword) > 0 then return end
 
-    for k, v in keyTable do
+    for k, v in keyActionTable do
         if v.category == category then
             if v.collapsed then
                 v.collapsed = false
@@ -263,12 +269,12 @@ local function ToggleLines(category)
 end
 
 local function SelectLine(dataIndex)
-    for k, v in keyTable do
+    for k, v in keyActionTable do
         v.selected = false
     end
 
-    if keyTable[dataIndex].type == 'entry' then
-        keyTable[dataIndex].selected = true
+    if keyActionTable[dataIndex].type == 'entry' then
+        keyActionTable[dataIndex].selected = true
     end
     keyActionsContainer:Filter(keyword)
 end
@@ -360,7 +366,7 @@ function CreateKeyActionLine()
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
                 SelectLine(self.data.index)
-                keyActionFilter.text:AcquireFocus()
+                keyActionsFilter.text:AcquireFocus()
                 return true
             elseif event.Type == 'ButtonDClick' then
                 SelectLine(self.data.index)
@@ -369,8 +375,8 @@ function CreateKeyActionLine()
             end
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
             if string.len(keyword) == 0 then
-                ToggleLines(self.data.category)
-                keyActionFilter.text:AcquireFocus()
+                ToggleKeyActionLines(self.data.category)
+                keyActionsFilter.text:AcquireFocus()
 
                 if keyGroups[self.data.category].collapsed then
                     self.toggle.txt:SetText('+')
@@ -390,7 +396,7 @@ function CreateKeyActionLine()
     end
 
     keyActionLine.UnbindKeyBinding = function(self)
-        if keyTable[self.data.index].key then
+        if keyActionTable[self.data.index].key then
             SelectLine(self.data.index)
             UnbindCurrentSelection()
         end
@@ -491,6 +497,183 @@ function CreateKeyActionLine()
     return keyActionLine
 end
 
+function CreateKeyBindingLine()
+    local keyBindingLine = Bitmap(keyBindingsContainer)
+    keyBindingLine.Left:Set(keyBindingsContainer.Left)
+    keyBindingLine.Right:Set(keyBindingsContainer.Right)
+    LayoutHelpers.SetHeight(keyBindingLine, 24)
+
+    keyBindingLine.description = UIUtil.CreateText(keyBindingLine, '', 16, "Arial")
+    keyBindingLine.description:DisableHitTest()
+    keyBindingLine.description:SetClipToWidth(true)
+    keyBindingLine.description.Width:Set(function() return keyBindingLine.Width() - 50 end)
+    keyBindingLine.description:SetAlpha(0.9)
+
+    keyBindingLine.Height:Set(24)
+    keyBindingLine.Width:Set(function() return keyBindingLine.Right() - keyBindingLine.Left() end)
+
+    keyBindingLine.statistics = UIUtil.CreateText(keyBindingLine, '', 16, "Arial")
+    keyBindingLine.statistics:EnableHitTest()
+    keyBindingLine.statistics:SetColor('FF9A9A9A')
+    keyBindingLine.statistics:SetAlpha(0.9)
+
+    Tooltip.AddControlTooltip(keyBindingLine.statistics,
+        {
+            text = '<LOC key_binding_0014>Category Statistics',
+            body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
+        })
+
+    LayoutHelpers.AtLeftIn(keyBindingLine.description, keyBindingLine, 40)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.description, keyBindingLine)
+    LayoutHelpers.AtRightIn(keyBindingLine.statistics, keyBindingLine, 10)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.statistics, keyBindingLine)
+
+    -- Remove keyBindingLine.key and adjust HandleEvent function accordingly
+
+    keyBindingLine.HandleEvent = function(self, event)
+        if event.Type == 'MouseEnter' then
+            keyBindingLine:SetAlpha(0.9)
+            keyBindingLine.description:SetAlpha(1.0)
+            keyBindingLine.statistics:SetAlpha(1.0)
+            PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
+        elseif event.Type == 'MouseExit' then
+            keyBindingLine:SetAlpha(1.0)
+            keyBindingLine.description:SetAlpha(0.9)
+            keyBindingLine.statistics:SetAlpha(0.9)
+        elseif self.data.type == 'entry' then
+            if event.Type == 'ButtonPress' then
+                SelectLine(self.data.index)
+                keyBindingsFilter.text:AcquireFocus()
+                return true
+            elseif event.Type == 'ButtonDClick' then
+                SelectLine(self.data.index)
+                AssignCurrentSelection()
+                return true
+            end
+        elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
+            if string.len(keyword) == 0 then
+                ToggleKeyBindingLines(self.data.category)
+                keyBindingsFilter.text:AcquireFocus()
+
+                if keyGroups[self.data.category].collapsed then
+                    self.toggle.txt:SetText('+')
+                else
+                    self.toggle.txt:SetText('-')
+                end
+                PlaySound(Sound({ Cue = "UI_Menu_MouseDown_Sml", Bank = "Interface" }))
+                return true
+            end
+        end
+        return false
+    end
+
+    keyBindingLine.AssignKeyBinding = function(self)
+        SelectLine(self.data.index)
+        AssignCurrentSelection()
+    end
+
+    keyBindingLine.UnbindKeyBinding = function(self)
+        if keyBindingTable[self.data.index].key then
+            SelectLine(self.data.index)
+            UnbindCurrentSelection()
+        end
+    end
+
+    keyBindingLine.toggle = CreateToggle(keyBindingLine,
+        'FF1B1A1A',
+        UIUtil.factionTextColor,
+        keyBindingLine.description.Height() + 4, 18, '+')
+    LayoutHelpers.AtLeftIn(keyBindingLine.toggle, keyBindingLine)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.toggle, keyBindingLine)
+    Tooltip.AddControlTooltip(keyBindingLine.toggle,
+        {
+            text = '<LOC key_binding_0010>Toggle Category',
+            body = '<LOC key_binding_0011>Toggle visibility of all actions for this category of keys'
+        })
+
+    keyBindingLine.wikiButton = UIUtil.CreateBitmap(keyBindingLine, '/textures/ui/common/mods/mod_url_website.dds')
+    LayoutHelpers.SetDimensions(keyBindingLine.wikiButton, 20, 20)
+    LayoutHelpers.AtRightIn(keyBindingLine.wikiButton, keyBindingLine, 10)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.wikiButton, keyBindingLine)
+    keyBindingLine.wikiButton:SetAlpha(0.5)
+    keyBindingLine.wikiButton.HandleEvent = function(self, event)
+        if event.Type == 'MouseEnter' then
+            self:SetAlpha(1.0, false)
+        elseif event.Type == 'MouseExit' then
+            self:SetAlpha(0.5, false)
+        elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
+            local url = "http://wiki.faforever.com/" .. tostring(self.url)
+            OpenURL(url)
+        end
+        return true
+    end
+
+    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(keyBindingLine.wikiButton,
+        'Learn more on the Wiki of FAForever', ''
+        , 0, 140, 6, 14, 14, 'left')
+
+    keyBindingLine.assignKeyButton = CreateToggle(keyBindingLine,
+        '645F5E5E',
+        'FFAEACAC',
+        keyBindingLine.description.Height() + 4, 18, '+')
+    LayoutHelpers.AtLeftIn(keyBindingLine.assignKeyButton, keyBindingLine)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingLine.assignKeyButton, keyBindingLine)
+    Tooltip.AddControlTooltip(keyBindingLine.assignKeyButton,
+        {
+            text = "<LOC key_binding_0003>Assign Key",
+            body = '<LOC key_binding_0012>Opens a dialog that allows assigning key binding for a given action'
+        })
+    keyBindingLine.assignKeyButton.OnMouseClick = function(self)
+        keyBindingLine:AssignKeyBinding()
+        return true
+    end
+
+
+    keyBindingLine.Update = function(self, data, keyBindingLineID)
+        keyBindingLine:SetSolidColor(GetLineColor(keyBindingLineID, data))
+        keyBindingLine.data = table.copy(data)
+
+        if data.type == 'header' then
+            if keyGroups[self.data.category].collapsed then
+                self.toggle.txt:SetText('+')
+            else
+                self.toggle.txt:SetText('-')
+            end
+            local stats = keyGroups[data.category].visible
+            keyBindingLine.toggle:Show()
+            keyBindingLine.assignKeyButton:Hide()
+            keyBindingLine.wikiButton:Hide()
+            keyBindingLine.description:SetText(data.text)
+            keyBindingLine.description:SetFont(UIUtil.titleFont, 16)
+            keyBindingLine.description:SetColor(UIUtil.factionTextColor)
+            keyBindingLine.statistics:SetText(stats)
+            LayoutHelpers.AtVerticalCenterIn(keyBindingLine.description, keyBindingLine, 2)
+        elseif data.type == 'spacer' then
+            keyBindingLine.toggle:Hide()
+            keyBindingLine.assignKeyButton:Hide()
+            keyBindingLine.wikiButton:Hide()
+            keyBindingLine.description:SetText('')
+            keyBindingLine.statistics:SetText('')
+        elseif data.type == 'entry' then
+            keyBindingLine.toggle:Hide()
+            keyBindingLine.description:SetText(data.text)
+            keyBindingLine.description:SetFont('Arial', 14)
+            keyBindingLine.description:SetColor(UIUtil.fontColor)
+            keyBindingLine.statistics:SetText('')
+            keyBindingLine.assignKeyButton:Show()
+
+            if (data.wikiURL) then
+                keyBindingLine.wikiButton.url = tostring(data.wikiURL)
+                keyBindingLine.wikiButton:Show()
+            else
+                keyBindingLine.wikiButton.url = ""
+                keyBindingLine.wikiButton:Hide()
+            end
+        end
+    end
+    return keyBindingLine
+end
+
 function CloseUI()
     LOG('Keybindings CloseUI')
     if popup then
@@ -510,7 +693,7 @@ function CreateUI()
         return
     end
     keyword = ''
-    keyTable = FormatData()
+    keyActionTable = FormatKeyActionData()
 
     local screenWidth, screenHeight = GetFrame(0).Width(), GetFrame(0).Height()
     local dialogWidth, dialogHeight = screenWidth - 100, screenHeight - 100
@@ -543,19 +726,24 @@ function CreateUI()
             end
         end
     end
-    keyActionFilter = Bitmap(dialogContent)
 
-    keyActionFilter:SetSolidColor('FF282828')
-    LayoutHelpers.AtLeftIn(keyActionFilter, dialogContent, 10)
-    LayoutHelpers.AtTopIn(keyActionFilter, dialogContent, 30)
-    -- LayoutHelpers.AtRightIn(keyActionFilter, keyActionsContainer, 0)
-    -- LayoutHelpers.AnchorToBottom(keyActionFilter, title, 10)
-    -- LayoutHelpers.AtBottomIn(keyActionFilter, title, -40)
-    keyActionFilter.Width:Set(keyActionsContainerWidth)
-    keyActionFilter.Height:Set(30)
+    keyActionsSection = Group(dialogContent)
 
-    keyActionFilter:EnableHitTest()
-    import("/lua/ui/game/tooltip.lua").AddControlTooltip(keyActionFilter,
+    LayoutHelpers.SetWidth(keyActionsSection, 500)
+    LayoutHelpers.AtLeftIn(keyActionsSection, dialogContent, 20)
+    LayoutHelpers.AtTopIn(keyActionsSection, dialogContent, 30)
+    LayoutHelpers.AtBottomIn(keyActionsSection, dialogContent)
+
+    keyActionsFilter = Bitmap(keyActionsSection)
+
+    keyActionsFilter:SetSolidColor('FF282828')
+    LayoutHelpers.AtLeftIn(keyActionsFilter, keyActionsSection, 25)
+    LayoutHelpers.AtTopIn(keyActionsFilter, keyActionsSection, 30)
+    keyActionsFilter.Width:Set(keyActionsSection.Width() - 25)
+    keyActionsFilter.Height:Set(30)
+
+    keyActionsFilter:EnableHitTest()
+    import("/lua/ui/game/tooltip.lua").AddControlTooltip(keyActionsFilter,
         {
             text = '<LOC key_binding_0018>Key Binding Filter',
             body = '<LOC key_binding_0019>' ..
@@ -563,29 +751,29 @@ function CreateUI()
                 '\n\n Note that collapsing of key categories is disabled while this filter contains some text'
         }, nil)
 
-    local text = 'Type name of action'
-    keyActionFilter.info = UIUtil.CreateText(keyActionFilter, text, 16, UIUtil.titleFont)
-    keyActionFilter.info:SetColor('FF727171')
-    keyActionFilter.info:DisableHitTest()
-    LayoutHelpers.AtLeftIn(keyActionFilter.info, keyActionFilter, 10)
-    LayoutHelpers.AtVerticalCenterIn(keyActionFilter.info, keyActionFilter, 2)
+    local text = 'Filter actions'
+    keyActionsFilter.info = UIUtil.CreateText(keyActionsFilter, text, 16, UIUtil.titleFont)
+    keyActionsFilter.info:SetColor('FF727171')
+    keyActionsFilter.info:DisableHitTest()
+    LayoutHelpers.AtLeftIn(keyActionsFilter.info, keyActionsFilter, 10)
+    LayoutHelpers.AtVerticalCenterIn(keyActionsFilter.info, keyActionsFilter, 2)
 
-    keyActionFilter.text = Edit(keyActionFilter)
-    keyActionFilter.text:SetForegroundColor('FFF1ECEC')
-    keyActionFilter.text:SetBackgroundColor('04E1B44A')
-    keyActionFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    keyActionFilter.text:SetHighlightBackgroundColor("880085EF")
-    keyActionFilter.text.Height:Set(function() return keyActionFilter.Bottom() - keyActionFilter.Top() -
+    keyActionsFilter.text = Edit(keyActionsFilter)
+    keyActionsFilter.text:SetForegroundColor('FFF1ECEC')
+    keyActionsFilter.text:SetBackgroundColor('04E1B44A')
+    keyActionsFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
+    keyActionsFilter.text:SetHighlightBackgroundColor("880085EF")
+    keyActionsFilter.text.Height:Set(function() return keyActionsFilter.Bottom() - keyActionsFilter.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
-    LayoutHelpers.AtLeftIn(keyActionFilter.text, keyActionFilter, 5)
-    LayoutHelpers.AtRightIn(keyActionFilter.text, keyActionFilter)
-    LayoutHelpers.AtVerticalCenterIn(keyActionFilter.text, keyActionFilter)
-    keyActionFilter.text:AcquireFocus()
-    keyActionFilter.text:SetText('')
-    keyActionFilter.text:SetFont(UIUtil.titleFont, 16)
-    keyActionFilter.text:SetMaxChars(20)
-    keyActionFilter.text.OnTextChanged = function(self, newText, oldText)
+    LayoutHelpers.AtLeftIn(keyActionsFilter.text, keyActionsFilter, 5)
+    LayoutHelpers.AtRightIn(keyActionsFilter.text, keyActionsFilter)
+    LayoutHelpers.AtVerticalCenterIn(keyActionsFilter.text, keyActionsFilter)
+    keyActionsFilter.text:AcquireFocus()
+    keyActionsFilter.text:SetText('')
+    keyActionsFilter.text:SetFont(UIUtil.titleFont, 16)
+    keyActionsFilter.text:SetMaxChars(20)
+    keyActionsFilter.text.OnTextChanged = function(self, newText, oldText)
         -- interpret plus chars as spaces for easier key filtering
         keyword = string.gsub(string.lower(newText), '+', ' ')
         keyword = string.gsub(string.lower(keyword), '  ', ' ')
@@ -594,7 +782,7 @@ function CreateUI()
             for k, v in keyGroups do
                 v.collapsed = true
             end
-            for k, v in keyTable do
+            for k, v in keyActionTable do
                 v.collapsed = true
             end
         end
@@ -602,35 +790,34 @@ function CreateUI()
         keyActionsContainer:ScrollSetTop(nil, 0)
     end
 
-    keyActionFilter.clear = UIUtil.CreateText(keyActionFilter.text, 'X', 17, "Arial Bold")
-    keyActionFilter.clear:SetColor('FF8A8A8A')
-    keyActionFilter.clear:EnableHitTest()
-    LayoutHelpers.AtVerticalCenterIn(keyActionFilter.clear, keyActionFilter.text, 1)
-    LayoutHelpers.AtRightIn(keyActionFilter.clear, keyActionFilter.text, 9)
+    keyActionsFilter.clear = UIUtil.CreateText(keyActionsFilter.text, 'X', 17, "Arial Bold")
+    keyActionsFilter.clear:SetColor('FF8A8A8A')
+    keyActionsFilter.clear:EnableHitTest()
+    LayoutHelpers.AtVerticalCenterIn(keyActionsFilter.clear, keyActionsFilter.text, 1)
+    LayoutHelpers.AtRightIn(keyActionsFilter.clear, keyActionsFilter.text, 9)
 
-    keyActionFilter.clear.HandleEvent = function(self, event)
+    keyActionsFilter.clear.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
-            keyActionFilter.clear:SetColor('FFC9C7C7')
+            keyActionsFilter.clear:SetColor('FFC9C7C7')
         elseif event.Type == 'MouseExit' then
-            keyActionFilter.clear:SetColor('FF8A8A8A')
+            keyActionsFilter.clear:SetColor('FF8A8A8A')
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            keyActionFilter.text:SetText('')
-            keyActionFilter.text:AcquireFocus()
+            keyActionsFilter.text:SetText('')
+            keyActionsFilter.text:AcquireFocus()
         end
         return true
     end
-    Tooltip.AddControlTooltip(keyActionFilter.clear,
+    Tooltip.AddControlTooltip(keyActionsFilter.clear,
         {
             text = '<LOC key_binding_0016>Clear Filter',
             body = '<LOC key_binding_0017>Clears text that was typed in the filter field.'
         })
 
-    keyActionsContainer = Group(dialogContent)
-    LayoutHelpers.AtLeftIn(keyActionsContainer, dialogContent, 10)
-    LayoutHelpers.SetWidth(keyActionsContainer, keyActionsContainerWidth)
-    LayoutHelpers.AnchorToBottom(keyActionsContainer, keyActionFilter, 10)
-    LayoutHelpers.AtBottomIn(keyActionsContainer, dialogContent, 10)
-    -- keyActionsContainer:SetSolidColor('55445F2F')
+    keyActionsContainer = Group(keyActionsSection)
+    LayoutHelpers.AtLeftIn(keyActionsContainer, keyActionsSection)
+    LayoutHelpers.SetWidth(keyActionsContainer, keyActionsSectionWidth)
+    LayoutHelpers.AnchorToBottom(keyActionsContainer, keyActionsFilter, 10)
+    LayoutHelpers.AtBottomIn(keyActionsContainer, keyActionsSection, 10)
 
     keyActionsContainer.Height:Set(function() return keyActionsContainer.Bottom() - keyActionsContainer.Top() -
             LayoutHelpers.ScaleNumber(10)
@@ -651,14 +838,14 @@ function CreateUI()
         index = index + 1
     end
 
-    local height = keyActionsContainer.Height()
-    local items = math.floor(keyActionsContainer.Height() / keyActionEntries[1].Height())
+    -- local height = keyActionsContainer.Height()
+    -- local items = math.floor(keyActionsContainer.Height() / keyActionEntries[1].Height())
 
-    local GetLinesTotal = function()
+    local GetKeyActionLinesTotal = function()
         return table.getsize(keyActionEntries)
     end
 
-    local function GetLinesVisible()
+    local function GetKeyActionLinesVisible()
         return table.getsize(keyActionLinesVisible)
     end
 
@@ -667,8 +854,8 @@ function CreateUI()
     -- rangeMin, rangeMax, visibleMin, visibleMax
     -- axis can be "Vert" or "Horz"
     keyActionsContainer.GetScrollValues = function(self, axis)
-        local size = GetLinesVisible()
-        local visibleMax = math.min(self.top + GetLinesTotal(), size)
+        local size = GetKeyActionLinesVisible()
+        local visibleMax = math.min(self.top + GetKeyActionLinesTotal(), size)
         return 0, size, self.top, visibleMax
     end
 
@@ -679,15 +866,15 @@ function CreateUI()
 
     -- Called when the scrollbar wants to scroll a specific number of pages (negative indicates scroll up)
     keyActionsContainer.ScrollPages = function(self, axis, delta)
-        self:ScrollSetTop(axis, self.top + math.floor(delta) * GetLinesTotal())
+        self:ScrollSetTop(axis, self.top + math.floor(delta) * GetKeyActionLinesTotal())
     end
 
     -- Called when the scrollbar wants to set a new visible top keyActionLine
     keyActionsContainer.ScrollSetTop = function(self, axis, top)
         top = math.floor(top)
         if top == self.top then return end
-        local size = GetLinesVisible()
-        self.top = math.max(math.min(size - GetLinesTotal(), top), 0)
+        local size = GetKeyActionLinesVisible()
+        self.top = math.max(math.min(size - GetKeyActionLinesTotal(), top), 0)
         self:CalcVisible()
     end
 
@@ -701,7 +888,7 @@ function CreateUI()
         for i, keyActionLine in keyActionEntries do
             local id = i + self.top
             local index = keyActionLinesVisible[id]
-            local data = keyTable[index]
+            local data = keyActionTable[index]
 
             if data then
                 keyActionLine:Update(data, id)
@@ -714,7 +901,7 @@ function CreateUI()
                 keyActionLine.wikiButton:Hide()
             end
         end
-        keyActionFilter.text:AcquireFocus()
+        keyActionsFilter.text:AcquireFocus()
     end
 
     keyActionsContainer.HandleEvent = function(control, event)
@@ -732,8 +919,8 @@ function CreateUI()
         keyActionLinesVisible = {}
 
         if not target or string.len(target) == 0 then
-            keyActionFilter.info:Show()
-            for k, v in keyTable do
+            keyActionsFilter.info:Show()
+            for k, v in keyActionTable do
                 if v.type == 'header' then
                     table.insert(keyActionLinesVisible, k)
                     keyGroups[v.category].visible = v.count
@@ -748,8 +935,8 @@ function CreateUI()
                 end
             end
         else
-            keyActionFilter.info:Hide()
-            for k, v in keyTable do
+            keyActionsFilter.info:Hide()
+            for k, v in keyActionTable do
                 local match = false
                 if v.type == 'header' then
                     keyGroups[v.category].visible = 0
@@ -793,28 +980,269 @@ function CreateUI()
         end
         self:CalcVisible()
     end
-    keyActionFilter.text:SetText('')
 
     -----------------------------------------------------------------
 
-    -- Create the main view for the KeyBindings
+    keyBindingsSection = Group(dialogContent)
 
+    LayoutHelpers.SetWidth(keyBindingsSection, dialogContent.Width() - (keyActionsSection.Width() + 100))
+    LayoutHelpers.AtLeftIn(keyBindingsSection, dialogContent, keyActionsSection.Width() + 50)
+    LayoutHelpers.AtTopIn(keyBindingsSection, dialogContent, 30)
+    LayoutHelpers.AtBottomIn(keyBindingsSection, dialogContent)
 
-    keyBindingsContainer = Group(dialogContent)
-    LayoutHelpers.AtTopIn(keyBindingsContainer, keyActionsContainer)
-    LayoutHelpers.AtLeftIn(keyBindingsContainer, dialogContent, keyActionsContainerWidth)
-    LayoutHelpers.SetWidth(keyBindingsContainer, keyActionsContainerWidth)
-    LayoutHelpers.AnchorToBottom(keyBindingsContainer, keyActionFilter, 10)
-    LayoutHelpers.AtBottomIn(keyBindingsContainer, dialogContent, 10)
+    keyBindingsFilter = Bitmap(keyBindingsSection)
 
-    keyBindingsContainer.Height:Set(function() return keyActionsContainer.Bottom() - keyActionsContainer.Top() -
+    keyBindingsFilter:SetSolidColor('FF282828')
+    LayoutHelpers.AtLeftIn(keyBindingsFilter, keyBindingsSection, 25)
+    LayoutHelpers.AtTopIn(keyBindingsFilter, keyBindingsSection, 30)
+    keyBindingsFilter.Width:Set(keyBindingsSection.Width() - 50)
+    keyBindingsFilter.Height:Set(30)
+
+    keyBindingsFilter:EnableHitTest()
+    import("/lua/ui/game/tooltip.lua").AddControlTooltip(keyBindingsFilter,
+        {
+            text = '<LOC key_binding_0018>Key Binding Filter',
+            body = '<LOC key_binding_0019>' ..
+                'Filter all actions by typing action :' ..
+                '\n\n Note that collapsing of key categories is disabled while this filter contains some text'
+        }, nil)
+
+    local text = 'Filter key bindings'
+    keyBindingsFilter.info = UIUtil.CreateText(keyBindingsFilter, text, 16, UIUtil.titleFont)
+    keyBindingsFilter.info:SetColor('FF727171')
+    keyBindingsFilter.info:DisableHitTest()
+    LayoutHelpers.AtLeftIn(keyBindingsFilter.info, keyBindingsFilter, 10)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingsFilter.info, keyBindingsFilter, 2)
+
+    keyBindingsFilter.text = Edit(keyBindingsFilter)
+    keyBindingsFilter.text:SetForegroundColor('FFF1ECEC')
+    keyBindingsFilter.text:SetBackgroundColor('04E1B44A')
+    keyBindingsFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
+    keyBindingsFilter.text:SetHighlightBackgroundColor("880085EF")
+    keyBindingsFilter.text.Height:Set(function() return keyBindingsFilter.Bottom() - keyBindingsFilter.Top() -
+            LayoutHelpers.ScaleNumber(10)
+    end)
+    LayoutHelpers.AtLeftIn(keyBindingsFilter.text, keyBindingsFilter, 5)
+    LayoutHelpers.AtRightIn(keyBindingsFilter.text, keyBindingsFilter)
+    LayoutHelpers.AtVerticalCenterIn(keyBindingsFilter.text, keyBindingsFilter)
+    keyBindingsFilter.text:AcquireFocus()
+    keyBindingsFilter.text:SetText('')
+    keyBindingsFilter.text:SetFont(UIUtil.titleFont, 16)
+    keyBindingsFilter.text:SetMaxChars(20)
+    keyBindingsFilter.text.OnTextChanged = function(self, newText, oldText)
+        -- interpret plus chars as spaces for easier key filtering
+        keyword = string.gsub(string.lower(newText), '+', ' ')
+        keyword = string.gsub(string.lower(keyword), '  ', ' ')
+        keyword = string.gsub(string.lower(keyword), '  ', ' ')
+        if string.len(keyword) == 0 then
+            for k, v in keyGroups do
+                v.collapsed = true
+            end
+            for k, v in keyBindingTable do
+                v.collapsed = true
+            end
+        end
+        keyBindingsContainer:Filter(keyword)
+        keyBindingsContainer:ScrollSetTop(nil, 0)
+    end
+
+    keyBindingsFilter.clear = UIUtil.CreateText(keyBindingsFilter.text, 'X', 17, "Arial Bold")
+    keyBindingsFilter.clear:SetColor('FF8A8A8A')
+    keyBindingsFilter.clear:EnableHitTest()
+    LayoutHelpers.AtVerticalCenterIn(keyBindingsFilter.clear, keyBindingsFilter.text, 1)
+    LayoutHelpers.AtRightIn(keyBindingsFilter.clear, keyBindingsFilter.text, 9)
+
+    keyBindingsFilter.clear.HandleEvent = function(self, event)
+        if event.Type == 'MouseEnter' then
+            keyBindingsFilter.clear:SetColor('FFC9C7C7')
+        elseif event.Type == 'MouseExit' then
+            keyBindingsFilter.clear:SetColor('FF8A8A8A')
+        elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
+            keyBindingsFilter.text:SetText('')
+            keyBindingsFilter.text:AcquireFocus()
+        end
+        return true
+    end
+    Tooltip.AddControlTooltip(keyBindingsFilter.clear,
+        {
+            text = '<LOC key_binding_0016>Clear Filter',
+            body = '<LOC key_binding_0017>Clears text that was typed in the filter field.'
+        })
+
+    keyBindingsContainer = Group(keyBindingsSection)
+    LayoutHelpers.AtLeftIn(keyBindingsContainer, keyBindingsSection)
+    LayoutHelpers.SetWidth(keyBindingsContainer, keyBindingsSection.Width())
+    LayoutHelpers.AnchorToBottom(keyBindingsContainer, keyBindingsFilter, 10)
+    LayoutHelpers.AtBottomIn(keyBindingsContainer, keyBindingsSection, 10)
+
+    keyBindingsContainer.Height:Set(function() return keyBindingsContainer.Bottom() - keyBindingsContainer.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
     keyBindingsContainer.top = 0
     UIUtil.CreateLobbyVertScrollbar(keyBindingsContainer)
+
+    local index = 1
+    keyBindingsEntries = {}
+    keyBindingsEntries[index] = CreateKeyBindingLine()
+    LayoutHelpers.AtTopIn(keyBindingsEntries[1], keyBindingsContainer)
+
+    index = index + 1
+    while keyBindingsEntries[table.getsize(keyBindingsEntries)].Top() + (2 * keyBindingsEntries[1].Height()) <
+        keyBindingsContainer.Bottom() do
+        keyBindingsEntries[index] = CreateKeyBindingLine()
+        LayoutHelpers.Below(keyBindingsEntries[index], keyBindingsEntries[index - 1])
+        index = index + 1
+    end
+
+    -- local height = keyBindingsContainer.Height()
+    -- local items = math.floor(keyBindingsContainer.Height() / keyBindingEntries[1].Height())
+
+    local GetKeyActionLinesTotal = function()
+        return table.getsize(keyBindingsEntries)
+    end
+
+    local function GetKeyActionLinesVisible()
+        return table.getsize(keyBindingsLinesVisible)
+    end
+
+    -- Called when the scrollbar for the control requires data to size itself
+    -- GetScrollValues must return 4 values in this order:
+    -- rangeMin, rangeMax, visibleMin, visibleMax
+    -- axis can be "Vert" or "Horz"
+    keyBindingsContainer.GetScrollValues = function(self, axis)
+        local size = GetKeyActionLinesVisible()
+        local visibleMax = math.min(self.top + GetKeyActionLinesTotal(), size)
+        return 0, size, self.top, visibleMax
+    end
+
+    -- Called when the scrollbar wants to scroll a specific number of keyBindingLines (negative indicates scroll up)
+    keyBindingsContainer.ScrollLines = function(self, axis, delta)
+        self:ScrollSetTop(axis, self.top + math.floor(delta))
+    end
+
+    -- Called when the scrollbar wants to scroll a specific number of pages (negative indicates scroll up)
+    keyBindingsContainer.ScrollPages = function(self, axis, delta)
+        self:ScrollSetTop(axis, self.top + math.floor(delta) * GetKeyActionLinesTotal())
+    end
+
+    -- Called when the scrollbar wants to set a new visible top keyBindingLine
+    keyBindingsContainer.ScrollSetTop = function(self, axis, top)
+        top = math.floor(top)
+        if top == self.top then return end
+        local size = GetKeyActionLinesVisible()
+        self.top = math.max(math.min(size - GetKeyActionLinesTotal(), top), 0)
+        self:CalcVisible()
+    end
+
+    -- Called to determine if the control is scrollable on a particular access. Must return true or false.
+    keyBindingsContainer.IsScrollable = function(self, axis)
+        return true
+    end
+
+    -- Determines what control keyBindingLines should be visible or not
+    keyBindingsContainer.CalcVisible = function(self)
+        for i, keyBindingLine in keyBindingsEntries do
+            local id = i + self.top
+            local index = keyBindingsLinesVisible[id]
+            local data = keyBindingTable[index]
+
+            if data then
+                keyBindingLine:Update(data, id)
+            else
+                keyBindingLine:SetSolidColor('00000000')
+                keyBindingLine.description:SetText('')
+                keyBindingLine.statistics:SetText('')
+                keyBindingLine.toggle:Hide()
+                keyBindingLine.assignKeyButton:Hide()
+                keyBindingLine.wikiButton:Hide()
+            end
+        end
+        keyBindingsFilter.text:AcquireFocus()
+    end
+
+    keyBindingsContainer.HandleEvent = function(control, event)
+        if event.Type == 'WheelRotation' then
+            local keyBindingLines = 1
+            if event.WheelRotation > 0 then
+                keyBindingLines = -1
+            end
+            control:ScrollLines(nil, keyBindingLines)
+        end
+    end
+    -- filter all key-bindings by checking if either text, action, or a key contains target string
+    keyBindingsContainer.Filter = function(self, target)
+        local headersVisible = {}
+        keyBindingsLinesVisible = {}
+
+        if not target or string.len(target) == 0 then
+            keyBindingsFilter.info:Show()
+            for k, v in keyBindingTable do
+                if v.type == 'header' then
+                    table.insert(keyBindingsLinesVisible, k)
+                    keyGroups[v.category].visible = v.count
+                    keyGroups[v.category].bindings = 0
+                elseif v.type == 'entry' then
+                    if not v.collapsed then
+                        table.insert(keyBindingsLinesVisible, k)
+                    end
+                    if v.key then
+                        keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                    end
+                end
+            end
+        else
+            keyBindingsFilter.info:Hide()
+            for k, v in keyBindingTable do
+                local match = false
+                if v.type == 'header' then
+                    keyGroups[v.category].visible = 0
+                    keyGroups[v.category].bindings = 0
+                    if not headersVisible[k] then
+                        headersVisible[k] = true
+                        table.insert(keyBindingsLinesVisible, k)
+                        keyGroups[v.category].collapsed = true
+                    end
+                elseif v.type == 'entry' and v.filters then
+                    if string.find(v.filters.text, target) then
+                        match = true
+                        v.filterMatch = 'text'
+                    elseif string.find(v.filters.key, target) then
+                        match = true
+                        v.filterMatch = 'key'
+                    elseif string.find(v.filters.action, target) then
+                        match = true
+                        v.filterMatch = 'action'
+                    elseif string.find(v.filters.category, target) then
+                        match = true
+                        v.filterMatch = 'category'
+                    else
+                        match = false
+                        v.filterMatch = nil
+                    end
+                    if match then
+                        if not headersVisible[v.header] then
+                            headersVisible[v.header] = true
+                            table.insert(keyBindingsLinesVisible, v.header)
+                        end
+                        keyGroups[v.category].collapsed = false
+                        keyGroups[v.category].visible = keyGroups[v.category].visible + 1
+                        table.insert(keyBindingsLinesVisible, k)
+                        if v.key then
+                            keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                        end
+                    end
+                end
+            end
+        end
+        self:CalcVisible()
+    end
+
+    -----------------------------------------------------------------
+
+    keyActionsFilter.text:SetText('')
 end
 
-function SortData(dataTable)
+function SortKeyActionData(dataTable)
     table.sort(dataTable, function(a, b)
         if a.order ~= b.order then
             return a.order < b.order
@@ -837,7 +1265,7 @@ function SortData(dataTable)
 end
 
 -- format all key data, group them based on key category or default to none category and finally sort all keys
-function FormatData()
+function FormatKeyActionData()
     local keyData = {}
     local keyLookup = KeyMapper.GetKeyLookup()
     local keyActions = KeyMapper.GetKeyActions()
@@ -910,7 +1338,7 @@ function FormatData()
         end
     end
 
-    SortData(keyData)
+    SortKeyActionData(keyData)
 
     -- store index of a header keyActionLine for each key keyActionLine
     local header = 1
