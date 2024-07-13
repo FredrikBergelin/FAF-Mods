@@ -1194,37 +1194,36 @@ end
 function RIGHTSIDE_FormatData()
     local keyData = {}
     local keyLookup = KeyMapper.GetKeyLookup()
-    local keyActions = KeyMapper.GetKeyActions()
+    local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
 
     -- reset previously formated key actions in all groups because they might have been re-mapped
     for category, group in RIGHTSIDE_keyGroups do
         group.actions = {}
     end
     -- group game keys and key defined in mods by their key category
-    for k, v in keyActions do
-        local category = string.lower(v.category or 'none')
+    for k, v in advancedKeyMap do
         local keyForAction = keyLookup[k]
 
         -- create header if it doesn't exist
-        if not RIGHTSIDE_keyGroups[category] then
-            RIGHTSIDE_keyGroups[category] = {}
-            RIGHTSIDE_keyGroups[category].actions = {}
-            RIGHTSIDE_keyGroups[category].name = category
-            RIGHTSIDE_keyGroups[category].collapsed = RIGHTSIDE_linesCollapsed
-            RIGHTSIDE_keyGroups[category].order = table.getsize(RIGHTSIDE_keyGroups) - 1
-            RIGHTSIDE_keyGroups[category].text = v.category or keyCategories['none'].text
+        if not RIGHTSIDE_keyGroups[k] then
+            RIGHTSIDE_keyGroups[k] = {}
+            RIGHTSIDE_keyGroups[k].actions = {}
+            RIGHTSIDE_keyGroups[k].name = k
+            RIGHTSIDE_keyGroups[k].collapsed = RIGHTSIDE_linesCollapsed
+            RIGHTSIDE_keyGroups[k].order = table.getsize(RIGHTSIDE_keyGroups) - 1
+            RIGHTSIDE_keyGroups[k].text = k
         end
 
         local data = {
-            action = k,
+            action = tostring(v),
             key = keyForAction,
-            keyText = RIGHTSIDE_FormatKeyName(keyForAction),
-            category = category,
-            order = RIGHTSIDE_keyGroups[category].order,
+            keyText = '',
+            category = k,
+            order = RIGHTSIDE_keyGroups[k].order,
             text = KeyMapper.GetActionName(k),
             wikiURL = v.wikiURL
         }
-        table.insert(RIGHTSIDE_keyGroups[category].actions, data)
+        table.insert(RIGHTSIDE_keyGroups[k].actions, data)
     end
     -- flatten all key actions to a list separated by a header with info about key category
     local index = 1
