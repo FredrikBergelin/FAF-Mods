@@ -23,7 +23,14 @@ local KeyMapper = import("/lua/keymap/keymapper.lua")
 
 local popup = nil
 
+local TOP_PADDING = 100
+local SIDE_PADDING = 10
+local SCROLLBAR_WIDTH = 10
+local KEYBINDING_WIDTH = 210
+local LEFTSIDE_WIDTH = 700
+
 local LEFTSIDE_FormatData
+local LEFTSIDE_Section
 local LEFTSIDE_keyContainer
 local LEFTSIDE_keyTable
 local LEFTSIDE_keyFilter
@@ -331,7 +338,6 @@ end
 
 -- create a line with dynamically updating UI elements based on type of data line
 function LEFTSIDE_CreateLine()
-    local keyBindingWidth = 210
     local line = Bitmap(LEFTSIDE_keyContainer)
     line.Left:Set(LEFTSIDE_keyContainer.Left)
     line.Right:Set(LEFTSIDE_keyContainer.Right)
@@ -344,7 +350,7 @@ function LEFTSIDE_CreateLine()
     line.description = UIUtil.CreateText(line, '', 16, "Arial")
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
-    line.description.Width:Set(line.Right() - line.Left() - keyBindingWidth)
+    line.description.Width:Set(line.Right() - line.Left() - KEYBINDING_WIDTH)
     line.description:SetAlpha(0.9)
 
     line.Height:Set(function() return line.key.Height() + 4 end)
@@ -361,7 +367,7 @@ function LEFTSIDE_CreateLine()
             body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
         })
 
-    LayoutHelpers.AtLeftIn(line.description, line, keyBindingWidth)
+    LayoutHelpers.AtLeftIn(line.description, line, KEYBINDING_WIDTH)
     LayoutHelpers.AtVerticalCenterIn(line.description, line)
     LayoutHelpers.LeftOf(line.key, line.description, 30)
     LayoutHelpers.AtVerticalCenterIn(line.key, line)
@@ -423,7 +429,7 @@ function LEFTSIDE_CreateLine()
         'FF1B1A1A', ----FF1B1A1A'
         UIUtil.factionTextColor,
         line.key.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(line.toggle, line, keyBindingWidth - 30)
+    LayoutHelpers.AtLeftIn(line.toggle, line, KEYBINDING_WIDTH - 30)
     LayoutHelpers.AtVerticalCenterIn(line.toggle, line)
     Tooltip.AddControlTooltip(line.toggle,
         {
@@ -698,8 +704,12 @@ function CreateUI()
     LEFTSIDE_keyword = ''
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
 
+    local screenWidth, screenHeight = GetFrame(0).Width(), GetFrame(0).Height()
+    local dialogWidth, dialogHeight = screenWidth - 100, screenHeight - 150
+
     local dialogContent = Group(GetFrame(0))
-    LayoutHelpers.SetDimensions(dialogContent, 980, 730)
+    LayoutHelpers.SetDimensions(dialogContent, dialogWidth, dialogHeight)
+    LayoutHelpers.AtLeftTopIn(dialogContent, GetFrame(0), 50, 100)
 
     popup = Popup(GetFrame(0), dialogContent)
     popup.OnShadowClicked = CloseUI
@@ -792,21 +802,21 @@ function CreateUI()
             end
         end
     end
-    LEFTSIDE_keyFilter = Bitmap(dialogContent)
 
-    LEFTSIDE_keyFilter.label = UIUtil.CreateText(dialogContent, '<LOC key_binding_0023>Filter', 17)
-    LEFTSIDE_keyFilter.label:SetColor('FF929191') -- --FF929191
-    LEFTSIDE_keyFilter.label:SetFont(UIUtil.titleFont, 17)
-    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.label, LEFTSIDE_keyFilter, 2)
-    LayoutHelpers.AtLeftIn(LEFTSIDE_keyFilter.label, dialogContent, 9)
+    LEFTSIDE_Section = Group(dialogContent)
+
+    LayoutHelpers.SetWidth(LEFTSIDE_Section, LEFTSIDE_WIDTH)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_Section, dialogContent, SIDE_PADDING)
+    LayoutHelpers.AtTopIn(LEFTSIDE_Section, dialogContent, TOP_PADDING)
+    LayoutHelpers.AtBottomIn(LEFTSIDE_Section, dialogContent)
+
+    LEFTSIDE_keyFilter = Bitmap(LEFTSIDE_Section)
 
     LEFTSIDE_keyFilter:SetSolidColor('FF282828')
-    LayoutHelpers.AnchorToRight(LEFTSIDE_keyFilter, LEFTSIDE_keyFilter.label, 5)
-    LayoutHelpers.AtRightIn(LEFTSIDE_keyFilter, dialogContent, 6)
-    LayoutHelpers.AnchorToBottom(LEFTSIDE_keyFilter, title, 10)
-    LayoutHelpers.AtBottomIn(LEFTSIDE_keyFilter, title, -40)
-    LEFTSIDE_keyFilter.Width:Set(function() return LEFTSIDE_keyFilter.Right() - LEFTSIDE_keyFilter.Left() end)
-    LEFTSIDE_keyFilter.Height:Set(function() return LEFTSIDE_keyFilter.Bottom() - LEFTSIDE_keyFilter.Top() end)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_keyFilter, LEFTSIDE_Section)
+    LayoutHelpers.AtTopIn(LEFTSIDE_keyFilter, LEFTSIDE_Section)
+    LEFTSIDE_keyFilter.Width:Set(LEFTSIDE_Section.Width())
+    LEFTSIDE_keyFilter.Height:Set(30)
 
     LEFTSIDE_keyFilter:EnableHitTest()
     import("/lua/ui/game/tooltip.lua").AddControlTooltip(LEFTSIDE_keyFilter,
@@ -883,9 +893,9 @@ function CreateUI()
             body = '<LOC key_binding_0017>Clears text that was typed in the filter field.'
         })
 
-    LEFTSIDE_keyContainer = Group(dialogContent)
-    LayoutHelpers.AtLeftIn(LEFTSIDE_keyContainer, dialogContent, 10)
-    LayoutHelpers.AtRightIn(LEFTSIDE_keyContainer, dialogContent, 20)
+    LEFTSIDE_keyContainer = Group(LEFTSIDE_Section)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_keyContainer, LEFTSIDE_Section)
+    LayoutHelpers.AtRightIn(LEFTSIDE_keyContainer, LEFTSIDE_Section)
     LayoutHelpers.AnchorToBottom(LEFTSIDE_keyContainer, LEFTSIDE_keyFilter, 10)
     LayoutHelpers.AnchorToTop(LEFTSIDE_keyContainer, defaultButton, 10)
     LEFTSIDE_keyContainer.Height:Set(function() return LEFTSIDE_keyContainer.Bottom() - LEFTSIDE_keyContainer.Top() -
