@@ -14,24 +14,36 @@ keyMap = {
 		{
 			immediate = {
 				{
-					print = '0',
+					print = '0 was pressed',
 				},
 			},
 			conditionals = {
 				{
-					func = 'AllHaveCategory',
+					func = 'AllSelectedHaveCategory',
 					args = 'categories.ENGINEER',
 					checkFor = true,
 				},
 				{
 					func = 'AllHaveCategory',
-					args = 'categories.COMMAND',
+					args = 'categories.TECH1',
 					checkFor = true,
 				}
 			},
-			valid = {},
-			invalid = {},
-			finally = {},
+			valid = {
+				{
+					print = 'Conditionals are Valid',
+				},
+			},
+			invalid = {
+				{
+					print = 'Conditionals are Invalid',
+				},
+			},
+			finally = {
+				{
+					print = 'Always do at the end',
+				},
+			},
 			subkeys = {
 				['0'] = {
 					{

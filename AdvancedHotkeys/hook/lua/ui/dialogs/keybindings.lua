@@ -315,8 +315,6 @@ local function ToggleKeyActionLines(category)
     end
     keyActionsContainer:Filter(keyActionKeyword)
 end
-
--- toggles expansion or collapse of keyActionLines with specified key category only if searching is not active
 local function ToggleKeyBindingLines(category)
     if keyBindingKeyword and string.len(keyBindingKeyword) > 0 then return end
 
@@ -364,6 +362,13 @@ function CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not txtColor then txtColor = UIUtil.factionTextColor end
     if not txtSize then txtSize = 18 end
     if not txt then txt = '?' end
+
+    -- keyBindingLine.toggle = Bitmap(keyBindingLine)
+    -- keyBindingLine.toggle:SetSolidColor('FF2F2F2F')
+    -- LayoutHelpers.AtRightIn(keyBindingLine.toggle, keyBindingLine, 5)
+    -- LayoutHelpers.AtVerticalCenterIn(keyBindingLine.toggle, keyBindingLine)
+    -- keyBindingLine.toggle.Width:Set(20)
+    -- keyBindingLine.toggle.Height:Set(20)
 
     local button = Bitmap(parent)
     button:SetSolidColor(bgColor)
@@ -735,6 +740,7 @@ function CreateUI()
         CloseUI()
         return
     end
+
     keyActionKeyword = ''
     keyBindingKeyword = ''
     keyActionTable = FormatKeyActionData()
@@ -882,9 +888,6 @@ function CreateUI()
         LayoutHelpers.Below(keyActionEntries[index], keyActionEntries[index - 1])
         index = index + 1
     end
-
-    -- local height = keyActionsContainer.Height()
-    -- local items = math.floor(keyActionsContainer.Height() / keyActionEntries[1].Height())
 
     local GetKeyActionLinesTotal = function()
         return table.getsize(keyActionEntries)
@@ -1088,7 +1091,7 @@ function CreateUI()
                 v.collapsed = true
             end
         end
-        keyBindingsContainer:Filter(keyBindingKeyword)
+        keyBindingsContainer:Filter(keyBindingKeyword) -- TODO
         keyBindingsContainer:ScrollSetTop(nil, 0)
     end
 
@@ -1185,7 +1188,7 @@ function CreateUI()
         return true
     end
 
-    -- Determines what control keyBindingLines should be visible or not
+    -- Determines what control keyActionLines should be visible or not
     keyBindingsContainer.CalcVisible = function(self)
         for i, keyBindingLine in keyBindingsEntries do
             local id = i + self.top
@@ -1195,10 +1198,16 @@ function CreateUI()
             if data then
                 keyBindingLine:Update(data, id)
             else
+                LOG("i: " .. i)
+
                 keyBindingLine:SetSolidColor('00000000')
                 keyBindingLine.description:SetText('')
-                keyBindingLine.toggle:Hide()
-                keyBindingLine.assignActionButton:Hide()
+                keyBindingLine.statistics:SetText('')
+
+
+                keyBindingLine.toggle:Hide() -- TODO
+                keyBindingLine.assignKeyButton:Hide()
+                keyBindingLine.wikiButton:Hide()
             end
         end
         keyBindingsFilter.text:AcquireFocus()
@@ -1279,12 +1288,13 @@ function CreateUI()
                 end
             end
         end
-        self:CalcVisible()
+        self:CalcVisible() -- TODO
     end
 
     -----------------------------------------------------------------
 
     keyActionsFilter.text:SetText('')
+    keyBindingsFilter.text:SetText('')
 end
 
 function SortKeyActionData(dataTable)
