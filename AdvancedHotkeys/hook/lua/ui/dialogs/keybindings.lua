@@ -22,52 +22,52 @@ local keyCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrde
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
 local popup = nil
-local FormatData
-local keyContainer
-local keyTable
-local keyFilter
-local keyEntries = {}
-local keyword = ''
--- store indexes of visible lines including headers and key entries
-local linesVisible = {}
-local linesCollapsed = true
 
--- store info about current state of key categories and preserve their state between FormatData() calls
-local keyGroups = {}
+local LEFTSIDE_FormatData
+local LEFTSIDE_keyContainer
+local LEFTSIDE_keyTable
+local LEFTSIDE_keyFilter
+local LEFTSIDE_keyEntries = {}
+local LEFTSIDE_keyword = ''
+local LEFTSIDE_linesVisible = {}
+local LEFTSIDE_linesCollapsed = true
+
+-- store info about current state of key categories and preserve their state between LEFTSIDE_FormatData() calls
+local LEFTSIDE_keyGroups = {}
 for order, category in keyCategoryOrder do
     local name = string.lower(category)
-    keyGroups[name] = {}
-    keyGroups[name].order = order
-    keyGroups[name].name = name
-    keyGroups[name].text = LOC(keyCategories[category])
-    keyGroups[name].collapsed = linesCollapsed
+    LEFTSIDE_keyGroups[name] = {}
+    LEFTSIDE_keyGroups[name].order = order
+    LEFTSIDE_keyGroups[name].name = name
+    LEFTSIDE_keyGroups[name].text = LOC(keyCategories[category])
+    LEFTSIDE_keyGroups[name].collapsed = LEFTSIDE_linesCollapsed
 end
 
-local function ResetBindingToDefaultKeyMap()
+local function LEFTSIDE_ResetBindingToDefaultKeyMap()
     IN_ClearKeyMap()
     KeyMapper.ResetUserKeyMapTo('defaultKeyMap.lua')
     IN_AddKeyMapTable(KeyMapper.GetKeyActions())
-    keyTable = FormatData()
-    keyContainer:Filter(keyword)
+    LEFTSIDE_keyTable = LEFTSIDE_FormatData()
+    LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
 
-local function ResetBindingToHotbuildKeyMap()
+local function LEFTSIDE_ResetBindingToHotbuildKeyMap()
     IN_ClearKeyMap()
     KeyMapper.ResetUserKeyMapTo('hotbuildKeyMap.lua')
     IN_AddKeyMapTable(KeyMapper.GetKeyActions())
-    keyTable = FormatData()
-    keyContainer:Filter(keyword)
+    LEFTSIDE_keyTable = LEFTSIDE_FormatData()
+    LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
 
-local function ResetBindingToalternativeKeyMap()
+local function LEFTSIDE_ResetBindingToalternativeKeyMap()
     IN_ClearKeyMap()
     KeyMapper.ResetUserKeyMapTo('alternativeKeyMap.lua')
     IN_AddKeyMapTable(KeyMapper.GetKeyActions())
-    keyTable = FormatData()
-    keyContainer:Filter(keyword)
+    LEFTSIDE_keyTable = LEFTSIDE_FormatData()
+    LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
 
-local function ConfirmNewKeyMap()
+local function LEFTSIDE_ConfirmNewKeyMap()
     KeyMapper.SaveUserKeyMap()
     IN_ClearKeyMap()
     IN_AddKeyMapTable(KeyMapper.GetKeyMappings(true))
@@ -78,7 +78,7 @@ local function ConfirmNewKeyMap()
     end
 end
 
-local function ClearActionKey(action, currentKey)
+local function LEFTSIDE_ClearActionKey(action, currentKey)
     KeyMapper.ClearUserKeyMapping(currentKey)
     -- auto-clear shift action, e.g. 'shift_attack' for 'attack' action
     local target = KeyMapper.GetShiftAction(action, 'orders')
@@ -87,7 +87,7 @@ local function ClearActionKey(action, currentKey)
     end
 end
 
-local function EditActionKey(parent, action, currentKey)
+local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
 
@@ -111,7 +111,7 @@ local function EditActionKey(parent, action, currentKey)
     helpText:SetText(LOC("<LOC key_binding_0002>Hit the key combination you'd like to assign"))
     helpText:SetCenteredHorizontally(true)
 
-    local keyText = UIUtil.CreateText(dialogContent, FormatKeyName(currentKey), 24)
+    local keyText = UIUtil.CreateText(dialogContent, LEFTSIDE_FormatKeyName(currentKey), 24)
     keyText:SetColor(UIUtil.factionBackColor)
     LayoutHelpers.Above(keyText, okButton)
     LayoutHelpers.AtHorizontalCenterIn(keyText, dialogContent)
@@ -194,8 +194,8 @@ local function EditActionKey(parent, action, currentKey)
                         { escapeButton = 2, enterButton = 1, worldCover = false })
                 end
             end
-            keyTable = FormatData()
-            keyContainer:Filter(keyword)
+            LEFTSIDE_keyTable = LEFTSIDE_FormatData()
+            LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
         end
 
         -- checks if this key is already assigned to some other action
@@ -219,27 +219,27 @@ local function EditActionKey(parent, action, currentKey)
     end
 end
 
-local function AssignCurrentSelection()
-    for k, v in keyTable do
+local function LEFTSIDE_AssignCurrentSelection()
+    for k, v in LEFTSIDE_keyTable do
         if v.selected then
-            EditActionKey(popup, v.action, v.key)
+            LEFTSIDE_EditActionKey(popup, v.action, v.key)
             break
         end
     end
 end
 
-local function UnbindCurrentSelection()
-    for k, v in keyTable do
+local function LEFTSIDE_UnbindCurrentSelection()
+    for k, v in LEFTSIDE_keyTable do
         if v.selected then
-            ClearActionKey(v.action, v.key)
+            LEFTSIDE_ClearActionKey(v.action, v.key)
             break
         end
     end
-    keyTable = FormatData()
-    keyContainer:Filter(keyword)
+    LEFTSIDE_keyTable = LEFTSIDE_FormatData()
+    LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
 
-local function GetLineColor(lineID, data)
+local function LEFTSIDE_GetLineColor(lineID, data)
     if data.type == 'header' then
         return 'FF282828' ----FF282828
     elseif data.type == 'spacer' then
@@ -258,10 +258,10 @@ local function GetLineColor(lineID, data)
 end
 
 -- toggles expansion or collapse of lines with specified key category only if searching is not active
-local function ToggleLines(category)
-    if keyword and string.len(keyword) > 0 then return end
+local function LEFTSIDE_ToggleLines(category)
+    if LEFTSIDE_keyword and string.len(LEFTSIDE_keyword) > 0 then return end
 
-    for k, v in keyTable do
+    for k, v in LEFTSIDE_keyTable do
         if v.category == category then
             if v.collapsed then
                 v.collapsed = false
@@ -270,26 +270,26 @@ local function ToggleLines(category)
             end
         end
     end
-    if keyGroups[category].collapsed then
-        keyGroups[category].collapsed = false
+    if LEFTSIDE_keyGroups[category].collapsed then
+        LEFTSIDE_keyGroups[category].collapsed = false
     else
-        keyGroups[category].collapsed = true
+        LEFTSIDE_keyGroups[category].collapsed = true
     end
-    keyContainer:Filter(keyword)
+    LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
 
-local function SelectLine(dataIndex)
-    for k, v in keyTable do
+local function LEFTSIDE_SelectLine(dataIndex)
+    for k, v in LEFTSIDE_keyTable do
         v.selected = false
     end
 
-    if keyTable[dataIndex].type == 'entry' then
-        keyTable[dataIndex].selected = true
+    if LEFTSIDE_keyTable[dataIndex].type == 'entry' then
+        LEFTSIDE_keyTable[dataIndex].selected = true
     end
-    keyContainer:Filter(keyword)
+    LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
 
-function CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
+function LEFTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
     if not bgColor then bgColor = 'FF343232' end -- --FF343232
     if not txtColor then txtColor = UIUtil.factionTextColor end
@@ -330,11 +330,11 @@ function CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
 end
 
 -- create a line with dynamically updating UI elements based on type of data line
-function CreateLine()
+function LEFTSIDE_CreateLine()
     local keyBindingWidth = 210
-    local line = Bitmap(keyContainer)
-    line.Left:Set(keyContainer.Left)
-    line.Right:Set(keyContainer.Right)
+    local line = Bitmap(LEFTSIDE_keyContainer)
+    line.Left:Set(LEFTSIDE_keyContainer.Left)
+    line.Right:Set(LEFTSIDE_keyContainer.Right)
     LayoutHelpers.SetHeight(line, 20)
 
     line.key = UIUtil.CreateText(line, '', 16, "Arial")
@@ -382,20 +382,20 @@ function CreateLine()
             line.statistics:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
-                SelectLine(self.data.index)
-                keyFilter.text:AcquireFocus()
+                LEFTSIDE_SelectLine(self.data.index)
+                LEFTSIDE_keyFilter.text:AcquireFocus()
                 return true
             elseif event.Type == 'ButtonDClick' then
-                SelectLine(self.data.index)
-                AssignCurrentSelection()
+                LEFTSIDE_SelectLine(self.data.index)
+                LEFTSIDE_AssignCurrentSelection()
                 return true
             end
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
-            if string.len(keyword) == 0 then
-                ToggleLines(self.data.category)
-                keyFilter.text:AcquireFocus()
+            if string.len(LEFTSIDE_keyword) == 0 then
+                LEFTSIDE_ToggleLines(self.data.category)
+                LEFTSIDE_keyFilter.text:AcquireFocus()
 
-                if keyGroups[self.data.category].collapsed then
+                if LEFTSIDE_keyGroups[self.data.category].collapsed then
                     self.toggle.txt:SetText('+')
                 else
                     self.toggle.txt:SetText('-')
@@ -408,18 +408,18 @@ function CreateLine()
     end
 
     line.AssignKeyBinding = function(self)
-        SelectLine(self.data.index)
-        AssignCurrentSelection()
+        LEFTSIDE_SelectLine(self.data.index)
+        LEFTSIDE_AssignCurrentSelection()
     end
 
     line.UnbindKeyBinding = function(self)
-        if keyTable[self.data.index].key then
-            SelectLine(self.data.index)
-            UnbindCurrentSelection()
+        if LEFTSIDE_keyTable[self.data.index].key then
+            LEFTSIDE_SelectLine(self.data.index)
+            LEFTSIDE_UnbindCurrentSelection()
         end
     end
 
-    line.toggle = CreateToggle(line,
+    line.toggle = LEFTSIDE_CreateToggle(line,
         'FF1B1A1A', ----FF1B1A1A'
         UIUtil.factionTextColor,
         line.key.Height() + 4, 18, '+')
@@ -449,10 +449,11 @@ function CreateLine()
         end
         return true
     end
-    
-    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', '', 0, 140, 6, 14, 14, 'left')
 
-    line.assignKeyButton = CreateToggle(line,
+    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', ''
+        , 0, 140, 6, 14, 14, 'left')
+
+    line.assignKeyButton = LEFTSIDE_CreateToggle(line,
         '645F5E5E', ----735F5E5E'
         'FFAEACAC', ----FFAEACAC'
         line.key.Height() + 4, 18, '+')
@@ -468,7 +469,7 @@ function CreateLine()
         return true
     end
 
-    line.unbindKeyButton = CreateToggle(line,
+    line.unbindKeyButton = LEFTSIDE_CreateToggle(line,
         '645F5E5E', ----645F5E5E'
         'FFAEACAC', ----FFAEACAC'
         line.key.Height() + 4, 18, 'x')
@@ -486,17 +487,17 @@ function CreateLine()
     end
 
     line.Update = function(self, data, lineID)
-        line:SetSolidColor(GetLineColor(lineID, data))
+        line:SetSolidColor(LEFTSIDE_GetLineColor(lineID, data))
         line.data = table.copy(data)
 
         if data.type == 'header' then
-            if keyGroups[self.data.category].collapsed then
+            if LEFTSIDE_keyGroups[self.data.category].collapsed then
                 self.toggle.txt:SetText('+')
             else
                 self.toggle.txt:SetText('-')
             end
-            local stats = keyGroups[data.category].bindings .. ' / ' ..
-                keyGroups[data.category].visible
+            local stats = LEFTSIDE_keyGroups[data.category].bindings .. ' / ' ..
+                LEFTSIDE_keyGroups[data.category].visible
             line.toggle:Show()
             line.assignKeyButton:Hide()
             line.unbindKeyButton:Hide()
@@ -538,6 +539,143 @@ function CreateLine()
     return line
 end
 
+function LEFTSIDE_SortData(dataTable)
+    table.sort(dataTable, function(a, b)
+        if a.order ~= b.order then
+            return a.order < b.order
+        else
+            if a.category ~= b.category then
+                return string.lower(a.category) < string.lower(b.category)
+            else
+                if a.type == 'entry' and b.type == 'entry' then
+                    if string.lower(a.text) ~= string.lower(b.text) then
+                        return string.lower(a.text) < string.lower(b.text)
+                    else
+                        return a.action < b.action
+                    end
+                else
+                    return a.id < b.id
+                end
+            end
+        end
+    end)
+end
+
+-- format all key data, group them based on key category or default to none category and finally sort all keys
+function LEFTSIDE_FormatData()
+    local keyData = {}
+    local keyLookup = KeyMapper.GetKeyLookup()
+    local keyActions = KeyMapper.GetKeyActions()
+
+    -- reset previously formated key actions in all groups because they might have been re-mapped
+    for category, group in LEFTSIDE_keyGroups do
+        group.actions = {}
+    end
+    -- group game keys and key defined in mods by their key category
+    for k, v in keyActions do
+        local category = string.lower(v.category or 'none')
+        local keyForAction = keyLookup[k]
+
+        -- create header if it doesn't exist
+        if not LEFTSIDE_keyGroups[category] then
+            LEFTSIDE_keyGroups[category] = {}
+            LEFTSIDE_keyGroups[category].actions = {}
+            LEFTSIDE_keyGroups[category].name = category
+            LEFTSIDE_keyGroups[category].collapsed = LEFTSIDE_linesCollapsed
+            LEFTSIDE_keyGroups[category].order = table.getsize(LEFTSIDE_keyGroups) - 1
+            LEFTSIDE_keyGroups[category].text = v.category or keyCategories['none'].text
+        end
+
+        local data = {
+            action = k,
+            key = keyForAction,
+            keyText = LEFTSIDE_FormatKeyName(keyForAction),
+            category = category,
+            order = LEFTSIDE_keyGroups[category].order,
+            text = KeyMapper.GetActionName(k),
+            wikiURL = v.wikiURL
+        }
+        table.insert(LEFTSIDE_keyGroups[category].actions, data)
+    end
+    -- flatten all key actions to a list separated by a header with info about key category
+    local index = 1
+    for category, group in LEFTSIDE_keyGroups do
+        if not table.empty(group.actions) then
+            keyData[index] = {
+                type = 'header',
+                id = index,
+                order = LEFTSIDE_keyGroups[category].order,
+                count = table.getsize(group.actions),
+                category = category,
+                text = LEFTSIDE_keyGroups[category].text,
+                collapsed = LEFTSIDE_keyGroups[category].collapsed
+            }
+            index = index + 1
+            for _, data in group.actions do
+                keyData[index] = {
+                    type = 'entry',
+                    text = data.text,
+                    action = data.action,
+                    key = data.key,
+                    keyText = LOC(data.keyText),
+                    category = category,
+                    order = LEFTSIDE_keyGroups[category].order,
+                    collapsed = LEFTSIDE_keyGroups[category].collapsed,
+                    id = index,
+                    wikiURL = data.wikiURL,
+                    filters = { -- create filter parameters for quick searching of keys
+                        key = string.gsub(string.lower(data.keyText), ' %+ ', ' '),
+                        text = string.lower(data.text or ''),
+                        action = string.lower(data.action or ''),
+                        category = string.lower(data.category or ''),
+                    }
+                }
+                index = index + 1
+            end
+        end
+    end
+
+    LEFTSIDE_SortData(keyData)
+
+    -- store index of a header line for each key line
+    local header = 1
+    for i, data in keyData do
+        if data.type == 'header' then
+            header = i
+        elseif data.type == 'entry' then
+            data.header = header
+        end
+        data.index = i
+    end
+
+    return keyData
+end
+
+function LEFTSIDE_FormatKeyName(key)
+    if not key then
+        return ""
+    end
+
+    local function LookupToken(token)
+        if properKeyNames[token] then
+            return LOC(properKeyNames[token])
+        else
+            return token
+        end
+    end
+
+    local result = ''
+
+    while string.find(key, '-') do
+        local loc = string.find(key, '-')
+        local token = string.sub(key, 1, loc - 1)
+        result = result .. LookupToken(token) .. ' + '
+        key = string.sub(key, loc + 1)
+    end
+
+    return result .. LookupToken(key)
+end
+
 function CloseUI()
     LOG('Keybindings CloseUI')
     if popup then
@@ -556,8 +694,9 @@ function CreateUI()
         CloseUI()
         return
     end
-    keyword = ''
-    keyTable = FormatData()
+
+    LEFTSIDE_keyword = ''
+    LEFTSIDE_keyTable = LEFTSIDE_FormatData()
 
     local dialogContent = Group(GetFrame(0))
     LayoutHelpers.SetDimensions(dialogContent, 980, 730)
@@ -565,19 +704,14 @@ function CreateUI()
     popup = Popup(GetFrame(0), dialogContent)
     popup.OnShadowClicked = CloseUI
     popup.OnEscapePressed = CloseUI
-    popup.OnDestroy = function(self)
-        RemoveInputCapture(dialogContent)
-    end
+    popup.OnDestroy = function(self) RemoveInputCapture(dialogContent) end
+    popup.OnClosed = function(self) LEFTSIDE_ConfirmNewKeyMap() end
 
     local title = UIUtil.CreateText(dialogContent, LOC("<LOC key_binding_0000>Key Bindings"), 22)
     LayoutHelpers.AtTopIn(title, dialogContent, 12)
     LayoutHelpers.AtHorizontalCenterIn(title, dialogContent)
 
     local offset = dialogContent.Width() / 5.25
-
-    popup.OnClosed = function(self)
-        ConfirmNewKeyMap()
-    end
 
     local defaultButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
         "<LOC key_binding_0004>Default Preset")
@@ -588,7 +722,7 @@ function CreateUI()
     defaultButton.OnClick = function(self, modifiers)
         UIUtil.QuickDialog(popup,
             "<LOC key_binding_0005>Are you sure you want to reset all key bindings to the default (GPG) preset?",
-            "<LOC _Yes>", ResetBindingToDefaultKeyMap,
+            "<LOC _Yes>", LEFTSIDE_ResetBindingToDefaultKeyMap,
             "<LOC _No>", nil, nil, nil, true,
             { escapeButton = 2, enterButton = 1, worldCover = false })
     end
@@ -607,7 +741,7 @@ function CreateUI()
     hotbuildButton.OnClick = function(self, modifiers)
         UIUtil.QuickDialog(popup,
             "<LOC key_binding_0008>Are you sure you want to reset all key bindings to the hotbuild (FAF) preset?",
-            "<LOC _Yes>", ResetBindingToHotbuildKeyMap,
+            "<LOC _Yes>", LEFTSIDE_ResetBindingToHotbuildKeyMap,
             "<LOC _No>", nil, nil, nil, true,
             { escapeButton = 2, enterButton = 1, worldCover = false })
     end
@@ -626,7 +760,7 @@ function CreateUI()
     alternativeButton.OnClick = function(self, modifiers)
         UIUtil.QuickDialog(popup,
             "<LOC key_binding_0024>Are you sure you want to reset all key bindings to the alternative (FAF) preset?",
-            "<LOC _Yes>", ResetBindingToalternativeKeyMap,
+            "<LOC _Yes>", LEFTSIDE_ResetBindingToalternativeKeyMap,
             "<LOC _No>", nil, nil, nil, true,
             { escapeButton = 2, enterButton = 1, worldCover = false })
     end
@@ -658,24 +792,24 @@ function CreateUI()
             end
         end
     end
-    keyFilter = Bitmap(dialogContent)
+    LEFTSIDE_keyFilter = Bitmap(dialogContent)
 
-    keyFilter.label = UIUtil.CreateText(dialogContent, '<LOC key_binding_0023>Filter', 17)
-    keyFilter.label:SetColor('FF929191') -- --FF929191
-    keyFilter.label:SetFont(UIUtil.titleFont, 17)
-    LayoutHelpers.AtVerticalCenterIn(keyFilter.label, keyFilter, 2)
-    LayoutHelpers.AtLeftIn(keyFilter.label, dialogContent, 9)
+    LEFTSIDE_keyFilter.label = UIUtil.CreateText(dialogContent, '<LOC key_binding_0023>Filter', 17)
+    LEFTSIDE_keyFilter.label:SetColor('FF929191') -- --FF929191
+    LEFTSIDE_keyFilter.label:SetFont(UIUtil.titleFont, 17)
+    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.label, LEFTSIDE_keyFilter, 2)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_keyFilter.label, dialogContent, 9)
 
-    keyFilter:SetSolidColor('FF282828')
-    LayoutHelpers.AnchorToRight(keyFilter, keyFilter.label, 5)
-    LayoutHelpers.AtRightIn(keyFilter, dialogContent, 6)
-    LayoutHelpers.AnchorToBottom(keyFilter, title, 10)
-    LayoutHelpers.AtBottomIn(keyFilter, title, -40)
-    keyFilter.Width:Set(function() return keyFilter.Right() - keyFilter.Left() end)
-    keyFilter.Height:Set(function() return keyFilter.Bottom() - keyFilter.Top() end)
+    LEFTSIDE_keyFilter:SetSolidColor('FF282828')
+    LayoutHelpers.AnchorToRight(LEFTSIDE_keyFilter, LEFTSIDE_keyFilter.label, 5)
+    LayoutHelpers.AtRightIn(LEFTSIDE_keyFilter, dialogContent, 6)
+    LayoutHelpers.AnchorToBottom(LEFTSIDE_keyFilter, title, 10)
+    LayoutHelpers.AtBottomIn(LEFTSIDE_keyFilter, title, -40)
+    LEFTSIDE_keyFilter.Width:Set(function() return LEFTSIDE_keyFilter.Right() - LEFTSIDE_keyFilter.Left() end)
+    LEFTSIDE_keyFilter.Height:Set(function() return LEFTSIDE_keyFilter.Bottom() - LEFTSIDE_keyFilter.Top() end)
 
-    keyFilter:EnableHitTest()
-    import("/lua/ui/game/tooltip.lua").AddControlTooltip(keyFilter,
+    LEFTSIDE_keyFilter:EnableHitTest()
+    import("/lua/ui/game/tooltip.lua").AddControlTooltip(LEFTSIDE_keyFilter,
         {
             text = '<LOC key_binding_0018>Key Binding Filter',
             body = '<LOC key_binding_0019>' ..
@@ -688,119 +822,124 @@ function CreateUI()
         }, nil)
 
     local text = LOC("<LOC key_binding_filterInfo>Type key binding or name of action")
-    keyFilter.info = UIUtil.CreateText(keyFilter, text, 17, UIUtil.titleFont)
-    keyFilter.info:SetColor('FF727171') -- --FF727171
-    keyFilter.info:DisableHitTest()
-    LayoutHelpers.AtHorizontalCenterIn(keyFilter.info, keyFilter, -7)
-    LayoutHelpers.AtVerticalCenterIn(keyFilter.info, keyFilter, 2)
+    LEFTSIDE_keyFilter.info = UIUtil.CreateText(LEFTSIDE_keyFilter, text, 17, UIUtil.titleFont)
+    LEFTSIDE_keyFilter.info:SetColor('FF727171') -- --FF727171
+    LEFTSIDE_keyFilter.info:DisableHitTest()
+    LayoutHelpers.AtHorizontalCenterIn(LEFTSIDE_keyFilter.info, LEFTSIDE_keyFilter, -7)
+    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.info, LEFTSIDE_keyFilter, 2)
 
-    keyFilter.text = Edit(keyFilter)
-    keyFilter.text:SetForegroundColor('FFF1ECEC') -- --FFF1ECEC
-    keyFilter.text:SetBackgroundColor('04E1B44A') -- --04E1B44A
-    keyFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    keyFilter.text:SetHighlightBackgroundColor("880085EF") ----880085EF
-    keyFilter.text.Height:Set(function() return keyFilter.Bottom() - keyFilter.Top() - LayoutHelpers.ScaleNumber(10) end)
-    LayoutHelpers.AtLeftIn(keyFilter.text, keyFilter, 5)
-    LayoutHelpers.AtRightIn(keyFilter.text, keyFilter)
-    LayoutHelpers.AtVerticalCenterIn(keyFilter.text, keyFilter)
-    keyFilter.text:AcquireFocus()
-    keyFilter.text:SetText('')
-    keyFilter.text:SetFont(UIUtil.titleFont, 17)
-    keyFilter.text:SetMaxChars(20)
-    keyFilter.text.OnTextChanged = function(self, newText, oldText)
+    LEFTSIDE_keyFilter.text = Edit(LEFTSIDE_keyFilter)
+    LEFTSIDE_keyFilter.text:SetForegroundColor('FFF1ECEC') -- --FFF1ECEC
+    LEFTSIDE_keyFilter.text:SetBackgroundColor('04E1B44A') -- --04E1B44A
+    LEFTSIDE_keyFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
+    LEFTSIDE_keyFilter.text:SetHighlightBackgroundColor("880085EF") ----880085EF
+    LEFTSIDE_keyFilter.text.Height:Set(function() return LEFTSIDE_keyFilter.Bottom() - LEFTSIDE_keyFilter.Top() -
+            LayoutHelpers.ScaleNumber(10)
+    end)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_keyFilter.text, LEFTSIDE_keyFilter, 5)
+    LayoutHelpers.AtRightIn(LEFTSIDE_keyFilter.text, LEFTSIDE_keyFilter)
+    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.text, LEFTSIDE_keyFilter)
+    LEFTSIDE_keyFilter.text:AcquireFocus()
+    LEFTSIDE_keyFilter.text:SetText('')
+    LEFTSIDE_keyFilter.text:SetFont(UIUtil.titleFont, 17)
+    LEFTSIDE_keyFilter.text:SetMaxChars(20)
+    LEFTSIDE_keyFilter.text.OnTextChanged = function(self, newText, oldText)
         -- interpret plus chars as spaces for easier key filtering
-        keyword = string.gsub(string.lower(newText), '+', ' ')
-        keyword = string.gsub(string.lower(keyword), '  ', ' ')
-        keyword = string.gsub(string.lower(keyword), '  ', ' ')
-        if string.len(keyword) == 0 then
-            for k, v in keyGroups do
+        LEFTSIDE_keyword = string.gsub(string.lower(newText), '+', ' ')
+        LEFTSIDE_keyword = string.gsub(string.lower(LEFTSIDE_keyword), '  ', ' ')
+        LEFTSIDE_keyword = string.gsub(string.lower(LEFTSIDE_keyword), '  ', ' ')
+        if string.len(LEFTSIDE_keyword) == 0 then
+            for k, v in LEFTSIDE_keyGroups do
                 v.collapsed = true
             end
-            for k, v in keyTable do
+            for k, v in LEFTSIDE_keyTable do
                 v.collapsed = true
             end
         end
-        keyContainer:Filter(keyword)
-        keyContainer:ScrollSetTop(nil, 0)
+        LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
+        LEFTSIDE_keyContainer:ScrollSetTop(nil, 0)
     end
 
-    keyFilter.clear = UIUtil.CreateText(keyFilter.text, 'X', 17, "Arial Bold")
-    keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
-    keyFilter.clear:EnableHitTest()
-    LayoutHelpers.AtVerticalCenterIn(keyFilter.clear, keyFilter.text, 1)
-    LayoutHelpers.AtRightIn(keyFilter.clear, keyFilter.text, 9)
+    LEFTSIDE_keyFilter.clear = UIUtil.CreateText(LEFTSIDE_keyFilter.text, 'X', 17, "Arial Bold")
+    LEFTSIDE_keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
+    LEFTSIDE_keyFilter.clear:EnableHitTest()
+    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.clear, LEFTSIDE_keyFilter.text, 1)
+    LayoutHelpers.AtRightIn(LEFTSIDE_keyFilter.clear, LEFTSIDE_keyFilter.text, 9)
 
-    keyFilter.clear.HandleEvent = function(self, event)
+    LEFTSIDE_keyFilter.clear.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
-            keyFilter.clear:SetColor('FFC9C7C7') -- --FFC9C7C7
+            LEFTSIDE_keyFilter.clear:SetColor('FFC9C7C7') -- --FFC9C7C7
         elseif event.Type == 'MouseExit' then
-            keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
+            LEFTSIDE_keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            keyFilter.text:SetText('')
-            keyFilter.text:AcquireFocus()
+            LEFTSIDE_keyFilter.text:SetText('')
+            LEFTSIDE_keyFilter.text:AcquireFocus()
         end
         return true
     end
-    Tooltip.AddControlTooltip(keyFilter.clear,
+    Tooltip.AddControlTooltip(LEFTSIDE_keyFilter.clear,
         {
             text = '<LOC key_binding_0016>Clear Filter',
             body = '<LOC key_binding_0017>Clears text that was typed in the filter field.'
         })
 
-    keyContainer = Group(dialogContent)
-    LayoutHelpers.AtLeftIn(keyContainer, dialogContent, 10)
-    LayoutHelpers.AtRightIn(keyContainer, dialogContent, 20)
-    LayoutHelpers.AnchorToBottom(keyContainer, keyFilter, 10)
-    LayoutHelpers.AnchorToTop(keyContainer, defaultButton, 10)
-    keyContainer.Height:Set(function() return keyContainer.Bottom() - keyContainer.Top() - LayoutHelpers.ScaleNumber(10) end)
-    keyContainer.top = 0
-    UIUtil.CreateLobbyVertScrollbar(keyContainer)
+    LEFTSIDE_keyContainer = Group(dialogContent)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_keyContainer, dialogContent, 10)
+    LayoutHelpers.AtRightIn(LEFTSIDE_keyContainer, dialogContent, 20)
+    LayoutHelpers.AnchorToBottom(LEFTSIDE_keyContainer, LEFTSIDE_keyFilter, 10)
+    LayoutHelpers.AnchorToTop(LEFTSIDE_keyContainer, defaultButton, 10)
+    LEFTSIDE_keyContainer.Height:Set(function() return LEFTSIDE_keyContainer.Bottom() - LEFTSIDE_keyContainer.Top() -
+            LayoutHelpers.ScaleNumber(10)
+    end)
+    LEFTSIDE_keyContainer.top = 0
+    UIUtil.CreateLobbyVertScrollbar(LEFTSIDE_keyContainer)
 
     local index = 1
-    keyEntries = {}
-    keyEntries[index] = CreateLine()
-    LayoutHelpers.AtTopIn(keyEntries[1], keyContainer)
+    LEFTSIDE_keyEntries = {}
+    LEFTSIDE_keyEntries[index] = LEFTSIDE_CreateLine()
+    LayoutHelpers.AtTopIn(LEFTSIDE_keyEntries[1], LEFTSIDE_keyContainer)
 
     index = index + 1
-    while keyEntries[table.getsize(keyEntries)].Top() + (2 * keyEntries[1].Height()) < keyContainer.Bottom() do
-        keyEntries[index] = CreateLine()
-        LayoutHelpers.Below(keyEntries[index], keyEntries[index - 1])
+    while LEFTSIDE_keyEntries[table.getsize(LEFTSIDE_keyEntries)].Top() + (2 * LEFTSIDE_keyEntries[1].Height()) <
+        LEFTSIDE_keyContainer.Bottom() do
+        LEFTSIDE_keyEntries[index] = LEFTSIDE_CreateLine()
+        LayoutHelpers.Below(LEFTSIDE_keyEntries[index], LEFTSIDE_keyEntries[index - 1])
         index = index + 1
     end
 
-    local height = keyContainer.Height()
-    local items = math.floor(keyContainer.Height() / keyEntries[1].Height())
+    local height = LEFTSIDE_keyContainer.Height()
+    local items = math.floor(LEFTSIDE_keyContainer.Height() / LEFTSIDE_keyEntries[1].Height())
 
     local GetLinesTotal = function()
-        return table.getsize(keyEntries)
+        return table.getsize(LEFTSIDE_keyEntries)
     end
 
     local function GetLinesVisible()
-        return table.getsize(linesVisible)
+        return table.getsize(LEFTSIDE_linesVisible)
     end
 
     -- Called when the scrollbar for the control requires data to size itself
     -- GetScrollValues must return 4 values in this order:
     -- rangeMin, rangeMax, visibleMin, visibleMax
     -- axis can be "Vert" or "Horz"
-    keyContainer.GetScrollValues = function(self, axis)
+    LEFTSIDE_keyContainer.GetScrollValues = function(self, axis)
         local size = GetLinesVisible()
         local visibleMax = math.min(self.top + GetLinesTotal(), size)
         return 0, size, self.top, visibleMax
     end
 
     -- Called when the scrollbar wants to scroll a specific number of lines (negative indicates scroll up)
-    keyContainer.ScrollLines = function(self, axis, delta)
+    LEFTSIDE_keyContainer.ScrollLines = function(self, axis, delta)
         self:ScrollSetTop(axis, self.top + math.floor(delta))
     end
 
     -- Called when the scrollbar wants to scroll a specific number of pages (negative indicates scroll up)
-    keyContainer.ScrollPages = function(self, axis, delta)
+    LEFTSIDE_keyContainer.ScrollPages = function(self, axis, delta)
         self:ScrollSetTop(axis, self.top + math.floor(delta) * GetLinesTotal())
     end
 
     -- Called when the scrollbar wants to set a new visible top line
-    keyContainer.ScrollSetTop = function(self, axis, top)
+    LEFTSIDE_keyContainer.ScrollSetTop = function(self, axis, top)
         top = math.floor(top)
         if top == self.top then return end
         local size = GetLinesVisible()
@@ -809,16 +948,16 @@ function CreateUI()
     end
 
     -- Called to determine if the control is scrollable on a particular access. Must return true or false.
-    keyContainer.IsScrollable = function(self, axis)
+    LEFTSIDE_keyContainer.IsScrollable = function(self, axis)
         return true
     end
 
     -- Determines what control lines should be visible or not
-    keyContainer.CalcVisible = function(self)
-        for i, line in keyEntries do
+    LEFTSIDE_keyContainer.CalcVisible = function(self)
+        for i, line in LEFTSIDE_keyEntries do
             local id = i + self.top
-            local index = linesVisible[id]
-            local data = keyTable[index]
+            local index = LEFTSIDE_linesVisible[id]
+            local data = LEFTSIDE_keyTable[index]
 
             if data then
                 line:Update(data, id)
@@ -833,10 +972,10 @@ function CreateUI()
                 line.wikiButton:Hide()
             end
         end
-        keyFilter.text:AcquireFocus()
+        LEFTSIDE_keyFilter.text:AcquireFocus()
     end
 
-    keyContainer.HandleEvent = function(control, event)
+    LEFTSIDE_keyContainer.HandleEvent = function(control, event)
         if event.Type == 'WheelRotation' then
             local lines = 1
             if event.WheelRotation > 0 then
@@ -846,37 +985,37 @@ function CreateUI()
         end
     end
     -- filter all key-bindings by checking if either text, action, or a key contains target string
-    keyContainer.Filter = function(self, target)
+    LEFTSIDE_keyContainer.Filter = function(self, target)
         local headersVisible = {}
-        linesVisible = {}
+        LEFTSIDE_linesVisible = {}
 
         if not target or string.len(target) == 0 then
-            keyFilter.info:Show()
-            for k, v in keyTable do
+            LEFTSIDE_keyFilter.info:Show()
+            for k, v in LEFTSIDE_keyTable do
                 if v.type == 'header' then
-                    table.insert(linesVisible, k)
-                    keyGroups[v.category].visible = v.count
-                    keyGroups[v.category].bindings = 0
+                    table.insert(LEFTSIDE_linesVisible, k)
+                    LEFTSIDE_keyGroups[v.category].visible = v.count
+                    LEFTSIDE_keyGroups[v.category].bindings = 0
                 elseif v.type == 'entry' then
                     if not v.collapsed then
-                        table.insert(linesVisible, k)
+                        table.insert(LEFTSIDE_linesVisible, k)
                     end
                     if v.key then
-                        keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                        LEFTSIDE_keyGroups[v.category].bindings = LEFTSIDE_keyGroups[v.category].bindings + 1
                     end
                 end
             end
         else
-            keyFilter.info:Hide()
-            for k, v in keyTable do
+            LEFTSIDE_keyFilter.info:Hide()
+            for k, v in LEFTSIDE_keyTable do
                 local match = false
                 if v.type == 'header' then
-                    keyGroups[v.category].visible = 0
-                    keyGroups[v.category].bindings = 0
+                    LEFTSIDE_keyGroups[v.category].visible = 0
+                    LEFTSIDE_keyGroups[v.category].bindings = 0
                     if not headersVisible[k] then
                         headersVisible[k] = true
-                        table.insert(linesVisible, k)
-                        keyGroups[v.category].collapsed = true
+                        table.insert(LEFTSIDE_linesVisible, k)
+                        LEFTSIDE_keyGroups[v.category].collapsed = true
                     end
                 elseif v.type == 'entry' and v.filters then
                     if string.find(v.filters.text, target) then
@@ -898,13 +1037,13 @@ function CreateUI()
                     if match then
                         if not headersVisible[v.header] then
                             headersVisible[v.header] = true
-                            table.insert(linesVisible, v.header)
+                            table.insert(LEFTSIDE_linesVisible, v.header)
                         end
-                        keyGroups[v.category].collapsed = false
-                        keyGroups[v.category].visible = keyGroups[v.category].visible + 1
-                        table.insert(linesVisible, k)
+                        LEFTSIDE_keyGroups[v.category].collapsed = false
+                        LEFTSIDE_keyGroups[v.category].visible = LEFTSIDE_keyGroups[v.category].visible + 1
+                        table.insert(LEFTSIDE_linesVisible, k)
                         if v.key then
-                            keyGroups[v.category].bindings = keyGroups[v.category].bindings + 1
+                            LEFTSIDE_keyGroups[v.category].bindings = LEFTSIDE_keyGroups[v.category].bindings + 1
                         end
                     end
                 end
@@ -912,144 +1051,7 @@ function CreateUI()
         end
         self:CalcVisible()
     end
-    keyFilter.text:SetText('')
-end
-
-function SortData(dataTable)
-    table.sort(dataTable, function(a, b)
-        if a.order ~= b.order then
-            return a.order < b.order
-        else
-            if a.category ~= b.category then
-                return string.lower(a.category) < string.lower(b.category)
-            else
-                if a.type == 'entry' and b.type == 'entry' then
-                    if string.lower(a.text) ~= string.lower(b.text) then
-                        return string.lower(a.text) < string.lower(b.text)
-                    else
-                        return a.action < b.action
-                    end
-                else
-                    return a.id < b.id
-                end
-            end
-        end
-    end)
-end
-
--- format all key data, group them based on key category or default to none category and finally sort all keys
-function FormatData()
-    local keyData = {}
-    local keyLookup = KeyMapper.GetKeyLookup()
-    local keyActions = KeyMapper.GetKeyActions()
-
-    -- reset previously formated key actions in all groups because they might have been re-mapped
-    for category, group in keyGroups do
-        group.actions = {}
-    end
-    -- group game keys and key defined in mods by their key category
-    for k, v in keyActions do
-        local category = string.lower(v.category or 'none')
-        local keyForAction = keyLookup[k]
-
-        -- create header if it doesn't exist
-        if not keyGroups[category] then
-            keyGroups[category] = {}
-            keyGroups[category].actions = {}
-            keyGroups[category].name = category
-            keyGroups[category].collapsed = linesCollapsed
-            keyGroups[category].order = table.getsize(keyGroups) - 1
-            keyGroups[category].text = v.category or keyCategories['none'].text
-        end
-
-        local data = {
-            action = k,
-            key = keyForAction,
-            keyText = FormatKeyName(keyForAction),
-            category = category,
-            order = keyGroups[category].order,
-            text = KeyMapper.GetActionName(k),
-            wikiURL = v.wikiURL
-        }
-        table.insert(keyGroups[category].actions, data)
-    end
-    -- flatten all key actions to a list separated by a header with info about key category
-    local index = 1
-    for category, group in keyGroups do
-        if not table.empty(group.actions) then
-            keyData[index] = {
-                type = 'header',
-                id = index,
-                order = keyGroups[category].order,
-                count = table.getsize(group.actions),
-                category = category,
-                text = keyGroups[category].text,
-                collapsed = keyGroups[category].collapsed
-            }
-            index = index + 1
-            for _, data in group.actions do
-                keyData[index] = {
-                    type = 'entry',
-                    text = data.text,
-                    action = data.action,
-                    key = data.key,
-                    keyText = LOC(data.keyText),
-                    category = category,
-                    order = keyGroups[category].order,
-                    collapsed = keyGroups[category].collapsed,
-                    id = index,
-                    wikiURL = data.wikiURL,
-                    filters = { -- create filter parameters for quick searching of keys
-                        key = string.gsub(string.lower(data.keyText), ' %+ ', ' '),
-                        text = string.lower(data.text or ''),
-                        action = string.lower(data.action or ''),
-                        category = string.lower(data.category or ''),
-                    }
-                }
-                index = index + 1
-            end
-        end
-    end
-
-    SortData(keyData)
-
-    -- store index of a header line for each key line
-    local header = 1
-    for i, data in keyData do
-        if data.type == 'header' then
-            header = i
-        elseif data.type == 'entry' then
-            data.header = header
-        end
-        data.index = i
-    end
-
-    return keyData
-end
-
-function FormatKeyName(key)
-    if not key then
-        return ""
-    end
-
-    local function LookupToken(token)
-        if properKeyNames[token] then
-            return LOC(properKeyNames[token])
-        else
-            return token
-        end
-    end
-
-    local result = ''
-
-    while string.find(key, '-') do
-        local loc = string.find(key, '-')
-        local token = string.sub(key, 1, loc - 1)
-        result = result .. LookupToken(token) .. ' + '
-        key = string.sub(key, loc + 1)
-    end
-
-    return result .. LookupToken(key)
+    LEFTSIDE_keyFilter.text:SetText('')
 end
 
 -- kept for mod backwards compatibility
