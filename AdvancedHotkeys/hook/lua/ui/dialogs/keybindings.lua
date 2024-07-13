@@ -38,8 +38,6 @@ local LEFTSIDE_keyEntries = {}
 local LEFTSIDE_keyword = ''
 local LEFTSIDE_linesVisible = {}
 local LEFTSIDE_linesCollapsed = true
-
--- store info about current state of key categories and preserve their state between LEFTSIDE_FormatData() calls
 local LEFTSIDE_keyGroups = {}
 for order, category in keyCategoryOrder do
     local name = string.lower(category)
@@ -49,7 +47,6 @@ for order, category in keyCategoryOrder do
     LEFTSIDE_keyGroups[name].text = LOC(keyCategories[category])
     LEFTSIDE_keyGroups[name].collapsed = LEFTSIDE_linesCollapsed
 end
-
 local function LEFTSIDE_ResetBindingToDefaultKeyMap()
     IN_ClearKeyMap()
     KeyMapper.ResetUserKeyMapTo('defaultKeyMap.lua')
@@ -57,7 +54,6 @@ local function LEFTSIDE_ResetBindingToDefaultKeyMap()
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
     LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
-
 local function LEFTSIDE_ResetBindingToHotbuildKeyMap()
     IN_ClearKeyMap()
     KeyMapper.ResetUserKeyMapTo('hotbuildKeyMap.lua')
@@ -65,7 +61,6 @@ local function LEFTSIDE_ResetBindingToHotbuildKeyMap()
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
     LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
-
 local function LEFTSIDE_ResetBindingToalternativeKeyMap()
     IN_ClearKeyMap()
     KeyMapper.ResetUserKeyMapTo('alternativeKeyMap.lua')
@@ -73,7 +68,6 @@ local function LEFTSIDE_ResetBindingToalternativeKeyMap()
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
     LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
-
 local function LEFTSIDE_ConfirmNewKeyMap()
     KeyMapper.SaveUserKeyMap()
     IN_ClearKeyMap()
@@ -84,7 +78,6 @@ local function LEFTSIDE_ConfirmNewKeyMap()
         import("/lua/keymap/hotkeylabels.lua").init()
     end
 end
-
 local function LEFTSIDE_ClearActionKey(action, currentKey)
     KeyMapper.ClearUserKeyMapping(currentKey)
     -- auto-clear shift action, e.g. 'shift_attack' for 'attack' action
@@ -93,7 +86,6 @@ local function LEFTSIDE_ClearActionKey(action, currentKey)
         KeyMapper.ClearUserKeyMapping(target.key)
     end
 end
-
 local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
@@ -225,7 +217,6 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
         keyPopup:Close()
     end
 end
-
 local function LEFTSIDE_AssignCurrentSelection()
     for k, v in LEFTSIDE_keyTable do
         if v.selected then
@@ -234,7 +225,6 @@ local function LEFTSIDE_AssignCurrentSelection()
         end
     end
 end
-
 local function LEFTSIDE_UnbindCurrentSelection()
     for k, v in LEFTSIDE_keyTable do
         if v.selected then
@@ -245,7 +235,6 @@ local function LEFTSIDE_UnbindCurrentSelection()
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
     LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
-
 local function LEFTSIDE_GetLineColor(lineID, data)
     if data.type == 'header' then
         return 'FF282828' ----FF282828
@@ -263,8 +252,6 @@ local function LEFTSIDE_GetLineColor(lineID, data)
         return 'FF6B0088' ----FF9D06C6
     end
 end
-
--- toggles expansion or collapse of lines with specified key category only if searching is not active
 local function LEFTSIDE_ToggleLines(category)
     if LEFTSIDE_keyword and string.len(LEFTSIDE_keyword) > 0 then return end
 
@@ -284,7 +271,6 @@ local function LEFTSIDE_ToggleLines(category)
     end
     LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
-
 local function LEFTSIDE_SelectLine(dataIndex)
     for k, v in LEFTSIDE_keyTable do
         v.selected = false
@@ -295,7 +281,6 @@ local function LEFTSIDE_SelectLine(dataIndex)
     end
     LEFTSIDE_keyContainer:Filter(LEFTSIDE_keyword)
 end
-
 function LEFTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
     if not bgColor then bgColor = 'FF343232' end -- --FF343232
@@ -335,8 +320,6 @@ function LEFTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
 
     return button
 end
-
--- create a line with dynamically updating UI elements based on type of data line
 function LEFTSIDE_CreateLine()
     local line = Bitmap(LEFTSIDE_keyContainer)
     line.Left:Set(LEFTSIDE_keyContainer.Left)
@@ -544,7 +527,6 @@ function LEFTSIDE_CreateLine()
     end
     return line
 end
-
 function LEFTSIDE_SortData(dataTable)
     table.sort(dataTable, function(a, b)
         if a.order ~= b.order then
@@ -566,8 +548,6 @@ function LEFTSIDE_SortData(dataTable)
         end
     end)
 end
-
--- format all key data, group them based on key category or default to none category and finally sort all keys
 function LEFTSIDE_FormatData()
     local keyData = {}
     local keyLookup = KeyMapper.GetKeyLookup()
@@ -656,7 +636,6 @@ function LEFTSIDE_FormatData()
 
     return keyData
 end
-
 function LEFTSIDE_FormatKeyName(key)
     if not key then
         return ""
@@ -689,7 +668,6 @@ function CloseUI()
         popup = false
     end
 end
-
 function CreateUI()
     LOG('Keybindings CreateUI')
     if WorldIsLoading() or (import("/lua/ui/game/gamemain.lua").supressExitDialog == true) then
