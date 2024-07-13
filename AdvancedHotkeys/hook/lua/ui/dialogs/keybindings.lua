@@ -24,7 +24,7 @@ local KeyMapper = import("/lua/keymap/keymapper.lua")
 local popup = nil
 local dialogContent 
 
-local TOP_PADDING = 100
+local TOP_PADDING = 50
 local SIDE_PADDING = 10
 local KEYBINDING_WIDTH = 210
 local LEFTSIDE_WIDTH = 700
@@ -1724,8 +1724,8 @@ function CreateUI()
 
     RIGHTSIDE_Section = Group(dialogContent)
 
-    LayoutHelpers.SetWidth(RIGHTSIDE_Section, dialogContent.Width() - (LEFTSIDE_Section.Width() - (SIDE_PADDING * 2)))
-    LayoutHelpers.AtLeftIn(RIGHTSIDE_Section, dialogContent, LEFTSIDE_Section.Width() + SIDE_PADDING)
+    LayoutHelpers.SetWidth(RIGHTSIDE_Section, dialogContent.Width() - (LEFTSIDE_Section.Width() + (SIDE_PADDING * 6)))
+    LayoutHelpers.AtLeftIn(RIGHTSIDE_Section, dialogContent, LEFTSIDE_Section.Width() + (SIDE_PADDING * 3))
     LayoutHelpers.AtTopIn(RIGHTSIDE_Section, dialogContent, TOP_PADDING)
     LayoutHelpers.AtBottomIn(RIGHTSIDE_Section, dialogContent)
 
