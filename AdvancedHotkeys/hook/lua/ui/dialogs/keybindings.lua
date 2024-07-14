@@ -31,6 +31,7 @@ local LEFTSIDE_WIDTH = 700
 local BUTTON_PADDING = 10
 local STANDARD_FONT_SIZE = 16
 local LINEHEIGHT = 30
+local BUTTON_FONTSIZE = 18
 
 local LEFTSIDE_FormatData
 local LEFTSIDE_Section
@@ -299,7 +300,7 @@ function LEFTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
     if not bgColor then bgColor = 'FF343232' end
     if not txtColor then txtColor = UIUtil.factionTextColor end
-    if not txtSize then txtSize = 18 end
+    if not txtSize then txtSize = BUTTON_FONTSIZE end
     if not txt then txt = '?' end
 
     local button = Bitmap(parent)
@@ -339,7 +340,7 @@ function LEFTSIDE_CreateLine()
     local line = Bitmap(LEFTSIDE_keyContainer)
     line.Left:Set(LEFTSIDE_keyContainer.Left)
     line.Right:Set(LEFTSIDE_keyContainer.Right)
-    LayoutHelpers.SetHeight(line, 20)
+    LayoutHelpers.SetHeight(line, LINEHEIGHT)
 
     line.key = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.key:DisableHitTest()
@@ -366,7 +367,7 @@ function LEFTSIDE_CreateLine()
         })
 
     LayoutHelpers.AtLeftIn(line.description, line, KEYBINDING_WIDTH + LINEHEIGHT + BUTTON_PADDING)
-    LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
+    LayoutHelpers.AtVerticalCenterIn(line.description, line)
 
     LayoutHelpers.LeftOf(line.key, line.description, 30)
     LayoutHelpers.AtVerticalCenterIn(line.key, line)
@@ -424,20 +425,12 @@ function LEFTSIDE_CreateLine()
         end
     end
 
-    line.toggle = RIGHTSIDE_CreateToggle(
-        line,
-        'FF1B1A1A',
-        UIUtil.factionTextColor,
-        LINEHEIGHT,
-        18,
-        '+')
-
     line.toggle = LEFTSIDE_CreateToggle(
         line,
         'FF1B1A1A',
         UIUtil.factionTextColor,
         LINEHEIGHT,
-        18,
+        BUTTON_FONTSIZE,
         '+')
 
     LayoutHelpers.AtLeftIn(line.toggle, line, KEYBINDING_WIDTH)
@@ -450,9 +443,8 @@ function LEFTSIDE_CreateLine()
         })
 
     line.wikiButton = UIUtil.CreateBitmap(line, '/textures/ui/common/mods/mod_url_website.dds')
-    LayoutHelpers.SetDimensions(line.wikiButton, 20, 20)
+    LayoutHelpers.SetDimensions(line.wikiButton, STANDARD_FONT_SIZE, STANDARD_FONT_SIZE)
 
-    -- LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
     LayoutHelpers.RightOf(line.wikiButton, line.key, 4)
     LayoutHelpers.AtVerticalCenterIn(line.wikiButton, line.key)
     line.wikiButton:SetAlpha(0.5)
@@ -471,10 +463,14 @@ function LEFTSIDE_CreateLine()
     import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', ''
         , 0, 140, 6, 14, 14, 'left')
 
-    line.assignKeyButton = LEFTSIDE_CreateToggle(line,
+    line.assignKeyButton = LEFTSIDE_CreateToggle(
+        line,
         '645F5E5E',
         'FFAEACAC',
-        line.key.Height() + 4, 18, '+')
+        LINEHEIGHT,
+        BUTTON_FONTSIZE,
+        '+')
+
     LayoutHelpers.AtLeftIn(line.assignKeyButton, line)
     LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
     Tooltip.AddControlTooltip(line.assignKeyButton,
@@ -487,10 +483,14 @@ function LEFTSIDE_CreateLine()
         return true
     end
 
-    line.unbindKeyButton = LEFTSIDE_CreateToggle(line,
+    line.unbindKeyButton = LEFTSIDE_CreateToggle(
+        line,
         '645F5E5E',
         'FFAEACAC',
-        line.key.Height() + 4, 18, 'x')
+        LINEHEIGHT,
+        BUTTON_FONTSIZE,
+        'x')
+
     LayoutHelpers.AtRightIn(line.unbindKeyButton, line)
     LayoutHelpers.AtVerticalCenterIn(line.unbindKeyButton, line)
     Tooltip.AddControlTooltip(line.unbindKeyButton,
@@ -937,10 +937,10 @@ function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
     if not bgColor then bgColor = 'FF343232' end
     if not txtColor then txtColor = UIUtil.factionTextColor end
-    if not txtSize then txtSize = 18 end
+    if not txtSize then txtSize = BUTTON_FONTSIZE end
     if not txt then txt = '?' end
 
-    local button = Bitmap(parent)
+    local button = Bitmap(parent) -- TODO
     button:SetSolidColor(bgColor)
     button.Height:Set(bgSize)
     button.Width:Set(bgSize)
@@ -977,7 +977,7 @@ function RIGHTSIDE_CreateLine()
     local line = Bitmap(RIGHTSIDE_keyContainer)
     line.Left:Set(RIGHTSIDE_keyContainer.Left)
     line.Right:Set(RIGHTSIDE_keyContainer.Right)
-    LayoutHelpers.SetHeight(line, 20)
+    LayoutHelpers.SetHeight(line, LINEHEIGHT)
 
     line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.description:DisableHitTest()
@@ -989,7 +989,7 @@ function RIGHTSIDE_CreateLine()
     line.Width:Set(function() return line.Right() - line.Left() end)
 
     LayoutHelpers.AtLeftIn(line.description, line, LINEHEIGHT + BUTTON_PADDING)
-    LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
+    LayoutHelpers.AtVerticalCenterIn(line.description, line)
 
     line.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
@@ -1043,7 +1043,7 @@ function RIGHTSIDE_CreateLine()
         'FF1B1A1A',
         UIUtil.factionTextColor,
         LINEHEIGHT,
-        18,
+        BUTTON_FONTSIZE,
         '+')
 
     LayoutHelpers.AtLeftIn(line.toggle, line)
@@ -1059,7 +1059,7 @@ function RIGHTSIDE_CreateLine()
         '645F5E5E',
         'FFAEACAC',
         LINEHEIGHT,
-        18,
+        BUTTON_FONTSIZE,
         'x')
 
     LayoutHelpers.AtRightIn(line.unbindKeyButton, line)
