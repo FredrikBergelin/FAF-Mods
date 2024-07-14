@@ -2,7 +2,6 @@ local Prefs = import('/lua/user/prefs.lua')
 local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions')
 local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap')
 
-
 modPath = '/mods/AdvancedHotkeys'
 conditionalsPath = modPath .. '/modules/conditionals.lua'
 
@@ -12,11 +11,10 @@ local lastClickTime = -9999
 keyMap = {
 	['0'] = {
 		{
-			immediate = {
-				{
-					print = '0 was pressed',
-				},
-			},
+			print = '0 was pressed',
+			executable = 'StartCommandMode order RULEUCC_Patrol',
+		},
+		{
 			conditionals = {
 				{
 					func = 'AllSelectedHaveCategory',
@@ -39,36 +37,14 @@ keyMap = {
 					print = 'Conditionals are Invalid',
 				},
 			},
-			finally = {
-				{
-					print = 'Always do at the end',
-				},
-			},
+		},
+		{
 			subkeys = {
 				['0'] = {
 					{
 						print = 's 0',
-						subkeys = {
-							['0'] = {
-								{
-									executable = 'StartCommandMode order RULEUCC_Patrol',
-									print = 's 0 2',
-								},
-
-							},
-							['9'] = {
-								{
-									print = 's 9 2',
-								},
-							}
-						}
 					},
 				},
-				['9'] = {
-					{
-						print = 's9',
-					},
-				}
 			}
 		}
 	},
@@ -161,11 +137,11 @@ function InitAdvancedKeys()
 			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. k .. '")',
 			category = 'AHK'
 		}
-		userKeyMap[k] = 'AHK ' .. name
+		-- userKeyMap[k] = 'AHK ' .. name
 	end
 
 	Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
-	Prefs.SetToCurrentProfile('UserKeyMap', userKeyMap)
+	-- Prefs.SetToCurrentProfile('UserKeyMap', userKeyMap)
 end
 
 function LoadKeyMap()

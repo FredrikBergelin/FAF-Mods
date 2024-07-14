@@ -5,6 +5,33 @@
 -- Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 -----------------------------------------------------------------
 
+function tLOG(tbl, indent)
+    if not indent then indent = 0 end
+    local formatting = string.rep("  ", indent)
+    if type(tbl) == "nil" then
+        LOG(formatting .. "nil")
+        return
+    end
+    if type(tbl) == "string" then
+        LOG(formatting .. tbl)
+        return
+    end
+    for k, v in pairs(tbl) do
+        formatting = string.rep("  ", indent) .. k .. ": "
+        if type(v) == "nil" then
+            LOG(formatting .. "NIL")
+        elseif type(v) == "table" then
+            LOG(formatting)
+            tLOG(v, indent + 1)
+        elseif type(v) == 'boolean' then
+            LOG(formatting .. tostring(v))
+        else
+            LOG(formatting)
+            LOG(v)
+        end
+    end
+end
+
 -- This file is the F1 menu used for navigating and interacting with keybindings
 local UIUtil        = import("/lua/ui/uiutil.lua")
 local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
@@ -30,6 +57,7 @@ local KEYBINDING_WIDTH = 210
 local LEFTSIDE_WIDTH = 800
 local BUTTON_PADDING = 10
 local STANDARD_FONT_SIZE = 16
+local HEADER_FONT_SIZE = 20
 local LINEHEIGHT = 30
 local BUTTON_FONTSIZE = 18
 
@@ -521,8 +549,9 @@ function LEFTSIDE_CreateLine()
             line.unbindKeyButton:Hide()
             line.wikiButton:Hide()
             line.description:SetText(data.text)
-            line.description:SetFont(UIUtil.titleFont, STANDARD_FONT_SIZE)
+            line.description:SetFont(UIUtil.titleFont, HEADER_FONT_SIZE)
             line.description:SetColor(UIUtil.factionTextColor)
+            LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
             line.key:SetText('')
             line.statistics:SetText(stats)
         elseif data.type == 'spacer' then
@@ -936,7 +965,7 @@ end
 function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
     if not bgColor then bgColor = 'FF343232' end
-    if not txtColor then txtColor = UIUtil.factionTextColor end
+    if not txtColor then txtColor = UIUtil.fontColor end
     if not txtSize then txtSize = BUTTON_FONTSIZE end
     if not txt then txt = '?' end
 
@@ -1088,8 +1117,9 @@ function RIGHTSIDE_CreateLine()
             line.toggle:Show()
             line.unbindKeyButton:Hide()
             line.description:SetText(data.text)
-            line.description:SetFont(UIUtil.titleFont, STANDARD_FONT_SIZE)
-            line.description:SetColor(UIUtil.factionTextColor)
+            line.description:SetFont('Arial', HEADER_FONT_SIZE)
+            line.description:SetColor(UIUtil.fontColor)
+            line.description:SetColor('ffffffff')
         elseif data.type == 'spacer' then
             line.toggle:Hide()
             line.unbindKeyButton:Hide()
@@ -1127,40 +1157,85 @@ function RIGHTSIDE_SortData(dataTable)
     end)
 end
 
+function RIGHTSIDE_RECURSIVE_FORMATTING(k, entries)
+
+    -- create header if it doesn't exist
+    if not RIGHTSIDE_keyGroups[k] then
+        RIGHTSIDE_keyGroups[k] = {}
+        RIGHTSIDE_keyGroups[k].actions = {}
+        RIGHTSIDE_keyGroups[k].name = k
+        RIGHTSIDE_keyGroups[k].collapsed = RIGHTSIDE_linesCollapsed
+        RIGHTSIDE_keyGroups[k].order = table.getsize(RIGHTSIDE_keyGroups) - 1
+        RIGHTSIDE_keyGroups[k].text = k
+    end
+
+    local orderIndex = 1
+
+    for entryKey, entry in entries do
+
+        if entry["print"] ~= nil then
+            table.insert(RIGHTSIDE_keyGroups[k].actions, {
+                action = "ACTION",
+                key = "KEY",
+                keyText = '',
+                category = k,
+                order = RIGHTSIDE_keyGroups[k].order + orderIndex,
+                text = entry['print'],
+                wikiURL = entry.wikiURL
+            })
+            orderIndex = orderIndex + 1
+        end
+
+        if entry["executable"] ~= nil then
+            table.insert(RIGHTSIDE_keyGroups[k].actions, {
+                action = "ACTION",
+                key = "KEY",
+                keyText = '',
+                category = k,
+                order = RIGHTSIDE_keyGroups[k].order + orderIndex,
+                text = entry['executable'],
+                wikiURL = entries.wikiURL
+            })
+            orderIndex = orderIndex + 1
+        end
+
+        if entry["immediate"] ~= nil then
+            -- RECURSIVE_FORMATTING(entry["immediate"])
+        end
+
+        if entry["conditionals"] ~= nil then
+            if entry["valid"] ~= nil then
+                -- RECURSIVE_FORMATTING(entry["valid"])
+            end
+            if entry["invalid"] ~= nil then
+                -- RECURSIVE_FORMATTING(entry["invalid"])
+            end
+        end
+
+        if entry["finally"] ~= nil then
+            -- RECURSIVE_FORMATTING(entry["finally"])
+        end
+
+        if entry["subkeys"] ~= nil then
+            -- RECURSIVE_FORMATTING(entry["subkeys"])
+        end
+
+    end
+end
+
 function RIGHTSIDE_FormatData()
     local keyData = {}
-    local keyLookup = KeyMapper.GetKeyLookup()
     local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
 
     -- reset previously formated key actions in all groups because they might have been re-mapped
     for category, group in RIGHTSIDE_keyGroups do
         group.actions = {}
     end
-    -- group game keys and key defined in mods by their key category
+
     for k, v in advancedKeyMap do
-        local keyForAction = keyLookup[k]
-
-        -- create header if it doesn't exist
-        if not RIGHTSIDE_keyGroups[k] then
-            RIGHTSIDE_keyGroups[k] = {}
-            RIGHTSIDE_keyGroups[k].actions = {}
-            RIGHTSIDE_keyGroups[k].name = k
-            RIGHTSIDE_keyGroups[k].collapsed = RIGHTSIDE_linesCollapsed
-            RIGHTSIDE_keyGroups[k].order = table.getsize(RIGHTSIDE_keyGroups) - 1
-            RIGHTSIDE_keyGroups[k].text = k
-        end
-
-        local data = {
-            action = tostring(v),
-            key = keyForAction,
-            keyText = '',
-            category = k,
-            order = RIGHTSIDE_keyGroups[k].order,
-            text = KeyMapper.GetActionName(k),
-            wikiURL = v.wikiURL
-        }
-        table.insert(RIGHTSIDE_keyGroups[k].actions, data)
+        RIGHTSIDE_RECURSIVE_FORMATTING(k, v)
     end
+
     -- flatten all key actions to a list separated by a header with info about key category
     local index = 1
     for category, group in RIGHTSIDE_keyGroups do
@@ -1274,17 +1349,7 @@ function CloseUI()
     end
 end
 
-function CreateUI()
-    LOG('Keybindings CreateUI')
-    if WorldIsLoading() or (import("/lua/ui/game/gamemain.lua").supressExitDialog == true) then
-        return
-    end
-
-    if popup then
-        CloseUI()
-        return
-    end
-
+local function LEFTSIDE_CreateUI()
     LEFTSIDE_keyword = ''
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
 
@@ -1652,11 +1717,9 @@ function CreateUI()
         self:CalcVisible()
     end
     LEFTSIDE_keyFilter.text:SetText('')
+end
 
-    -- / LEFTSIDE ---------------------------------------------------------------
-
-    -- RIGHTSIDE ----------------------------------------------------------------
-
+local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_Section = Group(dialogContent)
 
     LayoutHelpers.SetWidth(RIGHTSIDE_Section, dialogContent.Width() - (LEFTSIDE_Section.Width() + (SIDE_PADDING * 6)))
@@ -1855,21 +1918,7 @@ function CreateUI()
             for k, v in RIGHTSIDE_keyTable do
                 if v.type == 'header' then
                     table.insert(RIGHTSIDE_linesVisible, k)
-                    RIGHTSIDE_keyGroups[v.category].visible = v.count -- 1 WARNING: Error running OnTextChanged script in CScriptObject at 1c49cf40: ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2977): Attempt to set attribute 'visible' on nil
-                    --     stack traceback:
-                    --     [C]: in function `error'
-                    --     ...ata\faforever\gamedata\lua.nx2\lua\system\config.lua(14): in function <...ata\faforever\gamedata\lua.nx2\lua\system\config.lua:13>
-                    --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2977): in function `Filter'
-                    --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2838): in function <...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua:2825>
-                    --     [C]: in function `SetText'
-                    --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(3034): in function `CreateUI'
-                    --     [string "import("/lua/ui/dialogs/keybindings.lua").C..."](1): in main chunk
-                    --     [C]: ?
-                    --     ...gramdata\faforever\gamedata\lua.nx2\lua\userinit.lua(221): in function `ConExecute'
-                    --     ...orged alliance\mods\advancedhotkeys\modules\main.lua(124): in function `ExecuteRecursively'
-                    --     ...orged alliance\mods\advancedhotkeys\modules\main.lua(126): in function `ExecuteRecursively'
-                    --     ...orged alliance\mods\advancedhotkeys\modules\main.lua(101): in function `RouteHotkey'
-                    --     [string "import("/mods/AdvancedHotkeys/modules/main...."](1): in main chunk
+                    RIGHTSIDE_keyGroups[v.category].visible = v.count
                     RIGHTSIDE_keyGroups[v.category].bindings = 0
                 elseif v.type == 'entry' then
                     if not v.collapsed then
@@ -1927,8 +1976,18 @@ function CreateUI()
         self:CalcVisible()
     end
     RIGHTSIDE_keyFilter.text:SetText('')
+end
 
-    -- / RIGHTSIDE --------------------------------------------------------------
+function CreateUI()
+    LOG('Keybindings CreateUI')
+
+    if WorldIsLoading() or (import("/lua/ui/game/gamemain.lua").supressExitDialog == true) then return end
+
+    if popup then CloseUI() return end
+
+    LEFTSIDE_CreateUI()
+
+    RIGHTSIDE_CreateUI()
 end
 
 -- kept for mod backwards compatibility
