@@ -22,12 +22,15 @@ local keyCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrde
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
 local popup = nil
-local dialogContent 
+local dialogContent
 
 local TOP_PADDING = 50
 local SIDE_PADDING = 10
 local KEYBINDING_WIDTH = 210
 local LEFTSIDE_WIDTH = 700
+local BUTTON_PADDING = 10
+local STANDARD_FONT_SIZE = 16
+local LINEHEIGHT = 30
 
 local LEFTSIDE_FormatData
 local LEFTSIDE_Section
@@ -108,7 +111,7 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     LayoutHelpers.AtBottomIn(okButton, dialogContent, 15)
     LayoutHelpers.AtLeftIn(okButton, dialogContent, -2)
 
-    local helpText = MultiLineText(dialogContent, UIUtil.bodyFont, 16, UIUtil.fontColor)
+    local helpText = MultiLineText(dialogContent, UIUtil.bodyFont, STANDARD_FONT_SIZE, UIUtil.fontColor)
     LayoutHelpers.AtTopIn(helpText, dialogContent, 10)
     LayoutHelpers.AtHorizontalCenterIn(helpText, dialogContent)
     helpText.Width:Set(dialogContent.Width() - 10)
@@ -294,7 +297,7 @@ end
 
 function LEFTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
-    if not bgColor then bgColor = 'FF343232' end -- --FF343232
+    if not bgColor then bgColor = 'FF343232' end
     if not txtColor then txtColor = UIUtil.factionTextColor end
     if not txtSize then txtSize = 18 end
     if not txt then txt = '?' end
@@ -302,7 +305,7 @@ function LEFTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     local button = Bitmap(parent)
     button:SetSolidColor(bgColor)
     button.Height:Set(bgSize)
-    button.Width:Set(bgSize + 4)
+    button.Width:Set(bgSize)
     button.txt = UIUtil.CreateText(button, txt, txtSize)
     button.txt:SetColor(txtColor)
     button.txt:SetFont(UIUtil.bodyFont, txtSize)
@@ -338,22 +341,22 @@ function LEFTSIDE_CreateLine()
     line.Right:Set(LEFTSIDE_keyContainer.Right)
     LayoutHelpers.SetHeight(line, 20)
 
-    line.key = UIUtil.CreateText(line, '', 16, "Arial")
+    line.key = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.key:DisableHitTest()
     line.key:SetAlpha(0.9)
 
-    line.description = UIUtil.CreateText(line, '', 16, "Arial")
+    line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
     line.description.Width:Set(line.Right() - line.Left() - KEYBINDING_WIDTH)
     line.description:SetAlpha(0.9)
 
-    line.Height:Set(function() return line.key.Height() + 4 end)
+    line.Height:Set(LINEHEIGHT)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
-    line.statistics = UIUtil.CreateText(line, '', 16, "Arial")
+    line.statistics = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.statistics:EnableHitTest()
-    line.statistics:SetColor('FF9A9A9A') ----FF9A9A9A'
+    line.statistics:SetColor('FF9A9A9A')
     line.statistics:SetAlpha(0.9)
 
     Tooltip.AddControlTooltip(line.statistics,
@@ -362,8 +365,9 @@ function LEFTSIDE_CreateLine()
             body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
         })
 
-    LayoutHelpers.AtLeftIn(line.description, line, KEYBINDING_WIDTH)
-    LayoutHelpers.AtVerticalCenterIn(line.description, line)
+    LayoutHelpers.AtLeftIn(line.description, line, KEYBINDING_WIDTH + LINEHEIGHT + BUTTON_PADDING)
+    LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
+
     LayoutHelpers.LeftOf(line.key, line.description, 30)
     LayoutHelpers.AtVerticalCenterIn(line.key, line)
     LayoutHelpers.AtRightIn(line.statistics, line, 10)
@@ -420,12 +424,25 @@ function LEFTSIDE_CreateLine()
         end
     end
 
-    line.toggle = LEFTSIDE_CreateToggle(line,
-        'FF1B1A1A', ----FF1B1A1A'
+    line.toggle = RIGHTSIDE_CreateToggle(
+        line,
+        'FF1B1A1A',
         UIUtil.factionTextColor,
-        line.key.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(line.toggle, line, KEYBINDING_WIDTH - 30)
+        LINEHEIGHT,
+        18,
+        '+')
+
+    line.toggle = LEFTSIDE_CreateToggle(
+        line,
+        'FF1B1A1A',
+        UIUtil.factionTextColor,
+        LINEHEIGHT,
+        18,
+        '+')
+
+    LayoutHelpers.AtLeftIn(line.toggle, line, KEYBINDING_WIDTH)
     LayoutHelpers.AtVerticalCenterIn(line.toggle, line)
+
     Tooltip.AddControlTooltip(line.toggle,
         {
             text = '<LOC key_binding_0010>Toggle Category',
@@ -455,8 +472,8 @@ function LEFTSIDE_CreateLine()
         , 0, 140, 6, 14, 14, 'left')
 
     line.assignKeyButton = LEFTSIDE_CreateToggle(line,
-        '645F5E5E', ----735F5E5E'
-        'FFAEACAC', ----FFAEACAC'
+        '645F5E5E',
+        'FFAEACAC',
         line.key.Height() + 4, 18, '+')
     LayoutHelpers.AtLeftIn(line.assignKeyButton, line)
     LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
@@ -471,8 +488,8 @@ function LEFTSIDE_CreateLine()
     end
 
     line.unbindKeyButton = LEFTSIDE_CreateToggle(line,
-        '645F5E5E', ----645F5E5E'
-        'FFAEACAC', ----FFAEACAC'
+        '645F5E5E',
+        'FFAEACAC',
         line.key.Height() + 4, 18, 'x')
     LayoutHelpers.AtRightIn(line.unbindKeyButton, line)
     LayoutHelpers.AtVerticalCenterIn(line.unbindKeyButton, line)
@@ -504,7 +521,7 @@ function LEFTSIDE_CreateLine()
             line.unbindKeyButton:Hide()
             line.wikiButton:Hide()
             line.description:SetText(data.text)
-            line.description:SetFont(UIUtil.titleFont, 16)
+            line.description:SetFont(UIUtil.titleFont, STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.factionTextColor)
             line.key:SetText('')
             line.statistics:SetText(stats)
@@ -519,10 +536,10 @@ function LEFTSIDE_CreateLine()
         elseif data.type == 'entry' then
             line.toggle:Hide()
             line.key:SetText(data.keyText)
-            line.key:SetColor('ffffffff') ----ffffffff'
-            line.key:SetFont('Arial', 16)
+            line.key:SetColor('ffffffff')
+            line.key:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetText(data.text)
-            line.description:SetFont('Arial', 16)
+            line.description:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
             line.statistics:SetText('')
             line.unbindKeyButton:Show()
@@ -686,6 +703,7 @@ local RIGHTSIDE_keyword = ''
 local RIGHTSIDE_linesVisible = {}
 local RIGHTSIDE_linesCollapsed = true
 local RIGHTSIDE_keyGroups = {}
+
 for order, category in keyCategoryOrder do
     local name = string.lower(category)
     RIGHTSIDE_keyGroups[name] = {}
@@ -731,7 +749,7 @@ local function RIGHTSIDE_EditActionKey(parent, action, currentKey)
     LayoutHelpers.AtBottomIn(okButton, dialogContent, 15)
     LayoutHelpers.AtLeftIn(okButton, dialogContent, -2)
 
-    local helpText = MultiLineText(dialogContent, UIUtil.bodyFont, 16, UIUtil.fontColor)
+    local helpText = MultiLineText(dialogContent, UIUtil.bodyFont, STANDARD_FONT_SIZE, UIUtil.fontColor)
     LayoutHelpers.AtTopIn(helpText, dialogContent, 10)
     LayoutHelpers.AtHorizontalCenterIn(helpText, dialogContent)
     helpText.Width:Set(dialogContent.Width() - 10)
@@ -868,19 +886,19 @@ end
 
 local function RIGHTSIDE_GetLineColor(lineID, data)
     if data.type == 'header' then
-        return 'FF282828' ----FF282828
+        return 'FF282828'
     elseif data.type == 'spacer' then
-        return '00000000' ----00000000
+        return '00000000'
     elseif data.type == 'entry' then
         if data.selected then
             return UIUtil.factionBackColor
         elseif math.mod(lineID, 2) == 1 then
-            return 'ff202020' ----ff202020
+            return 'ff202020'
         else
-            return 'FF343333' ----FF343333
+            return 'FF343333'
         end
     else
-        return 'FF6B0088' ----FF9D06C6
+        return 'FF6B0088'
     end
 end
 
@@ -917,7 +935,7 @@ end
 
 function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not bgSize then bgSize = 20 end
-    if not bgColor then bgColor = 'FF343232' end -- --FF343232
+    if not bgColor then bgColor = 'FF343232' end
     if not txtColor then txtColor = UIUtil.factionTextColor end
     if not txtSize then txtSize = 18 end
     if not txt then txt = '?' end
@@ -925,8 +943,8 @@ function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     local button = Bitmap(parent)
     button:SetSolidColor(bgColor)
     button.Height:Set(bgSize)
-    button.Width:Set(bgSize + 4)
-    button.txt = UIUtil.CreateText(button, txt, txtSize)
+    button.Width:Set(bgSize)
+    button.txt = UIUtil.CreateText(button, txt, txtSize) -- TODO
     button.txt:SetColor(txtColor)
     button.txt:SetFont(UIUtil.bodyFont, txtSize)
     LayoutHelpers.AtVerticalCenterIn(button.txt, button)
@@ -961,49 +979,26 @@ function RIGHTSIDE_CreateLine()
     line.Right:Set(RIGHTSIDE_keyContainer.Right)
     LayoutHelpers.SetHeight(line, 20)
 
-    line.key = UIUtil.CreateText(line, '', 16, "Arial")
-    line.key:DisableHitTest()
-    line.key:SetAlpha(0.9)
-
-    line.description = UIUtil.CreateText(line, '', 16, "Arial")
+    line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
-    line.description.Width:Set(line.Right() - line.Left() - KEYBINDING_WIDTH)
+    line.description.Width:Set(line.Right() - line.Left())
     line.description:SetAlpha(0.9)
 
-    line.Height:Set(function() return line.key.Height() + 4 end)
+    line.Height:Set(LINEHEIGHT)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
-    line.statistics = UIUtil.CreateText(line, '', 16, "Arial")
-    line.statistics:EnableHitTest()
-    line.statistics:SetColor('FF9A9A9A') ----FF9A9A9A'
-    line.statistics:SetAlpha(0.9)
-
-    Tooltip.AddControlTooltip(line.statistics,
-        {
-            text = '<LOC key_binding_0014>Category Statistics',
-            body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
-        })
-
-    LayoutHelpers.AtLeftIn(line.description, line, KEYBINDING_WIDTH)
-    LayoutHelpers.AtVerticalCenterIn(line.description, line)
-    LayoutHelpers.LeftOf(line.key, line.description, 30)
-    LayoutHelpers.AtVerticalCenterIn(line.key, line)
-    LayoutHelpers.AtRightIn(line.statistics, line, 10)
-    LayoutHelpers.AtVerticalCenterIn(line.statistics, line)
+    LayoutHelpers.AtLeftIn(line.description, line, LINEHEIGHT + BUTTON_PADDING)
+    LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
 
     line.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
             line:SetAlpha(0.9)
-            line.key:SetAlpha(1.0)
             line.description:SetAlpha(1.0)
-            line.statistics:SetAlpha(1.0)
             PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
         elseif event.Type == 'MouseExit' then
             line:SetAlpha(1.0)
-            line.key:SetAlpha(0.9)
             line.description:SetAlpha(0.9)
-            line.statistics:SetAlpha(0.9)
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
                 RIGHTSIDE_SelectLine(self.data.index)
@@ -1043,11 +1038,15 @@ function RIGHTSIDE_CreateLine()
         end
     end
 
-    line.toggle = RIGHTSIDE_CreateToggle(line,
-        'FF1B1A1A', ----FF1B1A1A'
+    line.toggle = RIGHTSIDE_CreateToggle(
+        line,
+        'FF1B1A1A',
         UIUtil.factionTextColor,
-        line.key.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(line.toggle, line, KEYBINDING_WIDTH - 30)
+        LINEHEIGHT,
+        18,
+        '+')
+
+    LayoutHelpers.AtLeftIn(line.toggle, line)
     LayoutHelpers.AtVerticalCenterIn(line.toggle, line)
     Tooltip.AddControlTooltip(line.toggle,
         {
@@ -1055,48 +1054,14 @@ function RIGHTSIDE_CreateLine()
             body = '<LOC key_binding_0011>Toggle visibility of all actions for this category of keys'
         })
 
-    line.wikiButton = UIUtil.CreateBitmap(line, '/textures/ui/common/mods/mod_url_website.dds')
-    LayoutHelpers.SetDimensions(line.wikiButton, 20, 20)
+    line.unbindKeyButton = RIGHTSIDE_CreateToggle(
+        line,
+        '645F5E5E',
+        'FFAEACAC',
+        LINEHEIGHT,
+        18,
+        'x')
 
-    -- LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
-    LayoutHelpers.RightOf(line.wikiButton, line.key, 4)
-    LayoutHelpers.AtVerticalCenterIn(line.wikiButton, line.key)
-    line.wikiButton:SetAlpha(0.5)
-    line.wikiButton.HandleEvent = function(self, event)
-        if event.Type == 'MouseEnter' then
-            self:SetAlpha(1.0, false)
-        elseif event.Type == 'MouseExit' then
-            self:SetAlpha(0.5, false)
-        elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            local url = "http://wiki.faforever.com/" .. tostring(self.url)
-            OpenURL(url)
-        end
-        return true
-    end
-
-    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', ''
-        , 0, 140, 6, 14, 14, 'left')
-
-    line.assignKeyButton = RIGHTSIDE_CreateToggle(line,
-        '645F5E5E', ----735F5E5E'
-        'FFAEACAC', ----FFAEACAC'
-        line.key.Height() + 4, 18, '+')
-    LayoutHelpers.AtLeftIn(line.assignKeyButton, line)
-    LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
-    Tooltip.AddControlTooltip(line.assignKeyButton,
-        {
-            text = "<LOC key_binding_0003>Assign Key",
-            body = '<LOC key_binding_0012>Opens a dialog that allows assigning key binding for a given action'
-        })
-    line.assignKeyButton.OnMouseClick = function(self)
-        line:AssignKeyBinding()
-        return true
-    end
-
-    line.unbindKeyButton = RIGHTSIDE_CreateToggle(line,
-        '645F5E5E', ----645F5E5E'
-        'FFAEACAC', ----FFAEACAC'
-        line.key.Height() + 4, 18, 'x')
     LayoutHelpers.AtRightIn(line.unbindKeyButton, line)
     LayoutHelpers.AtVerticalCenterIn(line.unbindKeyButton, line)
     Tooltip.AddControlTooltip(line.unbindKeyButton,
@@ -1120,50 +1085,21 @@ function RIGHTSIDE_CreateLine()
             else
                 self.toggle.txt:SetText('-')
             end
-            local stats = RIGHTSIDE_keyGroups[data.category].bindings .. ' / ' ..
-                RIGHTSIDE_keyGroups[data.category].visible -- 2 WARNING: Error running HandleEvent script in CScriptObject at 249412c0: ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2180): attempt to concatenate field `visible' (a nil value)
-                -- stack traceback:
-                --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2180): in function `Update'
-                --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2943): in function `CalcVisible'
-                --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2927): in function `ScrollSetTop'
-                --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2913): in function `ScrollLines'
-                --     ...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua(2964): in function <...ever\gamedata\lua.nx2\lua\ui\dialogs\keybindings.lua:2958>
             line.toggle:Show()
-            line.assignKeyButton:Hide()
             line.unbindKeyButton:Hide()
-            line.wikiButton:Hide()
             line.description:SetText(data.text)
-            line.description:SetFont(UIUtil.titleFont, 16)
+            line.description:SetFont(UIUtil.titleFont, STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.factionTextColor)
-            line.key:SetText('')
-            line.statistics:SetText(stats)
         elseif data.type == 'spacer' then
             line.toggle:Hide()
-            line.assignKeyButton:Hide()
             line.unbindKeyButton:Hide()
-            line.wikiButton:Hide()
-            line.key:SetText('')
             line.description:SetText('')
-            line.statistics:SetText('')
         elseif data.type == 'entry' then
             line.toggle:Hide()
-            line.key:SetText(data.keyText)
-            line.key:SetColor('ffffffff') ----ffffffff'
-            line.key:SetFont('Arial', 16)
             line.description:SetText(data.text)
-            line.description:SetFont('Arial', 16)
+            line.description:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
-            line.statistics:SetText('')
             line.unbindKeyButton:Show()
-            line.assignKeyButton:Show()
-
-            if (data.wikiURL) then
-                line.wikiButton.url = tostring(data.wikiURL)
-                line.wikiButton:Show()
-            else
-                line.wikiButton.url = ""
-                line.wikiButton:Hide()
-            end
         end
     end
     return line
@@ -1486,16 +1422,16 @@ function CreateUI()
 
     local text = LOC("<LOC key_binding_filterInfo>Type key binding or name of action")
     LEFTSIDE_keyFilter.info = UIUtil.CreateText(LEFTSIDE_keyFilter, text, 17, UIUtil.titleFont)
-    LEFTSIDE_keyFilter.info:SetColor('FF727171') -- --FF727171
+    LEFTSIDE_keyFilter.info:SetColor('FF727171')
     LEFTSIDE_keyFilter.info:DisableHitTest()
     LayoutHelpers.AtHorizontalCenterIn(LEFTSIDE_keyFilter.info, LEFTSIDE_keyFilter, -7)
     LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.info, LEFTSIDE_keyFilter, 2)
 
     LEFTSIDE_keyFilter.text = Edit(LEFTSIDE_keyFilter)
-    LEFTSIDE_keyFilter.text:SetForegroundColor('FFF1ECEC') -- --FFF1ECEC
-    LEFTSIDE_keyFilter.text:SetBackgroundColor('04E1B44A') -- --04E1B44A
+    LEFTSIDE_keyFilter.text:SetForegroundColor('FFF1ECEC')
+    LEFTSIDE_keyFilter.text:SetBackgroundColor('04E1B44A')
     LEFTSIDE_keyFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    LEFTSIDE_keyFilter.text:SetHighlightBackgroundColor("880085EF") ----880085EF
+    LEFTSIDE_keyFilter.text:SetHighlightBackgroundColor("880085EF")
     LEFTSIDE_keyFilter.text.Height:Set(function() return LEFTSIDE_keyFilter.Bottom() - LEFTSIDE_keyFilter.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
@@ -1524,16 +1460,16 @@ function CreateUI()
     end
 
     LEFTSIDE_keyFilter.clear = UIUtil.CreateText(LEFTSIDE_keyFilter.text, 'X', 17, "Arial Bold")
-    LEFTSIDE_keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
+    LEFTSIDE_keyFilter.clear:SetColor('FF8A8A8A')
     LEFTSIDE_keyFilter.clear:EnableHitTest()
     LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_keyFilter.clear, LEFTSIDE_keyFilter.text, 1)
     LayoutHelpers.AtRightIn(LEFTSIDE_keyFilter.clear, LEFTSIDE_keyFilter.text, 9)
 
     LEFTSIDE_keyFilter.clear.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
-            LEFTSIDE_keyFilter.clear:SetColor('FFC9C7C7') -- --FFC9C7C7
+            LEFTSIDE_keyFilter.clear:SetColor('FFC9C7C7')
         elseif event.Type == 'MouseExit' then
-            LEFTSIDE_keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
+            LEFTSIDE_keyFilter.clear:SetColor('FF8A8A8A')
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
             LEFTSIDE_keyFilter.text:SetText('')
             LEFTSIDE_keyFilter.text:AcquireFocus()
@@ -1626,7 +1562,7 @@ function CreateUI()
             if data then
                 line:Update(data, id)
             else
-                line:SetSolidColor('00000000') ----00000000
+                line:SetSolidColor('00000000')
                 line.key:SetText('')
                 line.description:SetText('')
                 line.statistics:SetText('')
@@ -1751,16 +1687,16 @@ function CreateUI()
 
     local text = LOC("<LOC key_binding_filterInfo>Type key binding or name of action")
     RIGHTSIDE_keyFilter.info = UIUtil.CreateText(RIGHTSIDE_keyFilter, text, 17, UIUtil.titleFont)
-    RIGHTSIDE_keyFilter.info:SetColor('FF727171') -- --FF727171
+    RIGHTSIDE_keyFilter.info:SetColor('FF727171')
     RIGHTSIDE_keyFilter.info:DisableHitTest()
     LayoutHelpers.AtHorizontalCenterIn(RIGHTSIDE_keyFilter.info, RIGHTSIDE_keyFilter, -7)
     LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_keyFilter.info, RIGHTSIDE_keyFilter, 2)
 
     RIGHTSIDE_keyFilter.text = Edit(RIGHTSIDE_keyFilter)
-    RIGHTSIDE_keyFilter.text:SetForegroundColor('FFF1ECEC') -- --FFF1ECEC
-    RIGHTSIDE_keyFilter.text:SetBackgroundColor('04E1B44A') -- --04E1B44A
+    RIGHTSIDE_keyFilter.text:SetForegroundColor('FFF1ECEC')
+    RIGHTSIDE_keyFilter.text:SetBackgroundColor('04E1B44A')
     RIGHTSIDE_keyFilter.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    RIGHTSIDE_keyFilter.text:SetHighlightBackgroundColor("880085EF") ----880085EF
+    RIGHTSIDE_keyFilter.text:SetHighlightBackgroundColor("880085EF")
     RIGHTSIDE_keyFilter.text.Height:Set(function() return RIGHTSIDE_keyFilter.Bottom() - RIGHTSIDE_keyFilter.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
@@ -1789,16 +1725,16 @@ function CreateUI()
     end
 
     RIGHTSIDE_keyFilter.clear = UIUtil.CreateText(RIGHTSIDE_keyFilter.text, 'X', 17, "Arial Bold")
-    RIGHTSIDE_keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
+    RIGHTSIDE_keyFilter.clear:SetColor('FF8A8A8A')
     RIGHTSIDE_keyFilter.clear:EnableHitTest()
     LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_keyFilter.clear, RIGHTSIDE_keyFilter.text, 1)
     LayoutHelpers.AtRightIn(RIGHTSIDE_keyFilter.clear, RIGHTSIDE_keyFilter.text, 9)
 
     RIGHTSIDE_keyFilter.clear.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
-            RIGHTSIDE_keyFilter.clear:SetColor('FFC9C7C7') -- --FFC9C7C7
+            RIGHTSIDE_keyFilter.clear:SetColor('FFC9C7C7')
         elseif event.Type == 'MouseExit' then
-            RIGHTSIDE_keyFilter.clear:SetColor('FF8A8A8A') -- --FF8A8A8A
+            RIGHTSIDE_keyFilter.clear:SetColor('FF8A8A8A')
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
             RIGHTSIDE_keyFilter.text:SetText('')
             RIGHTSIDE_keyFilter.text:AcquireFocus()
@@ -1892,13 +1828,9 @@ function CreateUI()
                 line:Update(data, id)
             else
                 line:SetSolidColor('00000000') ----00000000
-                line.key:SetText('')
                 line.description:SetText('')
-                line.statistics:SetText('')
                 line.toggle:Hide()
-                line.assignKeyButton:Hide()
                 line.unbindKeyButton:Hide()
-                line.wikiButton:Hide()
             end
         end
         RIGHTSIDE_keyFilter.text:AcquireFocus()
