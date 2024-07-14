@@ -26,14 +26,13 @@ local EngineerOverlay = Class(Overlay)
         self.offsetY = 0
         self.isIdle = false
         if unit:IsInCategory("TECH1") then
-            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t1_idle.dds", 0)
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/engineer_t1_idle.dds", 0)
         elseif unit:IsInCategory("TECH2") then
-            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t2_idle.dds", 0)
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/engineer_t2_idle.dds", 0)
         elseif unit:IsInCategory("TECH3") and not unit:IsInCategory("SUBCOMMANDER") then
-            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/t3_idle.dds", 0)
-        -- Hides color coding underneath, and not really necessary anyway for sacu
-        -- elseif unit:IsInCategory("SUBCOMMANDER") then
-        --     self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/sacu_idle.dds", 0)
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/engineer_t3_idle.dds", 0)
+        elseif unit:IsInCategory("SUBCOMMANDER") then
+            self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/sacu_idle.dds", 0)
         end
     end,
 
@@ -173,8 +172,8 @@ local MissileSiloOverlay = Class(Overlay)
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_2.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_3.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_4.dds",
-            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds", --TODO
-            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds", --TODO
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_5.dds", --TODO
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_6.dds", --TODO
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds",
         })
     end,

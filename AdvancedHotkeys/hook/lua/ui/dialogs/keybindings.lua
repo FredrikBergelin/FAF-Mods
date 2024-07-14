@@ -71,6 +71,7 @@ local LEFTSIDE_keyword = ''
 local LEFTSIDE_linesVisible = {}
 local LEFTSIDE_linesCollapsed = true
 local LEFTSIDE_keyGroups = {}
+
 for order, category in keyCategoryOrder do
     local name = string.lower(category)
     LEFTSIDE_keyGroups[name] = {}
@@ -147,7 +148,7 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     helpText:SetText(LOC("<LOC key_binding_0002>Hit the key combination you'd like to assign"))
     helpText:SetCenteredHorizontally(true)
 
-    local keyText = UIUtil.CreateText(dialogContent, LEFTSIDE_FormatKeyName(currentKey), 24)
+    local keyText = UIUtil.CreateText(dialogContent, FormatKeyName(currentKey), 24)
     keyText:SetColor(UIUtil.factionBackColor)
     LayoutHelpers.Above(keyText, okButton)
     LayoutHelpers.AtHorizontalCenterIn(keyText, dialogContent)
@@ -635,7 +636,7 @@ function LEFTSIDE_FormatData()
         local data = {
             action = k,
             key = keyForAction,
-            keyText = LEFTSIDE_FormatKeyName(keyForAction),
+            keyText = FormatKeyName(keyForAction),
             category = category,
             order = LEFTSIDE_keyGroups[category].order,
             text = KeyMapper.GetActionName(k),
@@ -695,31 +696,6 @@ function LEFTSIDE_FormatData()
     end
 
     return keyData
-end
-
-function LEFTSIDE_FormatKeyName(key)
-    if not key then
-        return ""
-    end
-
-    local function LookupToken(token)
-        if properKeyNames[token] then
-            return LOC(properKeyNames[token])
-        else
-            return token
-        end
-    end
-
-    local result = ''
-
-    while string.find(key, '-') do
-        local loc = string.find(key, '-')
-        local token = string.sub(key, 1, loc - 1)
-        result = result .. LookupToken(token) .. ' + '
-        key = string.sub(key, loc + 1)
-    end
-
-    return result .. LookupToken(key)
 end
 
 local RIGHTSIDE_FormatData
@@ -785,7 +761,7 @@ local function RIGHTSIDE_EditActionKey(parent, action, currentKey)
     helpText:SetText(LOC("<LOC key_binding_0002>Hit the key combination you'd like to assign"))
     helpText:SetCenteredHorizontally(true)
 
-    local keyText = UIUtil.CreateText(dialogContent, RIGHTSIDE_FormatKeyName(currentKey), 24)
+    local keyText = UIUtil.CreateText(dialogContent, FormatKeyName(currentKey), 24)
     keyText:SetColor(UIUtil.factionBackColor)
     LayoutHelpers.Above(keyText, okButton)
     LayoutHelpers.AtHorizontalCenterIn(keyText, dialogContent)
@@ -1288,65 +1264,6 @@ function RIGHTSIDE_FormatData()
     end
 
     return keyData
-end
-
-function RIGHTSIDE_FormatKeyName(key)
-    if not key then
-        return ""
-    end
-
-    local function LookupToken(token)
-        if properKeyNames[token] then
-            return LOC(properKeyNames[token])
-        else
-            return token
-        end
-    end
-
-    local result = ''
-
-    while string.find(key, '-') do
-        local loc = string.find(key, '-')
-        local token = string.sub(key, 1, loc - 1)
-        result = result .. LookupToken(token) .. ' + '
-        key = string.sub(key, loc + 1)
-    end
-
-    return result .. LookupToken(key)
-end
-
--- Needed elsewhere
-function FormatKeyName(key)
-    if not key then
-        return ""
-    end
-
-    local function LookupToken(token)
-        if properKeyNames[token] then
-            return LOC(properKeyNames[token])
-        else
-            return token
-        end
-    end
-
-    local result = ''
-
-    while string.find(key, '-') do
-        local loc = string.find(key, '-')
-        local token = string.sub(key, 1, loc - 1)
-        result = result .. LookupToken(token) .. ' + '
-        key = string.sub(key, loc + 1)
-    end
-
-    return result .. LookupToken(key)
-end
-
-function CloseUI()
-    LOG('Keybindings CloseUI')
-    if popup then
-        popup:Close()
-        popup = false
-    end
 end
 
 local function LEFTSIDE_CreateUI()
@@ -1988,6 +1905,40 @@ function CreateUI()
     LEFTSIDE_CreateUI()
 
     RIGHTSIDE_CreateUI()
+end
+
+function CloseUI()
+    LOG('Keybindings CloseUI')
+    if popup then
+        popup:Close()
+        popup = false
+    end
+end
+
+-- Needed elsewhere
+function FormatKeyName(key)
+    if not key then
+        return ""
+    end
+
+    local function LookupToken(token)
+        if properKeyNames[token] then
+            return LOC(properKeyNames[token])
+        else
+            return token
+        end
+    end
+
+    local result = ''
+
+    while string.find(key, '-') do
+        local loc = string.find(key, '-')
+        local token = string.sub(key, 1, loc - 1)
+        result = result .. LookupToken(token) .. ' + '
+        key = string.sub(key, loc + 1)
+    end
+
+    return result .. LookupToken(key)
 end
 
 -- kept for mod backwards compatibility
