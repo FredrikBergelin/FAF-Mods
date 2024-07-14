@@ -27,7 +27,7 @@ local dialogContent
 local TOP_PADDING = 50
 local SIDE_PADDING = 10
 local KEYBINDING_WIDTH = 210
-local LEFTSIDE_WIDTH = 700
+local LEFTSIDE_WIDTH = 800
 local BUTTON_PADDING = 10
 local STANDARD_FONT_SIZE = 16
 local LINEHEIGHT = 30
@@ -349,7 +349,7 @@ function LEFTSIDE_CreateLine()
     line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
-    line.description.Width:Set(line.Right() - line.Left() - KEYBINDING_WIDTH)
+    line.description.Width:Set(line.Right() - line.Left() - KEYBINDING_WIDTH - LINEHEIGHT - BUTTON_PADDING)
     line.description:SetAlpha(0.9)
 
     line.Height:Set(LINEHEIGHT)
@@ -366,10 +366,10 @@ function LEFTSIDE_CreateLine()
             body = '<LOC key_binding_0015>Show total of bound actions and total of all actions in this category of keys'
         })
 
-    LayoutHelpers.AtLeftIn(line.description, line, KEYBINDING_WIDTH + LINEHEIGHT + BUTTON_PADDING)
+    LayoutHelpers.AtLeftIn(line.description, line, (KEYBINDING_WIDTH + LINEHEIGHT + BUTTON_PADDING))
     LayoutHelpers.AtVerticalCenterIn(line.description, line)
 
-    LayoutHelpers.LeftOf(line.key, line.description, 30)
+    LayoutHelpers.LeftOf(line.key, line.description, (LINEHEIGHT + (BUTTON_PADDING * 2)))
     LayoutHelpers.AtVerticalCenterIn(line.key, line)
     LayoutHelpers.AtRightIn(line.statistics, line, 10)
     LayoutHelpers.AtVerticalCenterIn(line.statistics, line)
@@ -445,7 +445,7 @@ function LEFTSIDE_CreateLine()
     line.wikiButton = UIUtil.CreateBitmap(line, '/textures/ui/common/mods/mod_url_website.dds')
     LayoutHelpers.SetDimensions(line.wikiButton, STANDARD_FONT_SIZE, STANDARD_FONT_SIZE)
 
-    LayoutHelpers.RightOf(line.wikiButton, line.key, 4)
+    LayoutHelpers.LeftOf(line.wikiButton, line.description, (BUTTON_PADDING + LINEHEIGHT / 2 - STANDARD_FONT_SIZE / 2))
     LayoutHelpers.AtVerticalCenterIn(line.wikiButton, line.key)
     line.wikiButton:SetAlpha(0.5)
     line.wikiButton.HandleEvent = function(self, event)
