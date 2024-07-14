@@ -178,7 +178,7 @@ function DisableUpkeep(unitType, spendType)
 		v.econtrol.pausedMassConsumed = econData["massConsumed"]
 
 		if not v:IsDead() then
-		table.insert(unitType.pausedUpkeepUnits, v)
+			table.insert(unitType.pausedUpkeepUnits, v)
 		end
 	end
 
@@ -641,6 +641,28 @@ function buildUi()
 		UIP.econtrol = {}
 		unitTypes = from({
 			{
+				name = "Mass extraction",
+				category = categories.MASSEXTRACTION + categories.MASSSTORAGE +
+					categories.STRUCTURE * categories.MASSFABRICATION,
+				icon =
+				"icon_mass_category",
+				spacer = 0
+			},
+			{
+				name = "Energy production",
+				category = categories.STRUCTURE * categories.ENERGYPRODUCTION,
+				icon =
+				"icon_energy_category",
+				spacer = 0
+			},
+			{
+				name = "Energy storage",
+				category = categories.STRUCTURE * categories.ENERGYSTORAGE,
+				icon =
+				"icon_energy_storage_category",
+				spacer = 0
+			},
+			{
 				name = "Land Units",
 				category = categories.LAND * categories.BUILTBYTIER1FACTORY * categories.MOBILE - categories.ENGINEER +
 					categories.LAND * categories.BUILTBYTIER2FACTORY * categories.MOBILE - categories.ENGINEER +
@@ -699,28 +721,8 @@ function buildUi()
 				"icon_counterintel_category",
 				spacer = 0
 			},
-			{
-				name = "Energy production",
-				category = categories.STRUCTURE * categories.ENERGYPRODUCTION,
-				icon =
-				"icon_energy_category",
-				spacer = 0
-			},
-			{
-				name = "Energy storage",
-				category = categories.STRUCTURE * categories.ENERGYSTORAGE,
-				icon =
-				"icon_energy_storage_category",
-				spacer = 0
-			},
-			{
-				name = "Mass extraction",
-				category = categories.MASSEXTRACTION + categories.MASSSTORAGE +
-					categories.STRUCTURE * categories.MASSFABRICATION,
-				icon =
-				"icon_mass_category",
-				spacer = 0
-			},
+
+
 			{
 				name = "Silos",
 				category = categories.SILO,
