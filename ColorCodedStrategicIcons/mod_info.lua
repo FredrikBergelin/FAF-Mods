@@ -11,3 +11,5 @@ url = "https://forum.faforever.com/topic/6779/color-coded-strategic-icons"
 ui_only = true
 icon = "/mods/ColorCodedStrategicIcons/icon.png"
 __umt = true
+
+-- For reverting Engineers and overlays, but beware some other things in there too. "1 parent c0051d3 commit a6dbe7c"
