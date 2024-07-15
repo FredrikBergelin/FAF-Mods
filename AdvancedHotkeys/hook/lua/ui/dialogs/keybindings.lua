@@ -739,7 +739,7 @@ local function RIGHTSIDE_ClearActionKey(action, currentKey)
     end
 end
 
-local function RIGHTSIDE_EditPrintKey(parent, action, currentText)
+local function RIGHTSIDE_EditPrintKey(parent, k, v)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
 
@@ -763,21 +763,39 @@ local function RIGHTSIDE_EditPrintKey(parent, action, currentText)
     helpText:SetText("Write the message to print")
     helpText:SetCenteredHorizontally(true)
 
-    local keyTextBox = Edit(dialogContent)
-    LayoutHelpers.AtHorizontalCenterIn(keyTextBox, dialogContent)
-    LayoutHelpers.AtVerticalCenterIn(keyTextBox, dialogContent)
-    LayoutHelpers.SetDimensions(keyTextBox, 334, 24)
-    keyTextBox:AcquireFocus()
+    local textBox = Edit(dialogContent)
+    LayoutHelpers.AtHorizontalCenterIn(textBox, dialogContent)
+    LayoutHelpers.AtVerticalCenterIn(textBox, dialogContent)
+    LayoutHelpers.SetDimensions(textBox, 334, 24)
+    textBox:SetText(v.text)
 
-    dialogContent:AcquireKeyboardFocus(false)
+    textBox:AcquireFocus() -- Not working
+
+    -- dialogContent:AcquireKeyboardFocus(false)
+
     popup.OnClose = function(self)
         dialogContent:AbandonKeyboardFocus()
     end
 
     okButton.OnClick = function(self, modifiers)
-        local newText = keyTextBox:GetText()
-        -- Handle the new text (AssignKey or other functionality)
+        local newText = textBox:GetText()
+
+        v.text = newText
+
         popup:Close()
+    end
+end
+
+function RIGHTSIDE_UpdateKey(key)
+    -- advancedKeyMap[k] =
+end
+
+local function RIGHTSIDE_keyTable_FIND(key)
+    for k, v in RIGHTSIDE_keyTable do
+        if v.key == key then
+            RIGHTSIDE_UpdateKey(key)
+            break
+        end
     end
 end
 
@@ -916,7 +934,7 @@ end
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_keyTable do
         if v.selected then
-            RIGHTSIDE_EditPrintKey(popup, v.action, v.text)
+            RIGHTSIDE_EditPrintKey(popup, k, v)
             break
         end
     end
@@ -1314,110 +1332,6 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_keyword = ''
     LEFTSIDE_keyTable = LEFTSIDE_FormatData()
 
-    RIGHTSIDE_keyword = ''
-    RIGHTSIDE_keyTable = RIGHTSIDE_FormatData()
-
-    dialogContent = Group(GetFrame(0))
-    LayoutHelpers.SetDimensions(dialogContent, GetFrame(0).Width() - 100, GetFrame(0).Height() - 150)
-    LayoutHelpers.AtLeftTopIn(dialogContent, GetFrame(0), 50, 100)
-
-    popup = Popup(GetFrame(0), dialogContent)
-    popup.OnShadowClicked = CloseUI
-    popup.OnEscapePressed = CloseUI
-    popup.OnDestroy = function(self) RemoveInputCapture(dialogContent) end
-    popup.OnClosed = function(self)
-        LEFTSIDE_ConfirmNewKeyMap()
-        RIGHTSIDE_ConfirmNewKeyMap()
-    end
-
-    local title = UIUtil.CreateText(dialogContent, LOC("<LOC key_binding_0000>Key Bindings"), 22)
-    LayoutHelpers.AtTopIn(title, dialogContent, 12)
-    LayoutHelpers.AtHorizontalCenterIn(title, dialogContent)
-
-    local offset = dialogContent.Width() / 5.25
-
-    -- local defaultButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-    --     "<LOC key_binding_0004>Default Preset")
-    -- LayoutHelpers.SetWidth(defaultButton, 200)
-    -- LayoutHelpers.AtBottomIn(defaultButton, dialogContent, 10)
-    -- LayoutHelpers.AtLeftIn(defaultButton, dialogContent,
-    --     (offset - (defaultButton.Width() * 3 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    -- defaultButton.OnClick = function(self, modifiers)
-    --     UIUtil.QuickDialog(popup,
-    --         "<LOC key_binding_0005>Are you sure you want to reset all key bindings to the default (GPG) preset?",
-    --         "<LOC _Yes>", ResetBindingToDefaultKeyMap,
-    --         "<LOC _No>", nil, nil, nil, true,
-    --         { escapeButton = 2, enterButton = 1, worldCover = false })
-    -- end
-    -- Tooltip.AddControlTooltip(defaultButton,
-    --     {
-    --         text = "<LOC key_binding_0004>Default Preset",
-    --         body = '<LOC key_binding_0022>Reset all key bindings to the default (GPG) preset'
-    --     })
-
-    -- local hotbuildButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-    --     "<LOC key_binding_0009>Hotbuild Preset")
-    -- LayoutHelpers.SetWidth(hotbuildButton, 200)
-    -- LayoutHelpers.AtBottomIn(hotbuildButton, dialogContent, 10)
-    -- LayoutHelpers.AtLeftIn(hotbuildButton, defaultButton,
-    --     (offset + (defaultButton.Width() * 1 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    -- hotbuildButton.OnClick = function(self, modifiers)
-    --     UIUtil.QuickDialog(popup,
-    --         "<LOC key_binding_0008>Are you sure you want to reset all key bindings to the hotbuild (FAF) preset?",
-    --         "<LOC _Yes>", ResetBindingToHotbuildKeyMap,
-    --         "<LOC _No>", nil, nil, nil, true,
-    --         { escapeButton = 2, enterButton = 1, worldCover = false })
-    -- end
-    -- Tooltip.AddControlTooltip(hotbuildButton,
-    --     {
-    --         text = "<LOC key_binding_0009>Hotbuild Preset",
-    --         body = '<LOC key_binding_0020>Reset all key bindings to the hotbuild (FAF) preset'
-    --     })
-
-    -- local alternativeButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/",
-    --     "<LOC key_binding_0025>Alternative Preset")
-    -- LayoutHelpers.SetWidth(alternativeButton, 200)
-    -- LayoutHelpers.AtBottomIn(alternativeButton, dialogContent, 10)
-    -- LayoutHelpers.AtLeftIn(alternativeButton, hotbuildButton,
-    --     (offset + (defaultButton.Width() * 1 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    -- alternativeButton.OnClick = function(self, modifiers)
-    --     UIUtil.QuickDialog(popup,
-    --         "<LOC key_binding_0024>Are you sure you want to reset all key bindings to the alternative (FAF) preset?",
-    --         "<LOC _Yes>", ResetBindingToalternativeKeyMap,
-    --         "<LOC _No>", nil, nil, nil, true,
-    --         { escapeButton = 2, enterButton = 1, worldCover = false })
-    -- end
-    -- Tooltip.AddControlTooltip(alternativeButton,
-    --     {
-    --         text = "<LOC key_binding_0025>Alternative Preset",
-    --         body = '<LOC key_binding_0026>Reset all key bindings to the alternative (FAF) preset'
-    --     })
-
-    -- local closeButton = UIUtil.CreateButtonWithDropshadow(dialogContent, "/BUTTON/medium/", LOC("<LOC _Close>"))
-    -- LayoutHelpers.SetWidth(closeButton, 200)
-    -- LayoutHelpers.AtBottomIn(closeButton, dialogContent, 10)
-    -- LayoutHelpers.AtLeftIn(closeButton, alternativeButton,
-    --     (offset + (defaultButton.Width() * 1 / 4)) / LayoutHelpers.GetPixelScaleFactor())
-    -- Tooltip.AddControlTooltip(closeButton,
-    --     {
-    --         text = '<LOC _Close>Close',
-    --         body = '<LOC key_binding_0021>Closes this dialog and confirms assignments of key bindings'
-    --     })
-    -- closeButton.OnClick = function(self, modifiers)
-    --     -- confirmation of changes will occur on OnClosed of this UI
-    --     CloseUI()
-    -- end
-
-    dialogContent.HandleEvent = function(self, event)
-        if event.Type == 'KeyDown' then
-            if event.KeyCode == UIUtil.VK_ESCAPE or event.KeyCode == UIUtil.VK_ENTER or event.KeyCode == 342 then
-                closeButton:OnClick()
-            end
-        end
-    end
-
-    -- LEFTSIDE -----------------------------------------------------------------
-
     LEFTSIDE_Section = Group(dialogContent)
 
     LayoutHelpers.SetWidth(LEFTSIDE_Section, LEFTSIDE_WIDTH)
@@ -1681,6 +1595,9 @@ local function LEFTSIDE_CreateUI()
 end
 
 local function RIGHTSIDE_CreateUI()
+    RIGHTSIDE_keyword = ''
+    RIGHTSIDE_keyTable = RIGHTSIDE_FormatData()
+
     RIGHTSIDE_Section = Group(dialogContent)
 
     LayoutHelpers.SetWidth(RIGHTSIDE_Section, dialogContent.Width() - (LEFTSIDE_Section.Width() + (SIDE_PADDING * 6)))
@@ -1946,8 +1863,32 @@ function CreateUI()
 
     if popup then CloseUI() return end
 
-    LEFTSIDE_CreateUI()
+    dialogContent = Group(GetFrame(0))
+    LayoutHelpers.SetDimensions(dialogContent, GetFrame(0).Width() - 100, GetFrame(0).Height() - 150)
+    LayoutHelpers.AtLeftTopIn(dialogContent, GetFrame(0), 50, 100)
 
+    popup = Popup(GetFrame(0), dialogContent)
+    popup.OnShadowClicked = CloseUI
+    popup.OnEscapePressed = CloseUI
+    popup.OnDestroy = function(self) RemoveInputCapture(dialogContent) end
+    popup.OnClosed = function(self)
+        LEFTSIDE_ConfirmNewKeyMap()
+        RIGHTSIDE_ConfirmNewKeyMap()
+    end
+
+    local title = UIUtil.CreateText(dialogContent, LOC("<LOC key_binding_0000>Key Bindings"), 22)
+    LayoutHelpers.AtTopIn(title, dialogContent, 12)
+    LayoutHelpers.AtHorizontalCenterIn(title, dialogContent)
+
+    dialogContent.HandleEvent = function(self, event)
+        if event.Type == 'KeyDown' then
+            if event.KeyCode == UIUtil.VK_ESCAPE or event.KeyCode == UIUtil.VK_ENTER or event.KeyCode == 342 then
+                closeButton:OnClick()
+            end
+        end
+    end
+
+    LEFTSIDE_CreateUI()
     RIGHTSIDE_CreateUI()
 end
 
@@ -1959,7 +1900,6 @@ function CloseUI()
     end
 end
 
--- Needed elsewhere
 function FormatKeyName(key)
     if not key then
         return ""
