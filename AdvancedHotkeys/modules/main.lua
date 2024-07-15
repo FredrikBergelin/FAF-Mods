@@ -8,7 +8,7 @@ conditionalsPath = modPath .. '/modules/conditionals.lua'
 local currentSubKeys = nil
 local lastClickTime = -9999
 
-keyMap = {
+advancedKeyMap = {
 	['0'] = {
 		{
 			print = '0 was pressed',
@@ -74,7 +74,7 @@ function RouteHotkey(key)
 
 	-- Run the reguar action for this hotkey
 	currentSubKeys = nil
-	if keyMap[key] ~= nil then ExecuteRecursively(keyMap[key]) end
+	if advancedKeyMap[key] ~= nil then ExecuteRecursively(advancedKeyMap[key]) end
 end
 
 function CheckConditionals(conditionals)
@@ -135,7 +135,7 @@ function InitAdvancedKeys()
 		local name = string.gsub(k, "-", "_")
 		userKeyActions['AHK ' .. name] = {
 			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. k .. '")',
-			category = 'AHK'
+			category = 'Advanced Hotkeys Override'
 		}
 		-- userKeyMap[k] = 'AHK ' .. name
 	end
@@ -145,5 +145,5 @@ function InitAdvancedKeys()
 end
 
 function LoadKeyMap()
-	keyMap = GetPreference('AdvancedHotkeysKeyMap')
+	advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
 end

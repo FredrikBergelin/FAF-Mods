@@ -48,6 +48,8 @@ local keyCategories = import("/lua/keymap/keycategories.lua").keyCategories
 local keyCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrder
 local KeyMapper = import("/lua/keymap/keymapper.lua")
 
+advancedKeyMap = import('/mods/AdvancedHotkeys/modules/main.lua').advancedKeyMap
+
 local popup = nil
 local dialogContent
 
@@ -737,6 +739,48 @@ local function RIGHTSIDE_ClearActionKey(action, currentKey)
     end
 end
 
+local function RIGHTSIDE_EditPrintKey(parent, action, currentText)
+    local dialogContent = Group(parent)
+    LayoutHelpers.SetDimensions(dialogContent, 400, 170)
+
+    local popup = Popup(popup, dialogContent)
+
+    local cancelButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Cancel>")
+    LayoutHelpers.AtBottomIn(cancelButton, dialogContent, 15)
+    LayoutHelpers.AtRightIn(cancelButton, dialogContent, -2)
+    cancelButton.OnClick = function(self, modifiers)
+        popup:Close()
+    end
+
+    local okButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Ok>")
+    LayoutHelpers.AtBottomIn(okButton, dialogContent, 15)
+    LayoutHelpers.AtLeftIn(okButton, dialogContent, -2)
+
+    local helpText = MultiLineText(dialogContent, UIUtil.bodyFont, STANDARD_FONT_SIZE, UIUtil.fontColor)
+    LayoutHelpers.AtTopIn(helpText, dialogContent, 10)
+    LayoutHelpers.AtHorizontalCenterIn(helpText, dialogContent)
+    helpText.Width:Set(dialogContent.Width() - 10)
+    helpText:SetText("Write the message to print")
+    helpText:SetCenteredHorizontally(true)
+
+    local keyTextBox = Edit(dialogContent)
+    LayoutHelpers.AtHorizontalCenterIn(keyTextBox, dialogContent)
+    LayoutHelpers.AtVerticalCenterIn(keyTextBox, dialogContent)
+    LayoutHelpers.SetDimensions(keyTextBox, 334, 24)
+    keyTextBox:AcquireFocus()
+
+    dialogContent:AcquireKeyboardFocus(false)
+    popup.OnClose = function(self)
+        dialogContent:AbandonKeyboardFocus()
+    end
+
+    okButton.OnClick = function(self, modifiers)
+        local newText = keyTextBox:GetText()
+        -- Handle the new text (AssignKey or other functionality)
+        popup:Close()
+    end
+end
+
 local function RIGHTSIDE_EditActionKey(parent, action, currentKey)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
@@ -758,7 +802,7 @@ local function RIGHTSIDE_EditActionKey(parent, action, currentKey)
     LayoutHelpers.AtTopIn(helpText, dialogContent, 10)
     LayoutHelpers.AtHorizontalCenterIn(helpText, dialogContent)
     helpText.Width:Set(dialogContent.Width() - 10)
-    helpText:SetText(LOC("<LOC key_binding_0002>Hit the key combination you'd like to assign"))
+    helpText:SetText("Write the message to print")
     helpText:SetCenteredHorizontally(true)
 
     local keyText = UIUtil.CreateText(dialogContent, FormatKeyName(currentKey), 24)
@@ -872,7 +916,7 @@ end
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_keyTable do
         if v.selected then
-            RIGHTSIDE_EditActionKey(popup, v.action, v.key)
+            RIGHTSIDE_EditPrintKey(popup, v.action, v.text)
             break
         end
     end
