@@ -3,15 +3,15 @@ local Prefs = import('/lua/user/prefs.lua')
 
 function BackupKeyMap()
 	if not GetPreference('AdvancedHotkeysUserKeyMapBackupCreated') then
-		local userKeyMap = Prefs.GetFromCurrentProfile("UserKeyMap")
-		local userDebugKeyMap = Prefs.GetFromCurrentProfile("UserDebugKeyMap")
-		local userKeyActions = Prefs.GetFromCurrentProfile("UserKeyActions")
+		local userKeyMap = Prefs.GetFromCurrentProfile('UserKeyMap')
+		local userDebugKeyMap = Prefs.GetFromCurrentProfile('UserDebugKeyMap')
+		local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions')
 
 		SetPreference('AdvancedHotkeysUserKeyMapBackup', userKeyMap)
 		SetPreference('AdvancedHotkeysUserDebugKeyMapBackup', userDebugKeyMap)
 		SetPreference('AdvancedHotkeysUserKeyActionsBackup', userKeyActions)
 
-		Prefs.SetToCurrentProfile("UserDebugKeyMap", {})
+		Prefs.SetToCurrentProfile('UserDebugKeyMap', {})
 
 		-- Don't set all, let user create one by one
 		-- local keyActions = table.combine(

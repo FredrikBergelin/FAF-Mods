@@ -7,20 +7,20 @@
 
 function tLOG(tbl, indent)
     if not indent then indent = 0 end
-    local formatting = string.rep("  ", indent)
-    if type(tbl) == "nil" then
-        LOG(formatting .. "nil")
+    local formatting = string.rep('  ', indent)
+    if type(tbl) == 'nil' then
+        LOG(formatting .. 'nil')
         return
     end
-    if type(tbl) == "string" then
+    if type(tbl) == 'string' then
         LOG(formatting .. tbl)
         return
     end
     for k, v in pairs(tbl) do
-        formatting = string.rep("  ", indent) .. k .. ": "
-        if type(v) == "nil" then
-            LOG(formatting .. "NIL")
-        elseif type(v) == "table" then
+        formatting = string.rep('  ', indent) .. k .. ': '
+        if type(v) == 'nil' then
+            LOG(formatting .. 'NIL')
+        elseif type(v) == 'table' then
             LOG(formatting)
             tLOG(v, indent + 1)
         elseif type(v) == 'boolean' then
@@ -33,20 +33,20 @@ function tLOG(tbl, indent)
 end
 
 -- This file is the F1 menu used for navigating and interacting with keybindings
-local UIUtil        = import("/lua/ui/uiutil.lua")
-local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
-local Group         = import("/lua/maui/group.lua").Group
-local Bitmap        = import("/lua/maui/bitmap.lua").Bitmap
-local Edit          = import("/lua/maui/edit.lua").Edit
-local Popup         = import("/lua/ui/controls/popups/popup.lua").Popup
-local Tooltip       = import("/lua/ui/game/tooltip.lua")
-local MultiLineText = import("/lua/maui/multilinetext.lua").MultiLineText
+local UIUtil        = import('/lua/ui/uiutil.lua')
+local LayoutHelpers = import('/lua/maui/layouthelpers.lua')
+local Group         = import('/lua/maui/group.lua').Group
+local Bitmap        = import('/lua/maui/bitmap.lua').Bitmap
+local Edit          = import('/lua/maui/edit.lua').Edit
+local Popup         = import('/lua/ui/controls/popups/popup.lua').Popup
+local Tooltip       = import('/lua/ui/game/tooltip.lua')
+local MultiLineText = import('/lua/maui/multilinetext.lua').MultiLineText
 
-local KeyMapper = import("/lua/keymap/keymapper.lua")
-local properKeyNames = import("/lua/keymap/properkeynames.lua").properKeyNames
-local keyNames = import("/lua/keymap/keynames.lua").keyNames
-local actionCategories = import("/lua/keymap/keycategories.lua").keyCategories
-local actionCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrder
+local KeyMapper = import('/lua/keymap/keymapper.lua')
+local properKeyNames = import('/lua/keymap/properkeynames.lua').properKeyNames
+local keyNames = import('/lua/keymap/keynames.lua').keyNames
+local actionCategories = import('/lua/keymap/keycategories.lua').keyCategories
+local actionCategoryOrder = import('/lua/keymap/keycategories.lua').keyCategoryOrder
 local allHotkeysOrdered = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
 -- TODO
@@ -95,8 +95,8 @@ local function LEFTSIDE_ConfirmNewKeyMap()
     IN_AddKeyMapTable(KeyMapper.GetKeyMappings(true))
     -- update hotbuild modifiers and re-initialize hotbuild labels
     if SessionIsActive() then
-        import("/lua/keymap/hotbuild.lua").addModifiers()
-        import("/lua/keymap/hotkeylabels.lua").init()
+        import('/lua/keymap/hotbuild.lua').addModifiers()
+        import('/lua/keymap/hotkeylabels.lua').init()
     end
 end
 
@@ -115,14 +115,14 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
 
     local keyInputPopup = Popup(popup, dialogContent)
 
-    local cancelButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Cancel>")
+    local cancelButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', '<LOC _Cancel>')
     LayoutHelpers.AtBottomIn(cancelButton, dialogContent, 15)
     LayoutHelpers.AtRightIn(cancelButton, dialogContent, -2)
     cancelButton.OnClick = function(self, modifiers)
         keyInputPopup:Close()
     end
 
-    local okButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Ok>")
+    local okButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', '<LOC _Ok>')
     LayoutHelpers.AtBottomIn(okButton, dialogContent, 15)
     LayoutHelpers.AtLeftIn(okButton, dialogContent, -2)
 
@@ -153,22 +153,22 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
             return
         end
 
-        local keyComboName = ""
-        keyPattern = ""
+        local keyComboName = ''
+        keyPattern = ''
 
         if key ~= 'Ctrl' and modifiers.Ctrl then
-            keyPattern = keyPattern .. keyNames['11'] .. "-"
-            keyComboName = keyComboName .. LOC(properKeyNames[ keyNames['11'] ]) .. "-"
+            keyPattern = keyPattern .. keyNames['11'] .. '-'
+            keyComboName = keyComboName .. LOC(properKeyNames[ keyNames['11'] ]) .. '-'
         end
 
         if key ~= 'Alt' and modifiers.Alt then
-            keyPattern = keyPattern .. keyNames['12'] .. "-"
-            keyComboName = keyComboName .. LOC(properKeyNames[ keyNames['12'] ]) .. "-"
+            keyPattern = keyPattern .. keyNames['12'] .. '-'
+            keyComboName = keyComboName .. LOC(properKeyNames[ keyNames['12'] ]) .. '-'
         end
 
         if key ~= 'Shift' and modifiers.Shift then
-            keyPattern = keyPattern .. keyNames['10'] .. "-"
-            keyComboName = keyComboName .. LOC(properKeyNames[ keyNames['10'] ]) .. "-"
+            keyPattern = keyPattern .. keyNames['10'] .. '-'
+            keyComboName = keyComboName .. LOC(properKeyNames[ keyNames['10'] ]) .. '-'
         end
 
         keyPattern = keyPattern .. key
@@ -189,8 +189,8 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     local function AssignKey()
 
         local function ClearShiftKey()
-            KeyMapper.ClearUserKeyMapping("Shift-" .. keyPattern)
-            LOG("Keybindings clearing Shift-" .. keyPattern)
+            KeyMapper.ClearUserKeyMapping('Shift-' .. keyPattern)
+            LOG('Keybindings clearing Shift-' .. keyPattern)
         end
 
         local function MapKey()
@@ -204,15 +204,15 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
 
             -- checks if hotbuild modifier keys are conflicting with already mapped actions
             local keyMapping = KeyMapper.GetKeyMappingDetails()
-            if keyMapping[keyPattern] and keyMapping[keyPattern].category == "HOTBUILDING" then
-                local hotKey = "Shift-" .. keyPattern
+            if keyMapping[keyPattern] and keyMapping[keyPattern].category == 'HOTBUILDING' then
+                local hotKey = 'Shift-' .. keyPattern
                 if keyMapping[hotKey] then
                     UIUtil.QuickDialog(popup,
-                        LOCF("<LOC key_binding_0006>The %s key is already mapped under %s category, are you sure you want to clear it for the following action? \n\n %s"
+                        LOCF('<LOC key_binding_0006>The %s key is already mapped under %s category, are you sure you want to clear it for the following action? \n\n %s'
                             ,
                             hotKey, keyMapping[hotKey].category, keyMapping[hotKey].name),
-                        "<LOC _Yes>", ClearShiftKey,
-                        "<LOC _No>", nil, nil, nil, true,
+                        '<LOC _Yes>', ClearShiftKey,
+                        '<LOC _No>', nil, nil, nil, true,
                         { escapeButton = 2, enterButton = 1, worldCover = false })
                 end
             end
@@ -224,11 +224,11 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
         local keyMapping = KeyMapper.GetKeyMappingDetails()
         if keyMapping[keyPattern] and keyMapping[keyPattern].id ~= action then
             UIUtil.QuickDialog(popup,
-                LOCF("<LOC key_binding_0006>The %s key is already mapped under %s category, are you sure you want to clear it for the following action? \n\n %s"
+                LOCF('<LOC key_binding_0006>The %s key is already mapped under %s category, are you sure you want to clear it for the following action? \n\n %s'
                     ,
                     keyPattern, keyMapping[keyPattern].category, keyMapping[keyPattern].name),
-                "<LOC _Yes>", MapKey,
-                "<LOC _No>", nil, nil, nil, true,
+                '<LOC _Yes>', MapKey,
+                '<LOC _No>', nil, nil, nil, true,
                 { escapeButton = 2, enterButton = 1, worldCover = false })
         else
             MapKey()
@@ -356,11 +356,11 @@ function LEFTSIDE_CreateLine()
     line.Right:Set(LEFTSIDE_LIST.Right)
     LayoutHelpers.SetHeight(line, LINEHEIGHT)
 
-    line.key = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
+    line.key = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, 'Arial')
     line.key:DisableHitTest()
     line.key:SetAlpha(0.9)
 
-    line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
+    line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, 'Arial')
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
     line.description.Width:Set(line.Right() - line.Left() - KEYBINDING_WIDTH - LINEHEIGHT - BUTTON_PADDING)
@@ -369,7 +369,7 @@ function LEFTSIDE_CreateLine()
     line.Height:Set(LINEHEIGHT)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
-    line.statistics = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
+    line.statistics = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, 'Arial')
     line.statistics:EnableHitTest()
     line.statistics:SetColor('FF9A9A9A')
     line.statistics:SetAlpha(0.9)
@@ -394,7 +394,7 @@ function LEFTSIDE_CreateLine()
             line.key:SetAlpha(1.0)
             line.description:SetAlpha(1.0)
             line.statistics:SetAlpha(1.0)
-            PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
+            PlaySound(Sound({ Cue = 'UI_Menu_Rollover_Sml', Bank = 'Interface' }))
         elseif event.Type == 'MouseExit' then
             line:SetAlpha(1.0)
             line.key:SetAlpha(0.9)
@@ -420,7 +420,7 @@ function LEFTSIDE_CreateLine()
                 else
                     self.toggle.txt:SetText('-')
                 end
-                PlaySound(Sound({ Cue = "UI_Menu_MouseDown_Sml", Bank = "Interface" }))
+                PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
                 return true
             end
         end
@@ -468,13 +468,13 @@ function LEFTSIDE_CreateLine()
         elseif event.Type == 'MouseExit' then
             self:SetAlpha(0.5, false)
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            local url = "http://wiki.faforever.com/" .. tostring(self.url)
+            local url = 'http://wiki.faforever.com/' .. tostring(self.url)
             OpenURL(url)
         end
         return true
     end
 
-    import("/lua/ui/game/tooltip.lua").AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', ''
+    import('/lua/ui/game/tooltip.lua').AddControlTooltipManual(line.wikiButton, 'Learn more on the Wiki of FAForever', ''
         , 0, 140, 6, 14, 14, 'left')
 
     line.assignKeyButton = LEFTSIDE_CreateToggle(
@@ -489,7 +489,7 @@ function LEFTSIDE_CreateLine()
     LayoutHelpers.AtVerticalCenterIn(line.assignKeyButton, line)
     Tooltip.AddControlTooltip(line.assignKeyButton,
         {
-            text = "<LOC key_binding_0003>Assign Key",
+            text = '<LOC key_binding_0003>Assign Key',
             body = '<LOC key_binding_0012>Opens a dialog that allows assigning key binding for a given action'
         })
     line.assignKeyButton.OnMouseClick = function(self)
@@ -509,7 +509,7 @@ function LEFTSIDE_CreateLine()
     LayoutHelpers.AtVerticalCenterIn(line.unbindKeyButton, line)
     Tooltip.AddControlTooltip(line.unbindKeyButton,
         {
-            text = "<LOC key_binding_0007>Unbind Key",
+            text = '<LOC key_binding_0007>Unbind Key',
             body = '<LOC key_binding_0013>Removes currently assigned key binding for a given action'
         })
 
@@ -564,7 +564,7 @@ function LEFTSIDE_CreateLine()
                 line.wikiButton.url = tostring(data.wikiURL)
                 line.wikiButton:Show()
             else
-                line.wikiButton.url = ""
+                line.wikiButton.url = ''
                 line.wikiButton:Hide()
             end
         end
@@ -704,7 +704,7 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_FILTER.Height:Set(30)
 
     LEFTSIDE_FILTER:EnableHitTest()
-    import("/lua/ui/game/tooltip.lua").AddControlTooltip(LEFTSIDE_FILTER,
+    import('/lua/ui/game/tooltip.lua').AddControlTooltip(LEFTSIDE_FILTER,
         {
             text = '<LOC key_binding_0018>Key Binding Filter',
             body = '<LOC key_binding_0019>' ..
@@ -716,7 +716,7 @@ local function LEFTSIDE_CreateUI()
                 '\n\n Note that collapsing of key categories is disabled while this filter contains some text'
         }, nil)
 
-    local text = LOC("<LOC key_binding_filterInfo>Type key binding or name of action")
+    local text = LOC('<LOC key_binding_filterInfo>Type key binding or name of action')
     LEFTSIDE_FILTER.info = UIUtil.CreateText(LEFTSIDE_FILTER, text, 17, UIUtil.titleFont)
     LEFTSIDE_FILTER.info:SetColor('FF727171')
     LEFTSIDE_FILTER.info:DisableHitTest()
@@ -727,7 +727,7 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_FILTER.text:SetForegroundColor('FFF1ECEC')
     LEFTSIDE_FILTER.text:SetBackgroundColor('04E1B44A')
     LEFTSIDE_FILTER.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    LEFTSIDE_FILTER.text:SetHighlightBackgroundColor("880085EF")
+    LEFTSIDE_FILTER.text:SetHighlightBackgroundColor('880085EF')
     LEFTSIDE_FILTER.text.Height:Set(function() return LEFTSIDE_FILTER.Bottom() - LEFTSIDE_FILTER.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
@@ -755,7 +755,7 @@ local function LEFTSIDE_CreateUI()
         LEFTSIDE_LIST:ScrollSetTop(nil, 0)
     end
 
-    LEFTSIDE_FILTER.clear = UIUtil.CreateText(LEFTSIDE_FILTER.text, 'X', 17, "Arial Bold")
+    LEFTSIDE_FILTER.clear = UIUtil.CreateText(LEFTSIDE_FILTER.text, 'X', 17, 'Arial Bold')
     LEFTSIDE_FILTER.clear:SetColor('FF8A8A8A')
     LEFTSIDE_FILTER.clear:EnableHitTest()
     LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.clear, LEFTSIDE_FILTER.text, 1)
@@ -817,7 +817,7 @@ local function LEFTSIDE_CreateUI()
     -- Called when the scrollbar for the control requires data to size itself
     -- GetScrollValues must return 4 values in this order:
     -- rangeMin, rangeMax, visibleMin, visibleMax
-    -- axis can be "Vert" or "Horz"
+    -- axis can be 'Vert' or 'Horz'
     LEFTSIDE_LIST.GetScrollValues = function(self, axis)
         local size = LEFTSIDE_GetLinesVisible()
         local visibleMax = math.min(self.top + LEFTSIDE_GetLinesTotal(), size)
@@ -966,7 +966,7 @@ local RIGHTSIDE_linesCollapsed = true
 
 -- Set the default order of Hotkeys
 for i, hotkey in allHotkeysOrdered do
-    local name = string.gsub(hotkey, "-", "_")
+    local name = string.gsub(hotkey, '-', '_')
     RIGHTSIDE_Hotkeys[name] = {}
     RIGHTSIDE_Hotkeys[name].order = i
     RIGHTSIDE_Hotkeys[name].text = hotkey
@@ -979,8 +979,8 @@ local function RIGHTSIDE_ConfirmNewKeyMap()
     IN_AddKeyMapTable(KeyMapper.GetKeyMappings(true))
     -- update hotbuild modifiers and re-initialize hotbuild labels
     if SessionIsActive() then
-        import("/lua/keymap/hotbuild.lua").addModifiers()
-        import("/lua/keymap/hotkeylabels.lua").init()
+        import('/lua/keymap/hotbuild.lua').addModifiers()
+        import('/lua/keymap/hotkeylabels.lua').init()
     end
 end
 
@@ -999,14 +999,14 @@ local function RIGHTSIDE_EditMessage(parent, k, v)
 
     local popup = Popup(popup, dialogContent)
 
-    local cancelButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Cancel>")
+    local cancelButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', '<LOC _Cancel>')
     LayoutHelpers.AtBottomIn(cancelButton, dialogContent, 15)
     LayoutHelpers.AtRightIn(cancelButton, dialogContent, -2)
     cancelButton.OnClick = function(self, modifiers)
         popup:Close()
     end
 
-    local okButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Ok>")
+    local okButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', '<LOC _Ok>')
     LayoutHelpers.AtBottomIn(okButton, dialogContent, 15)
     LayoutHelpers.AtLeftIn(okButton, dialogContent, -2)
 
@@ -1014,7 +1014,7 @@ local function RIGHTSIDE_EditMessage(parent, k, v)
     LayoutHelpers.AtTopIn(helpText, dialogContent, 10)
     LayoutHelpers.AtHorizontalCenterIn(helpText, dialogContent)
     helpText.Width:Set(dialogContent.Width() - 10)
-    helpText:SetText("Write the message to print")
+    helpText:SetText('Write the message to print')
     helpText:SetCenteredHorizontally(true)
 
     local textBox = Edit(dialogContent)
@@ -1170,7 +1170,7 @@ function RIGHTSIDE_CreateLine()
     line.Right:Set(RIGHTSIDE_LIST.Right)
     LayoutHelpers.SetHeight(line, LINEHEIGHT)
 
-    line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, "Arial")
+    line.description = UIUtil.CreateText(line, '', STANDARD_FONT_SIZE, 'Arial')
     line.description:DisableHitTest()
     line.description:SetClipToWidth(true)
     line.description.Width:Set(line.Right() - line.Left())
@@ -1186,7 +1186,7 @@ function RIGHTSIDE_CreateLine()
         if event.Type == 'MouseEnter' then
             line:SetAlpha(0.9)
             line.description:SetAlpha(1.0)
-            PlaySound(Sound({ Cue = "UI_Menu_Rollover_Sml", Bank = "Interface" }))
+            PlaySound(Sound({ Cue = 'UI_Menu_Rollover_Sml', Bank = 'Interface' }))
         elseif event.Type == 'MouseExit' then
             line:SetAlpha(1.0)
             line.description:SetAlpha(0.9)
@@ -1210,7 +1210,7 @@ function RIGHTSIDE_CreateLine()
                 else
                     self.toggle.txt:SetText('-')
                 end
-                PlaySound(Sound({ Cue = "UI_Menu_MouseDown_Sml", Bank = "Interface" }))
+                PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
                 return true
             end
         end
@@ -1257,7 +1257,7 @@ function RIGHTSIDE_CreateLine()
     LayoutHelpers.AtVerticalCenterIn(line.unbindKeyButton, line)
     Tooltip.AddControlTooltip(line.unbindKeyButton,
         {
-            text = "<LOC key_binding_0007>Unbind Key",
+            text = '<LOC key_binding_0007>Unbind Key',
             body = '<LOC key_binding_0013>Removes currently assigned key binding for a given action'
         })
 
@@ -1337,8 +1337,8 @@ function RIGHTSIDE_RECURSIVE_FORMATTING(k, entries)
 
         if entry['message'] ~= nil then
             table.insert(RIGHTSIDE_Hotkeys[k].actions, {
-                action = "ACTION",
-                key = "KEY",
+                action = 'ACTION',
+                key = 'KEY',
                 keyText = '',
                 category = k,
                 order = RIGHTSIDE_Hotkeys[k].order + orderIndex,
@@ -1350,8 +1350,8 @@ function RIGHTSIDE_RECURSIVE_FORMATTING(k, entries)
 
         if entry['execute'] ~= nil then
             table.insert(RIGHTSIDE_Hotkeys[k].actions, {
-                action = "ACTION",
-                key = "KEY",
+                action = 'ACTION',
+                key = 'KEY',
                 keyText = '',
                 category = k,
                 order = RIGHTSIDE_Hotkeys[k].order + orderIndex,
@@ -1464,7 +1464,7 @@ local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_FILTER.Height:Set(30)
 
     RIGHTSIDE_FILTER:EnableHitTest()
-    import("/lua/ui/game/tooltip.lua").AddControlTooltip(RIGHTSIDE_FILTER,
+    import('/lua/ui/game/tooltip.lua').AddControlTooltip(RIGHTSIDE_FILTER,
         {
             text = '<LOC key_binding_0018>Key Binding Filter',
             body = '<LOC key_binding_0019>' ..
@@ -1476,7 +1476,7 @@ local function RIGHTSIDE_CreateUI()
                 '\n\n Note that collapsing of key categories is disabled while this filter contains some text'
         }, nil)
 
-    local text = LOC("<LOC key_binding_filterInfo>Type key binding or name of action")
+    local text = LOC('<LOC key_binding_filterInfo>Type key binding or name of action')
     RIGHTSIDE_FILTER.info = UIUtil.CreateText(RIGHTSIDE_FILTER, text, 17, UIUtil.titleFont)
     RIGHTSIDE_FILTER.info:SetColor('FF727171')
     RIGHTSIDE_FILTER.info:DisableHitTest()
@@ -1487,7 +1487,7 @@ local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_FILTER.text:SetForegroundColor('FFF1ECEC')
     RIGHTSIDE_FILTER.text:SetBackgroundColor('04E1B44A')
     RIGHTSIDE_FILTER.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    RIGHTSIDE_FILTER.text:SetHighlightBackgroundColor("880085EF")
+    RIGHTSIDE_FILTER.text:SetHighlightBackgroundColor('880085EF')
     RIGHTSIDE_FILTER.text.Height:Set(function() return RIGHTSIDE_FILTER.Bottom() - RIGHTSIDE_FILTER.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
@@ -1515,7 +1515,7 @@ local function RIGHTSIDE_CreateUI()
         RIGHTSIDE_LIST:ScrollSetTop(nil, 0)
     end
 
-    RIGHTSIDE_FILTER.clear = UIUtil.CreateText(RIGHTSIDE_FILTER.text, 'X', 17, "Arial Bold")
+    RIGHTSIDE_FILTER.clear = UIUtil.CreateText(RIGHTSIDE_FILTER.text, 'X', 17, 'Arial Bold')
     RIGHTSIDE_FILTER.clear:SetColor('FF8A8A8A')
     RIGHTSIDE_FILTER.clear:EnableHitTest()
     LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.clear, RIGHTSIDE_FILTER.text, 1)
@@ -1577,7 +1577,7 @@ local function RIGHTSIDE_CreateUI()
     -- Called when the scrollbar for the control requires data to size itself
     -- GetScrollValues must return 4 values in this order:
     -- rangeMin, rangeMax, visibleMin, visibleMax
-    -- axis can be "Vert" or "Horz"
+    -- axis can be 'Vert' or 'Horz'
     RIGHTSIDE_LIST.GetScrollValues = function(self, axis)
         local size = RIGHTSIDE_GetLinesVisible()
         local visibleMax = math.min(self.top + RIGHTSIDE_GetLinesTotal(), size)
@@ -1709,7 +1709,7 @@ end
 function CreateUI()
     LOG('Keybindings CreateUI')
 
-    if WorldIsLoading() or (import("/lua/ui/game/gamemain.lua").supressExitDialog == true) then return end
+    if WorldIsLoading() or (import('/lua/ui/game/gamemain.lua').supressExitDialog == true) then return end
 
     if popup then CloseUI() return end
 
@@ -1726,7 +1726,7 @@ function CreateUI()
         RIGHTSIDE_ConfirmNewKeyMap()
     end
 
-    local title = UIUtil.CreateText(dialogContent, LOC("<LOC key_binding_0000>Key Bindings"), 22)
+    local title = UIUtil.CreateText(dialogContent, LOC('<LOC key_binding_0000>Key Bindings'), 22)
     LayoutHelpers.AtTopIn(title, dialogContent, 12)
     LayoutHelpers.AtHorizontalCenterIn(title, dialogContent)
 
@@ -1752,7 +1752,7 @@ end
 
 function FormatKeyName(key)
     if not key then
-        return ""
+        return ''
     end
 
     local function LookupToken(token)
@@ -1776,4 +1776,4 @@ function FormatKeyName(key)
 end
 
 -- kept for mod backwards compatibility
-local Text = import("/lua/maui/text.lua").Text
+local Text = import('/lua/maui/text.lua').Text

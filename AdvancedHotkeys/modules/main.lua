@@ -52,7 +52,7 @@ advancedKeyMap = {
 
 -- An advanced hotkey has been pressed, we determine if it should fetch the action from the regular keymap or from a stored subkey
 function RouteHotkey(key)
-	LOG("RouteHotkey(" .. key .. ")")
+	LOG('RouteHotkey(' .. key .. ')')
 
 	local currentTime = GetSystemTimeSeconds()
 	local diffTime = currentTime - lastClickTime
@@ -123,7 +123,7 @@ function InitAdvancedKeys()
 	local hotkeys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
 	for i, v in hotkeys do
-		local name = string.gsub(v, "-", "_")
+		local name = string.gsub(v, '-', '_')
 		userKeyActions['AHK ' .. name] = {
 			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. v .. '")',
 			category = 'Advanced Hotkeys Override'
