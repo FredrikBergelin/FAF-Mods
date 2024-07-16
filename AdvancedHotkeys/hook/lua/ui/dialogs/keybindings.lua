@@ -42,12 +42,14 @@ local Popup         = import("/lua/ui/controls/popups/popup.lua").Popup
 local Tooltip       = import("/lua/ui/game/tooltip.lua")
 local MultiLineText = import("/lua/maui/multilinetext.lua").MultiLineText
 
+local KeyMapper = import("/lua/keymap/keymapper.lua")
 local properKeyNames = import("/lua/keymap/properkeynames.lua").properKeyNames
 local keyNames = import("/lua/keymap/keynames.lua").keyNames
-local keyCategories = import("/lua/keymap/keycategories.lua").keyCategories
-local keyCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrder
-local KeyMapper = import("/lua/keymap/keymapper.lua")
+local actionCategories = import("/lua/keymap/keycategories.lua").keyCategories
+local actionCategoryOrder = import("/lua/keymap/keycategories.lua").keyCategoryOrder
+local allHotkeysOrdered = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
+-- TODO
 advancedKeyMap = import('/mods/AdvancedHotkeys/modules/main.lua').advancedKeyMap
 
 local popup = nil
@@ -77,13 +79,13 @@ local LEFTSIDE_search = ''
 local LEFTSIDE_linesVisible = {}
 local LEFTSIDE_linesCollapsed = true
 
--- Set the default order
-for order, category in keyCategoryOrder do
+-- Set the default order of categories
+for order, category in actionCategoryOrder do
     local name = string.lower(category)
     LEFTSIDE_Categories[name] = {}
     LEFTSIDE_Categories[name].order = order
     LEFTSIDE_Categories[name].name = name
-    LEFTSIDE_Categories[name].text = LOC(keyCategories[category])
+    LEFTSIDE_Categories[name].text = LOC(actionCategories[category])
     LEFTSIDE_Categories[name].collapsed = LEFTSIDE_linesCollapsed
 end
 
@@ -111,13 +113,13 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
 
-    local keyPopup = Popup(popup, dialogContent)
+    local keyInputPopup = Popup(popup, dialogContent)
 
     local cancelButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Cancel>")
     LayoutHelpers.AtBottomIn(cancelButton, dialogContent, 15)
     LayoutHelpers.AtRightIn(cancelButton, dialogContent, -2)
     cancelButton.OnClick = function(self, modifiers)
-        keyPopup:Close()
+        keyInputPopup:Close()
     end
 
     local okButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', "<LOC _Ok>")
@@ -137,7 +139,7 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
     LayoutHelpers.AtHorizontalCenterIn(keyText, dialogContent)
 
     dialogContent:AcquireKeyboardFocus(false)
-    keyPopup.OnClose = function(self)
+    keyInputPopup.OnClose = function(self)
         dialogContent:AbandonKeyboardFocus()
     end
 
@@ -235,7 +237,7 @@ local function LEFTSIDE_EditActionKey(parent, action, currentKey)
 
     okButton.OnClick = function(self, modifiers)
         AssignKey()
-        keyPopup:Close()
+        keyInputPopup:Close()
     end
 end
 
@@ -614,7 +616,7 @@ function LEFTSIDE_FormatData()
             LEFTSIDE_Categories[category].name = category
             LEFTSIDE_Categories[category].collapsed = LEFTSIDE_linesCollapsed
             LEFTSIDE_Categories[category].order = table.getsize(LEFTSIDE_Categories) - 1
-            LEFTSIDE_Categories[category].text = v.category or keyCategories['none'].text
+            LEFTSIDE_Categories[category].text = v.category or actionCategories['none'].text
         end
 
         local data = {
@@ -962,14 +964,15 @@ local RIGHTSIDE_search = ''
 local RIGHTSIDE_linesVisible = {}
 local RIGHTSIDE_linesCollapsed = true
 
-for order, category in keyCategoryOrder do
-    local name = string.lower(category)
+-- Set the default order of Hotkeys
+for i, hotkey in allHotkeysOrdered do
+    local name = string.gsub(hotkey, "-", "_")
     RIGHTSIDE_Hotkeys[name] = {}
-    RIGHTSIDE_Hotkeys[name].order = order
-    RIGHTSIDE_Hotkeys[name].name = name
-    RIGHTSIDE_Hotkeys[name].text = LOC(keyCategories[category])
+    RIGHTSIDE_Hotkeys[name].order = i
+    RIGHTSIDE_Hotkeys[name].text = hotkey
     RIGHTSIDE_Hotkeys[name].collapsed = RIGHTSIDE_linesCollapsed
 end
+
 local function RIGHTSIDE_ConfirmNewKeyMap()
     KeyMapper.SaveUserKeyMap()
     IN_ClearKeyMap()
@@ -1039,8 +1042,8 @@ end
 
 function RIGHTSIDE_UpdateKey(key)
 
-    -- RIGHTSIDE_Hotkeys[key].text = 
-    -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key] 
+    -- RIGHTSIDE_Hotkeys[key].text =
+    -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
 end
 
 local function RIGHTSIDE_keyTable_FIND(key)

@@ -129,15 +129,15 @@ function ConditionalConExecute(executable)
 end
 
 function InitAdvancedKeys()
-	local keys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keys
+	local hotkeys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
-	for k, v in keys do
-		local name = string.gsub(k, "-", "_")
+	for i, v in hotkeys do
+		local name = string.gsub(v, "-", "_")
 		userKeyActions['AHK ' .. name] = {
-			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. k .. '")',
+			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. v .. '")',
 			category = 'Advanced Hotkeys Override'
 		}
-		-- userKeyMap[k] = 'AHK ' .. name
+		-- userKeyMap[v] = 'AHK ' .. name
 	end
 
 	Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
