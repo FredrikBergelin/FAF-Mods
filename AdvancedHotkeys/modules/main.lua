@@ -11,8 +11,8 @@ local lastClickTime = -9999
 advancedKeyMap = {
 	['0'] = {
 		{
-			print = '0 was pressed',
-			executable = 'StartCommandMode order RULEUCC_Patrol',
+			message = '0 was pressed',
+			execute = 'StartCommandMode order RULEUCC_Patrol',
 		},
 		{
 			conditionals = {
@@ -29,12 +29,12 @@ advancedKeyMap = {
 			},
 			valid = {
 				{
-					print = 'Conditionals are Valid',
+					message = 'Conditionals are Valid',
 				},
 			},
 			invalid = {
 				{
-					print = 'Conditionals are Invalid',
+					message = 'Conditionals are Invalid',
 				},
 			},
 		},
@@ -42,7 +42,7 @@ advancedKeyMap = {
 			subkeys = {
 				['0'] = {
 					{
-						print = 's 0',
+						message = 's 0',
 					},
 				},
 			}
@@ -72,22 +72,17 @@ function RouteHotkey(key)
 		end
 	end
 
-	-- Run the reguar action for this hotkey
 	currentSubKeys = nil
+
 	if advancedKeyMap[key] ~= nil then ExecuteRecursively(advancedKeyMap[key]) end
 end
 
 function CheckConditionals(conditionals)
 	local valid = true
 
-	for conditionalKey, conditional in pairs(conditionals) do if not valid then break end
+	for k, conditional in pairs(conditionals) do if not valid then break end
 		local executable = GetConditionalExecutable(conditional)
-
-		print(executable)
-
 		valid = conditional.checkFor == ConditionalConExecute(executable)
-
-		print(valid)
 	end
 
 	return valid
@@ -95,30 +90,26 @@ end
 
 function ExecuteRecursively(entries)
 	for entryKey, entry in entries do
-		if entry["print"] ~= nil then print(entry["print"]) end
+		if entry['message'] ~= nil then print(entry['message']) end
 
-		if entry["executable"] ~= nil then ConExecute(entry["executable"]) end
+		if entry['execute'] ~= nil then ConExecute(entry['execute']) end
 
-		if entry["immediate"] ~= nil then ExecuteRecursively(entry["immediate"]) end
-
-		if entry["conditionals"] ~= nil then
-			local valid = CheckConditionals(entry["conditionals"])
+		if entry['conditionals'] ~= nil then
+			local valid = CheckConditionals(entry['conditionals'])
 
 			if valid then
-				if entry["valid"] ~= nil then ExecuteRecursively(entry["valid"]) end
+				if entry['valid'] ~= nil then ExecuteRecursively(entry['valid']) end
 			else
-				if entry["invalid"] ~= nil then ExecuteRecursively(entry["invalid"]) end
+				if entry['invalid'] ~= nil then ExecuteRecursively(entry['invalid']) end
 			end
 		end
 
-		if entry["finally"] ~= nil then ExecuteRecursively(entry["finally"]) end
-
-		currentSubKeys = entry["subkeys"]
+		currentSubKeys = entry['subkeys']
 	end
 end
 
 function GetConditionalExecutable(entry)
-	return entry.executable or 'UI_Lua import("' .. (entry.path or
+	return entry.execute or 'UI_Lua import("' .. (entry.path or
 		conditionalsPath) .. '").' .. entry.func .. '(' .. entry.args .. ')'
 end
 

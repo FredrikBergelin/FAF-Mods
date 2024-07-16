@@ -7,19 +7,19 @@ function TableContains(table, element)
     return false
 end
 
-function CategoryFilterSelect(hotkey, printString, categoriesString, entityCategories, filterPrintString, filterEntityCategories)
+function CategoryFilterSelect(hotkey, message, categoriesString, entityCategories, filterPrintString, filterEntityCategories)
     if Functions.AnyHasCategory(filterEntityCategories or entityCategories) then
-        print("Filter " .. (filterPrintString or printString))
+        print("Filter " .. (filterPrintString or message))
         SelectUnits(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
     else
-        print("Onscreen " .. printString)
+        print("Onscreen " .. message)
         ConExecute("UI_SelectByCategory +inview " .. categoriesString)
         SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
     end
 
     SubHotkeys({
         [hotkey] = function() SubHotkey(hotkey, function(hotkey)
-                print("All " .. printString)
+                print("All " .. message)
                 ConExecute("UI_SelectByCategory " .. categoriesString)
                 SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
             end)
@@ -27,8 +27,8 @@ function CategoryFilterSelect(hotkey, printString, categoriesString, entityCateg
     })
 end
 
-function CategoryFilterAdd(hotkey, printString, categoriesString, entityCategories)
-    print("Add onscreen " .. printString)
+function CategoryFilterAdd(hotkey, message, categoriesString, entityCategories)
+    print("Add onscreen " .. message)
 
     Functions.AddToSelection(function()
         ConExecute("UI_SelectByCategory +inview " .. categoriesString)
@@ -36,8 +36,8 @@ function CategoryFilterAdd(hotkey, printString, categoriesString, entityCategori
     end)
 
     SubHotkeys({
-        [printString] = function() SubHotkey(printString, function(hotkey)
-                print("Add all " .. printString)
+        [message] = function() SubHotkey(message, function(hotkey)
+                print("Add all " .. message)
                 Functions.AddToSelection(function()
                     ConExecute("UI_SelectByCategory " .. categoriesString)
                     SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))

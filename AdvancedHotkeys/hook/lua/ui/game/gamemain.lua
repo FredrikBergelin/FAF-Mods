@@ -14,30 +14,23 @@ function BackupKeyMap()
 		Prefs.SetToCurrentProfile("UserDebugKeyMap", {})
 
 		-- Don't set all, let user create one by one
-
 		-- local keyActions = table.combine(
 		-- 	import('/lua/keymap/keyactions.lua').keyActions,
 		-- 	import('/lua/keymap/debugKeyActions.lua').debugKeyActions,
 		-- 	userKeyActions
 		-- )
-
 		-- local userKeyMaps = table.combine(userKeyMap, userDebugKeyMap)
-
 		-- local keymap = {}
-
 		-- for k, v in pairs(userKeyMaps) do
 		-- 	LOG(k)
 		-- 	keymap[k] = {
 		-- 		{
-		-- 			immediate = {
-		-- 				{
-		-- 					['executable'] = keyActions[v].action,
-		-- 				}
-		-- 			},
+		-- 			{
+		-- 				['execute'] = keyActions[v].action,
+		-- 			}
 		-- 		}
 		-- 	}
 		-- end
-
 		-- SetPreference('AdvancedHotkeysKeyMap', keymap)
 	end
 end

@@ -993,7 +993,7 @@ local function RIGHTSIDE_ClearActionKey(action, currentKey)
     end
 end
 
-local function RIGHTSIDE_EditPrintKey(parent, k, v)
+local function RIGHTSIDE_EditMessage(parent, k, v)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
 
@@ -1058,7 +1058,7 @@ end
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_LineData do
         if v.selected then
-            RIGHTSIDE_EditPrintKey(popup, k, v)
+            RIGHTSIDE_EditMessage(popup, k, v)
             break
         end
     end
@@ -1335,43 +1335,43 @@ function RIGHTSIDE_RECURSIVE_FORMATTING(k, entries)
 
     for entryKey, entry in entries do
 
-        if entry["print"] ~= nil then
+        if entry['message'] ~= nil then
             table.insert(RIGHTSIDE_Hotkeys[k].actions, {
                 action = "ACTION",
                 key = "KEY",
                 keyText = '',
                 category = k,
                 order = RIGHTSIDE_Hotkeys[k].order + orderIndex,
-                text = entry['print'],
+                text = entry['message'],
                 wikiURL = entry.wikiURL
             })
             orderIndex = orderIndex + 1
         end
 
-        if entry["executable"] ~= nil then
+        if entry['execute'] ~= nil then
             table.insert(RIGHTSIDE_Hotkeys[k].actions, {
                 action = "ACTION",
                 key = "KEY",
                 keyText = '',
                 category = k,
                 order = RIGHTSIDE_Hotkeys[k].order + orderIndex,
-                text = entry['executable'],
+                text = entry['execute'],
                 wikiURL = entries.wikiURL
             })
             orderIndex = orderIndex + 1
         end
 
-        if entry["conditionals"] ~= nil then
-            if entry["valid"] ~= nil then
-                -- RECURSIVE_FORMATTING(entry["valid"])
+        if entry['conditionals'] ~= nil then
+            if entry['valid'] ~= nil then
+                -- RECURSIVE_FORMATTING(entry['valid'])
             end
-            if entry["invalid"] ~= nil then
-                -- RECURSIVE_FORMATTING(entry["invalid"])
+            if entry['invalid'] ~= nil then
+                -- RECURSIVE_FORMATTING(entry['invalid'])
             end
         end
 
-        if entry["subkeys"] ~= nil then
-            -- RECURSIVE_FORMATTING(entry["subkeys"])
+        if entry['subkeys'] ~= nil then
+            -- RECURSIVE_FORMATTING(entry['subkeys'])
         end
 
     end
