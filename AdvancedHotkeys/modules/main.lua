@@ -12,6 +12,8 @@ advancedKeyMap = {
 	['0'] = {
 		{
 			message = '0 was pressed',
+		},
+		{
 			execute = 'StartCommandMode order RULEUCC_Patrol',
 		},
 		{
@@ -22,7 +24,7 @@ advancedKeyMap = {
 					checkFor = true,
 				},
 				{
-					func = 'AllHaveCategory',
+					func = 'AllSelectedHaveCategory',
 					args = 'categories.TECH1',
 					checkFor = true,
 				}

@@ -5,7 +5,7 @@ end
 
 AnyUnitSelected = import('/mods/common/modules/misc.lua').AnyUnitSelected
 
-function AnyHasCategory(category)
+function AnySelectedHasCategory(category)
     local units = GetSelectedUnits()
 
     if units == nil then
@@ -21,7 +21,7 @@ function AnyHasCategory(category)
     return GlobalReturn(false)
 end
 
-function AllHaveCategory(category)
+function AllSelectedHaveCategory(category)
     local units = GetSelectedUnits()
 
     if units == nil then

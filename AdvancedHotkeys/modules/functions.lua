@@ -7,8 +7,9 @@ function TableContains(table, element)
     return false
 end
 
-function CategoryFilterSelect(hotkey, message, categoriesString, entityCategories, filterPrintString, filterEntityCategories)
-    if Functions.AnyHasCategory(filterEntityCategories or entityCategories) then
+function CategoryFilterSelect(hotkey, message, categoriesString, entityCategories, filterPrintString,
+                              filterEntityCategories)
+    if Functions.AnySelectedHasCategory(filterEntityCategories or entityCategories) then
         print("Filter " .. (filterPrintString or message))
         SelectUnits(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
     else

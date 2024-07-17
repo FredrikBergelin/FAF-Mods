@@ -257,19 +257,17 @@ end
 
 local function LEFTSIDE_GetLineColor(lineID, data)
     if data.type == 'header' then
-        return 'FF282828' ----FF282828
-    elseif data.type == 'spacer' then
-        return '00000000' ----00000000
+        return 'FF282828'
     elseif data.type == 'entry' then
         if data.selected then
             return UIUtil.factionBackColor
         elseif math.mod(lineID, 2) == 1 then
-            return 'ff202020' ----ff202020
+            return 'ff202020'
         else
-            return 'FF343333' ----FF343333
+            return 'FF343333'
         end
     else
-        return 'FF6B0088' ----FF9D06C6
+        return 'FF6B0088'
     end
 end
 
@@ -397,7 +395,7 @@ function LEFTSIDE_CreateLine()
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
                 LEFTSIDE_SelectLine(self.data.index)
-                LEFTSIDE_FILTER.text:AcquireFocus()
+                LEFTSIDE_FILTER.input:AcquireFocus()
                 return true
             elseif event.Type == 'ButtonDClick' then
                 LEFTSIDE_SelectLine(self.data.index)
@@ -407,7 +405,7 @@ function LEFTSIDE_CreateLine()
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
             if string.len(LEFTSIDE_search) == 0 then
                 LEFTSIDE_ToggleLines(self.data.category)
-                LEFTSIDE_FILTER.text:AcquireFocus()
+                LEFTSIDE_FILTER.input:AcquireFocus()
 
                 if LEFTSIDE_Categories[self.data.category].collapsed then
                     self.toggle.txt:SetText('+')
@@ -534,14 +532,6 @@ function LEFTSIDE_CreateLine()
             LayoutHelpers.AtVerticalCenterIn(line.description, line, 2)
             line.key:SetText('')
             line.statistics:SetText(stats)
-        elseif data.type == 'spacer' then
-            line.toggle:Hide()
-            line.assignKeyButton:Hide()
-            line.unbindKeyButton:Hide()
-            line.wikiButton:Hide()
-            line.key:SetText('')
-            line.description:SetText('')
-            line.statistics:SetText('')
         elseif data.type == 'entry' then
             line.toggle:Hide()
             line.key:SetText(data.keyText)
@@ -717,22 +707,22 @@ local function LEFTSIDE_CreateUI()
     LayoutHelpers.AtHorizontalCenterIn(LEFTSIDE_FILTER.info, LEFTSIDE_FILTER, -7)
     LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.info, LEFTSIDE_FILTER, 2)
 
-    LEFTSIDE_FILTER.text = Edit(LEFTSIDE_FILTER)
-    LEFTSIDE_FILTER.text:SetForegroundColor('FFF1ECEC')
-    LEFTSIDE_FILTER.text:SetBackgroundColor('04E1B44A')
-    LEFTSIDE_FILTER.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    LEFTSIDE_FILTER.text:SetHighlightBackgroundColor('880085EF')
-    LEFTSIDE_FILTER.text.Height:Set(function() return LEFTSIDE_FILTER.Bottom() - LEFTSIDE_FILTER.Top() -
+    LEFTSIDE_FILTER.input = Edit(LEFTSIDE_FILTER)
+    LEFTSIDE_FILTER.input:SetForegroundColor('FFF1ECEC')
+    LEFTSIDE_FILTER.input:SetBackgroundColor('04E1B44A')
+    LEFTSIDE_FILTER.input:SetHighlightForegroundColor(UIUtil.highlightColor)
+    LEFTSIDE_FILTER.input:SetHighlightBackgroundColor('880085EF')
+    LEFTSIDE_FILTER.input.Height:Set(function() return LEFTSIDE_FILTER.Bottom() - LEFTSIDE_FILTER.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
-    LayoutHelpers.AtLeftIn(LEFTSIDE_FILTER.text, LEFTSIDE_FILTER, 5)
-    LayoutHelpers.AtRightIn(LEFTSIDE_FILTER.text, LEFTSIDE_FILTER)
-    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.text, LEFTSIDE_FILTER)
-    LEFTSIDE_FILTER.text:AcquireFocus()
-    LEFTSIDE_FILTER.text:SetText('')
-    LEFTSIDE_FILTER.text:SetFont(UIUtil.titleFont, 17)
-    LEFTSIDE_FILTER.text:SetMaxChars(20)
-    LEFTSIDE_FILTER.text.OnTextChanged = function(self, newText, oldText)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_FILTER.input, LEFTSIDE_FILTER, 5)
+    LayoutHelpers.AtRightIn(LEFTSIDE_FILTER.input, LEFTSIDE_FILTER)
+    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.input, LEFTSIDE_FILTER)
+    LEFTSIDE_FILTER.input:AcquireFocus()
+    LEFTSIDE_FILTER.input:SetText('')
+    LEFTSIDE_FILTER.input:SetFont(UIUtil.titleFont, 17)
+    LEFTSIDE_FILTER.input:SetMaxChars(20)
+    LEFTSIDE_FILTER.input.OnTextChanged = function(self, newText, oldText)
         -- interpret plus chars as spaces for easier key filtering
         LEFTSIDE_search = string.gsub(string.lower(newText), '+', ' ')
         LEFTSIDE_search = string.gsub(string.lower(LEFTSIDE_search), '  ', ' ')
@@ -749,11 +739,11 @@ local function LEFTSIDE_CreateUI()
         LEFTSIDE_LIST:ScrollSetTop(nil, 0)
     end
 
-    LEFTSIDE_FILTER.clear = UIUtil.CreateText(LEFTSIDE_FILTER.text, 'X', 17, 'Arial Bold')
+    LEFTSIDE_FILTER.clear = UIUtil.CreateText(LEFTSIDE_FILTER.input, 'X', 17, 'Arial Bold')
     LEFTSIDE_FILTER.clear:SetColor('FF8A8A8A')
     LEFTSIDE_FILTER.clear:EnableHitTest()
-    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.clear, LEFTSIDE_FILTER.text, 1)
-    LayoutHelpers.AtRightIn(LEFTSIDE_FILTER.clear, LEFTSIDE_FILTER.text, 9)
+    LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.clear, LEFTSIDE_FILTER.input, 1)
+    LayoutHelpers.AtRightIn(LEFTSIDE_FILTER.clear, LEFTSIDE_FILTER.input, 9)
 
     LEFTSIDE_FILTER.clear.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
@@ -761,8 +751,8 @@ local function LEFTSIDE_CreateUI()
         elseif event.Type == 'MouseExit' then
             LEFTSIDE_FILTER.clear:SetColor('FF8A8A8A')
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            LEFTSIDE_FILTER.text:SetText('')
-            LEFTSIDE_FILTER.text:AcquireFocus()
+            LEFTSIDE_FILTER.input:SetText('')
+            LEFTSIDE_FILTER.input:AcquireFocus()
         end
         return true
     end
@@ -862,7 +852,7 @@ local function LEFTSIDE_CreateUI()
                 line.wikiButton:Hide()
             end
         end
-        LEFTSIDE_FILTER.text:AcquireFocus()
+        LEFTSIDE_FILTER.input:AcquireFocus()
     end
 
     LEFTSIDE_LIST.HandleEvent = function(control, event)
@@ -875,11 +865,11 @@ local function LEFTSIDE_CreateUI()
         end
     end
     -- filter all key-bindings by checking if either text, action, or a key contains target string
-    LEFTSIDE_LIST.Filter = function(self, target)
+    LEFTSIDE_LIST.Filter = function(self, search)
         local headersVisible = {}
         LEFTSIDE_linesVisible = {}
 
-        if not target or string.len(target) == 0 then
+        if not search or string.len(search) == 0 then
             LEFTSIDE_FILTER.info:Show()
             for k, v in LEFTSIDE_LineData do
                 if v.type == 'header' then
@@ -908,16 +898,16 @@ local function LEFTSIDE_CreateUI()
                         LEFTSIDE_Categories[v.category].collapsed = true
                     end
                 elseif v.type == 'entry' and v.filters then
-                    if string.find(v.filters.text, target) then
+                    if string.find(v.filters.text, search) then
                         match = true
                         v.filterMatch = 'text'
-                    elseif string.find(v.filters.key, target) then
+                    elseif string.find(v.filters.key, search) then
                         match = true
                         v.filterMatch = 'key'
-                    elseif string.find(v.filters.action, target) then
+                    elseif string.find(v.filters.action, search) then
                         match = true
                         v.filterMatch = 'action'
-                    elseif string.find(v.filters.category, target) then
+                    elseif string.find(v.filters.category, search) then
                         match = true
                         v.filterMatch = 'category'
                     else
@@ -941,7 +931,7 @@ local function LEFTSIDE_CreateUI()
         end
         self:CalcVisible()
     end
-    LEFTSIDE_FILTER.text:SetText('')
+    LEFTSIDE_FILTER.input:SetText('')
 end
 
 -- / LEFTSIDE ----------------------------------------------------------------
@@ -949,7 +939,7 @@ end
 
 -- RIGHTSIDE -----------------------------------------------------------------
 
-local RIGHTSIDE_FormatData
+local RIGHTSIDE_FormatLineData -- Remove?
 
 local RIGHTSIDE_SECTION
 local RIGHTSIDE_FILTER
@@ -965,11 +955,12 @@ local RIGHTSIDE_linesCollapsed = true
 
 -- Set the default order of Hotkeys
 for i, hotkey in allHotkeysOrdered do
-    local name = string.gsub(hotkey, '-', '_')
-    RIGHTSIDE_Hotkeys[name] = {}
-    RIGHTSIDE_Hotkeys[name].order = i
-    RIGHTSIDE_Hotkeys[name].text = hotkey
-    RIGHTSIDE_Hotkeys[name].collapsed = RIGHTSIDE_linesCollapsed
+    local formattedName = string.gsub(hotkey, '-', '_')
+    RIGHTSIDE_Hotkeys[formattedName] = {}
+    RIGHTSIDE_Hotkeys[formattedName].hotkey = hotkey
+    RIGHTSIDE_Hotkeys[formattedName].order = i
+    RIGHTSIDE_Hotkeys[formattedName].collapsed = RIGHTSIDE_linesCollapsed
+    RIGHTSIDE_Hotkeys[formattedName].actions = {}
 end
 
 local function RIGHTSIDE_ConfirmNewKeyMap()
@@ -1020,7 +1011,7 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
     LayoutHelpers.AtHorizontalCenterIn(textBox, dialogContent)
     LayoutHelpers.AtVerticalCenterIn(textBox, dialogContent)
     LayoutHelpers.SetDimensions(textBox, 334, 24)
-    textBox:SetText(lineData.text)
+    textBox:SetText(lineData.message)
 
     textBox:AcquireFocus() -- Not working
 
@@ -1033,7 +1024,7 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
     okButton.OnClick = function(self, modifiers)
         local newText = textBox:GetText()
 
-        lineData.text = newText
+        lineData.message = newText
 
         local advancedKeyMap = import('/mods/AdvancedHotkeys/modules/main.lua').advancedKeyMap
 
@@ -1041,7 +1032,7 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
 
         tLOG(temp)
 
-        -- RIGHTSIDE_Hotkeys[key].text =
+        -- RIGHTSIDE_Hotkeys[key].message =
         -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
 
         popup:Close()
@@ -1064,15 +1055,13 @@ local function RIGHTSIDE_UnbindCurrentSelection()
             break
         end
     end
-    RIGHTSIDE_LineData = RIGHTSIDE_FormatData()
+    RIGHTSIDE_LineData = RIGHTSIDE_FormatLineData()
     RIGHTSIDE_LIST:Filter(RIGHTSIDE_search)
 end
 
 local function RIGHTSIDE_GetLineColor(lineID, data)
     if data.type == 'header' then
         return 'FF282828'
-    elseif data.type == 'spacer' then
-        return '00000000'
     elseif data.type == 'entry' then
         if data.selected then
             return UIUtil.factionBackColor
@@ -1186,7 +1175,7 @@ function RIGHTSIDE_CreateLine()
         elseif self.data.type == 'entry' then
             if event.Type == 'ButtonPress' then
                 RIGHTSIDE_SelectLine(self.data.index)
-                RIGHTSIDE_FILTER.text:AcquireFocus()
+                RIGHTSIDE_FILTER.input:AcquireFocus()
                 return true
             elseif event.Type == 'ButtonDClick' then
                 RIGHTSIDE_SelectLine(self.data.index)
@@ -1196,7 +1185,7 @@ function RIGHTSIDE_CreateLine()
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
             if string.len(RIGHTSIDE_search) == 0 then
                 RIGHTSIDE_ToggleLines(self.data.hotkey)
-                RIGHTSIDE_FILTER.text:AcquireFocus()
+                RIGHTSIDE_FILTER.input:AcquireFocus()
 
                 if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
                     self.toggle.txt:SetText('+')
@@ -1259,173 +1248,151 @@ function RIGHTSIDE_CreateLine()
         return true
     end
 
-    line.Update = function(self, data, lineID)
-        line:SetSolidColor(RIGHTSIDE_GetLineColor(lineID, data))
-        line.data = table.copy(data)
+    line.Update = function(self, lineData, lineID)
+        line:SetSolidColor(RIGHTSIDE_GetLineColor(lineID, lineData))
+        line.data = table.copy(lineData)
 
-        if data.type == 'header' then
+        if lineData.type == 'header' then
+            line.toggle:Show()
+            line.unbindKeyButton:Hide()
+
+            line.description:SetFont('Arial', HEADER_FONT_SIZE)
+            line.description:SetColor(UIUtil.fontColor)
+            line.description:SetColor('ffffffff')
+
+            line.description:SetText(lineData.hotkey)
+
             if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
                 self.toggle.txt:SetText('+')
             else
                 self.toggle.txt:SetText('-')
             end
-            line.toggle:Show()
-            line.unbindKeyButton:Hide()
-            line.description:SetText(data.text)
-            line.description:SetFont('Arial', HEADER_FONT_SIZE)
-            line.description:SetColor(UIUtil.fontColor)
-            line.description:SetColor('ffffffff')
-        elseif data.type == 'spacer' then
+        elseif lineData.type == 'entry' then
             line.toggle:Hide()
-            line.unbindKeyButton:Hide()
-            line.description:SetText('')
-        elseif data.type == 'entry' then
-            line.toggle:Hide()
-            line.description:SetText(data.text)
+            line.unbindKeyButton:Show()
+
             line.description:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
-            line.unbindKeyButton:Show()
+
+            if lineData.message ~= nil then
+                line.description:SetText('lineData.message')
+            elseif lineData.execute ~= nil then
+                line.description:SetText('lineData.execute')
+            elseif lineData.conditionals ~= nil then
+                line.description:SetText('CONDITIONALS')
+            elseif lineData.subkeys ~= nil then
+                line.description:SetText('SUBKEYS')
+            end
         end
     end
     return line
 end
 
+-- keybindings.lua(2358): bad argument #1 to `lower' (string expected, got nil)
 function RIGHTSIDE_SortData(dataTable)
     table.sort(dataTable, function(a, b)
         if a.order ~= b.order then
             return a.order < b.order
-        else
-            if a.hotkey ~= b.hotkey then
-                return string.lower(a.hotkey) < string.lower(b.hotkey)
-            else
-                if a.type == 'entry' and b.type == 'entry' then
-                    if string.lower(a.text) ~= string.lower(b.text) then
-                        return string.lower(a.text) < string.lower(b.text)
-                    else
-                        return a.action < b.action
-                    end
-                else
-                    return a.id < b.id
-                end
-            end
         end
     end)
 end
 
--- TODO: Standardize insert
-function RIGHTSIDE_InsertActions(actions, action)
-    -- table.insert(RIGHTSIDE_Hotkeys[hotkey].actions, {
-    --     action = 'ACTION',
-    --     key = 'KEY',
-    --     keyText = '',
-    --     hotkey = hotkey,
-    --     order = orderIndex,
-    --     text = entry['message'],
-    --     wikiURL = entry.wikiURL
-    -- })
-    -- orderIndex = orderIndex + 1
-end
-
 -- Takes entries from the game.prefs file, formats and inserts into Hotkeys
-function RIGHTSIDE_InsertFormattedPrefsEntries(hotkey, entries)
-
-    -- create header if it doesn't exist
-    if not RIGHTSIDE_Hotkeys[hotkey] then
-        RIGHTSIDE_Hotkeys[hotkey] = {}
-        RIGHTSIDE_Hotkeys[hotkey].actions = {}
-        RIGHTSIDE_Hotkeys[hotkey].hotkey = hotkey
-        RIGHTSIDE_Hotkeys[hotkey].name = hotkey
-        RIGHTSIDE_Hotkeys[hotkey].collapsed = RIGHTSIDE_linesCollapsed
-        RIGHTSIDE_Hotkeys[hotkey].order = table.getsize(RIGHTSIDE_Hotkeys) - 1
-        RIGHTSIDE_Hotkeys[hotkey].text = hotkey
-    end
-
-    local orderIndex
+local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
+    local Hotkey = {}
+    Hotkey.hotkey = hotkey
+    Hotkey.order = table.getsize(RIGHTSIDE_Hotkeys) - 1
+    Hotkey.collapsed = RIGHTSIDE_linesCollapsed
+    Hotkey.actions = {}
 
     -- Insert actions
-    for entryKey, entry in entries do
-        orderIndex = 1
+    for entryIndex, entry in entries do
 
         if entry['message'] ~= nil then
-            table.insert(RIGHTSIDE_Hotkeys[hotkey].actions, {
-                hotkey = hotkey,
-                order = orderIndex,
-                hotkey = hotkey,
-                text = entry['message'],
+            table.insert(Hotkey.actions, {
+                order = entryIndex,
+                message = entry['message'],
             })
-            orderIndex = orderIndex + 1
-        end
 
-        if entry['execute'] ~= nil then
-            table.insert(RIGHTSIDE_Hotkeys[hotkey].actions, {
-                hotkey = hotkey,
-                order = orderIndex,
-                action = 'ACTION',
-                key = 'KEY',
-                keyText = '',
-                text = entry['execute'],
-                wikiURL = entries.wikiURL
+        elseif entry['execute'] ~= nil then
+            table.insert(Hotkey.actions, {
+                order = entryIndex,
+                execute = entry['execute'],
             })
-            orderIndex = orderIndex + 1
-        end
 
-        if entry['conditionals'] ~= nil then
+        elseif entry['conditionals'] ~= nil then
+            local conditionals = {}
+
+            for conditionalIndex, conditional in entry['conditionals'] do
+                table.insert(conditionals, {
+                    order = conditionalIndex,
+                    func = conditional.func,
+                    args = conditional.args,
+                    checkFor = conditional.checkFor,
+                })
+            end
+
+            table.insert(Hotkey.actions, {
+                order = entryIndex,
+                conditionals = conditionals,
+            })
             if entry['valid'] ~= nil then
-                -- RECURSIVE_FORMATTING(entry['valid'])
+                RIGHTSIDE_FormattedHotkey(hotkey, entry['valid'])
             end
             if entry['invalid'] ~= nil then
-                -- RECURSIVE_FORMATTING(entry['invalid'])
+                RIGHTSIDE_FormattedHotkey(hotkey, entry['invalid'])
             end
-        end
 
-        if entry['subkeys'] ~= nil then
-            -- RECURSIVE_FORMATTING(entry['subkeys'])
-        end
+        elseif entry['subkeys'] ~= nil then
+            local subkeys = {}
 
+            for subkey, entries in entry['subkeys'] do
+                table.insert(subkeys, RIGHTSIDE_FormattedHotkey(subkey, entries))
+            end
+
+            table.insert(Hotkey.actions, {
+                order = entryIndex,
+                subkeys = subkeys,
+            })
+        end
     end
+
+    return Hotkey
 end
 
-function RIGHTSIDE_FormatData()
+local function RIGHTSIDE_FormatLineData()
     local keyData = {}
     local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
 
-    -- reset previously formated key actions in all groups because they might have been re-mapped
     for hotkey, entries in RIGHTSIDE_Hotkeys do
         entries.actions = {}
     end
 
     for hotkey, entries in advancedKeyMap do
-        RIGHTSIDE_InsertFormattedPrefsEntries(hotkey, entries)
+        RIGHTSIDE_Hotkeys[hotkey] = RIGHTSIDE_FormattedHotkey(hotkey, entries)
     end
 
-    -- flatten ... (NEVER RUNS)
     local index = 1
     for hotkey, entries in RIGHTSIDE_Hotkeys do
         if not table.empty(entries.actions) then
-            LOG(333)
+
             keyData[index] = {
-                hotkey = hotkey,
                 type = 'header',
+                hotkey = hotkey,
                 id = index,
                 order = RIGHTSIDE_Hotkeys[hotkey].order,
+                collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                 count = table.getsize(entries.actions),
-                text = RIGHTSIDE_Hotkeys[hotkey].text,
-                collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed
             }
+
             index = index + 1
             for _, data in entries.actions do
                 keyData[index] = {
                     type = 'entry',
                     hotkey = hotkey,
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
-                    text = data.text,
-                    action = data.action,
-                    key = data.key,
                     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
-                    id = index,
                     filters = { -- create filter parameters for quick searching of keys
-                        text = string.lower(data.text or ''),
-                        action = string.lower(data.action or ''),
                         hotkey = string.lower(data.hotkey or ''),
                     }
                 }
@@ -1434,7 +1401,7 @@ function RIGHTSIDE_FormatData()
         end
     end
 
-    RIGHTSIDE_SortData(keyData)
+    -- RIGHTSIDE_SortData(keyData)
 
     -- store index of a header line for each key line
     local header = 1
@@ -1452,7 +1419,7 @@ end
 
 local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_search = ''
-    RIGHTSIDE_LineData = RIGHTSIDE_FormatData()
+    RIGHTSIDE_LineData = RIGHTSIDE_FormatLineData()
 
     RIGHTSIDE_SECTION = Group(dialogContent)
 
@@ -1489,22 +1456,22 @@ local function RIGHTSIDE_CreateUI()
     LayoutHelpers.AtHorizontalCenterIn(RIGHTSIDE_FILTER.info, RIGHTSIDE_FILTER, -7)
     LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.info, RIGHTSIDE_FILTER, 2)
 
-    RIGHTSIDE_FILTER.text = Edit(RIGHTSIDE_FILTER)
-    RIGHTSIDE_FILTER.text:SetForegroundColor('FFF1ECEC')
-    RIGHTSIDE_FILTER.text:SetBackgroundColor('04E1B44A')
-    RIGHTSIDE_FILTER.text:SetHighlightForegroundColor(UIUtil.highlightColor)
-    RIGHTSIDE_FILTER.text:SetHighlightBackgroundColor('880085EF')
-    RIGHTSIDE_FILTER.text.Height:Set(function() return RIGHTSIDE_FILTER.Bottom() - RIGHTSIDE_FILTER.Top() -
+    RIGHTSIDE_FILTER.input = Edit(RIGHTSIDE_FILTER)
+    RIGHTSIDE_FILTER.input:SetForegroundColor('FFF1ECEC')
+    RIGHTSIDE_FILTER.input:SetBackgroundColor('04E1B44A')
+    RIGHTSIDE_FILTER.input:SetHighlightForegroundColor(UIUtil.highlightColor)
+    RIGHTSIDE_FILTER.input:SetHighlightBackgroundColor('880085EF')
+    RIGHTSIDE_FILTER.input.Height:Set(function() return RIGHTSIDE_FILTER.Bottom() - RIGHTSIDE_FILTER.Top() -
             LayoutHelpers.ScaleNumber(10)
     end)
-    LayoutHelpers.AtLeftIn(RIGHTSIDE_FILTER.text, RIGHTSIDE_FILTER, 5)
-    LayoutHelpers.AtRightIn(RIGHTSIDE_FILTER.text, RIGHTSIDE_FILTER)
-    LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.text, RIGHTSIDE_FILTER)
-    RIGHTSIDE_FILTER.text:AcquireFocus()
-    RIGHTSIDE_FILTER.text:SetText('')
-    RIGHTSIDE_FILTER.text:SetFont(UIUtil.titleFont, 17)
-    RIGHTSIDE_FILTER.text:SetMaxChars(20)
-    RIGHTSIDE_FILTER.text.OnTextChanged = function(self, newText, oldText)
+    LayoutHelpers.AtLeftIn(RIGHTSIDE_FILTER.input, RIGHTSIDE_FILTER, 5)
+    LayoutHelpers.AtRightIn(RIGHTSIDE_FILTER.input, RIGHTSIDE_FILTER)
+    LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.input, RIGHTSIDE_FILTER)
+    RIGHTSIDE_FILTER.input:AcquireFocus()
+    RIGHTSIDE_FILTER.input:SetText('')
+    RIGHTSIDE_FILTER.input:SetFont(UIUtil.titleFont, 17)
+    RIGHTSIDE_FILTER.input:SetMaxChars(20)
+    RIGHTSIDE_FILTER.input.OnTextChanged = function(self, newText, oldText)
         -- interpret plus chars as spaces for easier key filtering
         RIGHTSIDE_search = string.gsub(string.lower(newText), '+', ' ')
         RIGHTSIDE_search = string.gsub(string.lower(RIGHTSIDE_search), '  ', ' ')
@@ -1521,11 +1488,11 @@ local function RIGHTSIDE_CreateUI()
         RIGHTSIDE_LIST:ScrollSetTop(nil, 0)
     end
 
-    RIGHTSIDE_FILTER.clear = UIUtil.CreateText(RIGHTSIDE_FILTER.text, 'X', 17, 'Arial Bold')
+    RIGHTSIDE_FILTER.clear = UIUtil.CreateText(RIGHTSIDE_FILTER.input, 'X', 17, 'Arial Bold')
     RIGHTSIDE_FILTER.clear:SetColor('FF8A8A8A')
     RIGHTSIDE_FILTER.clear:EnableHitTest()
-    LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.clear, RIGHTSIDE_FILTER.text, 1)
-    LayoutHelpers.AtRightIn(RIGHTSIDE_FILTER.clear, RIGHTSIDE_FILTER.text, 9)
+    LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.clear, RIGHTSIDE_FILTER.input, 1)
+    LayoutHelpers.AtRightIn(RIGHTSIDE_FILTER.clear, RIGHTSIDE_FILTER.input, 9)
 
     RIGHTSIDE_FILTER.clear.HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
@@ -1533,8 +1500,8 @@ local function RIGHTSIDE_CreateUI()
         elseif event.Type == 'MouseExit' then
             RIGHTSIDE_FILTER.clear:SetColor('FF8A8A8A')
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            RIGHTSIDE_FILTER.text:SetText('')
-            RIGHTSIDE_FILTER.text:AcquireFocus()
+            RIGHTSIDE_FILTER.input:SetText('')
+            RIGHTSIDE_FILTER.input:AcquireFocus()
         end
         return true
     end
@@ -1567,10 +1534,6 @@ local function RIGHTSIDE_CreateUI()
         LayoutHelpers.Below(RIGHTSIDE_LINES[index], RIGHTSIDE_LINES[index - 1])
         index = index + 1
     end
-
-    -- Unused? Came with original file I think
-    -- local height = RIGHTSIDE_keyContainer.Height()
-    -- local items = math.floor(RIGHTSIDE_keyContainer.Height() / RIGHTSIDE_keyEntries[1].Height())
 
     local RIGHTSIDE_GetLinesTotal = function()
         return table.getsize(RIGHTSIDE_LINES)
@@ -1624,13 +1587,13 @@ local function RIGHTSIDE_CreateUI()
             if data then
                 line:Update(data, id)
             else
-                line:SetSolidColor('00000000') ----00000000
+                line:SetSolidColor('00000000')
                 line.description:SetText('')
                 line.toggle:Hide()
                 line.unbindKeyButton:Hide()
             end
         end
-        RIGHTSIDE_FILTER.text:AcquireFocus()
+        RIGHTSIDE_FILTER.input:AcquireFocus()
     end
 
     RIGHTSIDE_LIST.HandleEvent = function(control, event)
@@ -1643,11 +1606,11 @@ local function RIGHTSIDE_CreateUI()
         end
     end
     -- filter all key-bindings by checking if either text, action, or a key contains target string
-    RIGHTSIDE_LIST.Filter = function(self, target)
+    RIGHTSIDE_LIST.Filter = function(self, search)
         local headersVisible = {}
         RIGHTSIDE_linesVisible = {}
 
-        if not target or string.len(target) == 0 then
+        if not search or string.len(search) == 0 then
             RIGHTSIDE_FILTER.info:Show()
             for k, v in RIGHTSIDE_LineData do
                 if v.type == 'header' then
@@ -1676,16 +1639,7 @@ local function RIGHTSIDE_CreateUI()
                         RIGHTSIDE_Hotkeys[v.hotkey].collapsed = true
                     end
                 elseif v.type == 'entry' and v.filters then
-                    if string.find(v.filters.text, target) then
-                        match = true
-                        v.filterMatch = 'text'
-                    elseif string.find(v.filters.key, target) then
-                        match = true
-                        v.filterMatch = 'key'
-                    elseif string.find(v.filters.action, target) then
-                        match = true
-                        v.filterMatch = 'action'
-                    elseif string.find(v.filters.hotkey, target) then
+                    if string.find(v.filters.hotkey, search) then
                         match = true
                         v.filterMatch = 'hotkey'
                     else
@@ -1709,7 +1663,7 @@ local function RIGHTSIDE_CreateUI()
         end
         self:CalcVisible()
     end
-    RIGHTSIDE_FILTER.text:SetText('')
+    RIGHTSIDE_FILTER.input:SetText('')
 end
 
 -- / RIGHTSIDE ---------------------------------------------------------------
