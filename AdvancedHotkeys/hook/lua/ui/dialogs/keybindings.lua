@@ -5,30 +5,25 @@
 -- Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 -----------------------------------------------------------------
 
-function tLOG(tbl, indent)
-    if not indent then indent = 0 end
-    local formatting = string.rep('  ', indent)
-    if type(tbl) == 'nil' then
-        LOG(formatting .. 'nil')
+function tLOG(this, indentLevel)
+    if not indentLevel then indentLevel = 0 end
+
+    local indent = string.rep('  ', indentLevel)
+
+    if type(this) == 'nil' then
+        LOG(indent .. 'nil')
         return
-    end
-    if type(tbl) == 'string' then
-        LOG(formatting .. tbl)
+    elseif type(this) == 'string' then
+        LOG(indent .. '"' .. this .. '"')
         return
-    end
-    for k, v in pairs(tbl) do
-        formatting = string.rep('  ', indent) .. k .. ': '
-        if type(v) == 'nil' then
-            LOG(formatting .. 'NIL')
-        elseif type(v) == 'table' then
-            LOG(formatting)
-            tLOG(v, indent + 1)
-        elseif type(v) == 'boolean' then
-            LOG(formatting .. tostring(v))
-        else
-            LOG(formatting)
-            LOG(v)
+    elseif type(this) == 'boolean' then
+        LOG(indent .. tostring(this))
+    elseif type(this) == 'table' then
+        LOG(indent .. "{")
+        for index, value in this do
+            tLOG(value, indentLevel + 1)
         end
+        LOG(indent .. "}")
     end
 end
 
@@ -49,9 +44,6 @@ local actionCategories = import('/lua/keymap/keycategories.lua').keyCategories
 local actionCategoryOrder = import('/lua/keymap/keycategories.lua').keyCategoryOrder
 local allHotkeysOrdered = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
--- TODO
-advancedKeyMap = import('/mods/AdvancedHotkeys/modules/main.lua').advancedKeyMap
-
 local popup = nil
 local dialogContent
 
@@ -64,6 +56,8 @@ local STANDARD_FONT_SIZE = 16
 local HEADER_FONT_SIZE = 20
 local LINEHEIGHT = 30
 local BUTTON_FONTSIZE = 18
+
+-- LEFTSIDE ------------------------------------------------------------------
 
 local LEFTSIDE_FormatData
 
@@ -950,6 +944,11 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_FILTER.text:SetText('')
 end
 
+-- / LEFTSIDE ----------------------------------------------------------------
+
+
+-- RIGHTSIDE -----------------------------------------------------------------
+
 local RIGHTSIDE_FormatData
 
 local RIGHTSIDE_SECTION
@@ -993,7 +992,7 @@ local function RIGHTSIDE_ClearActionKey(action, currentKey)
     end
 end
 
-local function RIGHTSIDE_EditMessage(parent, k, v)
+local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
     local dialogContent = Group(parent)
     LayoutHelpers.SetDimensions(dialogContent, 400, 170)
 
@@ -1021,7 +1020,7 @@ local function RIGHTSIDE_EditMessage(parent, k, v)
     LayoutHelpers.AtHorizontalCenterIn(textBox, dialogContent)
     LayoutHelpers.AtVerticalCenterIn(textBox, dialogContent)
     LayoutHelpers.SetDimensions(textBox, 334, 24)
-    textBox:SetText(v.text)
+    textBox:SetText(lineData.text)
 
     textBox:AcquireFocus() -- Not working
 
@@ -1034,24 +1033,18 @@ local function RIGHTSIDE_EditMessage(parent, k, v)
     okButton.OnClick = function(self, modifiers)
         local newText = textBox:GetText()
 
-        v.text = newText
+        lineData.text = newText
+
+        local advancedKeyMap = import('/mods/AdvancedHotkeys/modules/main.lua').advancedKeyMap
+
+        local temp = advancedKeyMap[lineData.hotkey]
+
+        tLOG(temp)
+
+        -- RIGHTSIDE_Hotkeys[key].text =
+        -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
 
         popup:Close()
-    end
-end
-
-function RIGHTSIDE_UpdateKey(key)
-
-    -- RIGHTSIDE_Hotkeys[key].text =
-    -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
-end
-
-local function RIGHTSIDE_keyTable_FIND(key)
-    for k, v in RIGHTSIDE_LineData do
-        if v.key == key then
-            RIGHTSIDE_UpdateKey(key)
-            break
-        end
     end
 end
 
@@ -1093,11 +1086,11 @@ local function RIGHTSIDE_GetLineColor(lineID, data)
     end
 end
 
-local function RIGHTSIDE_ToggleLines(category)
+local function RIGHTSIDE_ToggleLines(hotkey)
     if RIGHTSIDE_search and string.len(RIGHTSIDE_search) > 0 then return end
 
     for k, v in RIGHTSIDE_LineData do
-        if v.category == category then
+        if v.hotkey == hotkey then
             if v.collapsed then
                 v.collapsed = false
             else
@@ -1105,10 +1098,10 @@ local function RIGHTSIDE_ToggleLines(category)
             end
         end
     end
-    if RIGHTSIDE_Hotkeys[category].collapsed then
-        RIGHTSIDE_Hotkeys[category].collapsed = false
+    if RIGHTSIDE_Hotkeys[hotkey].collapsed then
+        RIGHTSIDE_Hotkeys[hotkey].collapsed = false
     else
-        RIGHTSIDE_Hotkeys[category].collapsed = true
+        RIGHTSIDE_Hotkeys[hotkey].collapsed = true
     end
     RIGHTSIDE_LIST:Filter(RIGHTSIDE_search)
 end
@@ -1202,10 +1195,10 @@ function RIGHTSIDE_CreateLine()
             end
         elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
             if string.len(RIGHTSIDE_search) == 0 then
-                RIGHTSIDE_ToggleLines(self.data.category)
+                RIGHTSIDE_ToggleLines(self.data.hotkey)
                 RIGHTSIDE_FILTER.text:AcquireFocus()
 
-                if RIGHTSIDE_Hotkeys[self.data.category].collapsed then
+                if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
                     self.toggle.txt:SetText('+')
                 else
                     self.toggle.txt:SetText('-')
@@ -1242,7 +1235,7 @@ function RIGHTSIDE_CreateLine()
     Tooltip.AddControlTooltip(line.toggle,
         {
             text = '<LOC key_binding_0010>Toggle Category',
-            body = '<LOC key_binding_0011>Toggle visibility of all actions for this category of keys'
+            body = '<LOC key_binding_0011>Toggle visibility of all actions for this hotkey of keys'
         })
 
     line.unbindKeyButton = RIGHTSIDE_CreateToggle(
@@ -1271,7 +1264,7 @@ function RIGHTSIDE_CreateLine()
         line.data = table.copy(data)
 
         if data.type == 'header' then
-            if RIGHTSIDE_Hotkeys[self.data.category].collapsed then
+            if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
                 self.toggle.txt:SetText('+')
             else
                 self.toggle.txt:SetText('-')
@@ -1302,8 +1295,8 @@ function RIGHTSIDE_SortData(dataTable)
         if a.order ~= b.order then
             return a.order < b.order
         else
-            if a.category ~= b.category then
-                return string.lower(a.category) < string.lower(b.category)
+            if a.hotkey ~= b.hotkey then
+                return string.lower(a.hotkey) < string.lower(b.hotkey)
             else
                 if a.type == 'entry' and b.type == 'entry' then
                     if string.lower(a.text) ~= string.lower(b.text) then
@@ -1319,42 +1312,57 @@ function RIGHTSIDE_SortData(dataTable)
     end)
 end
 
-function RIGHTSIDE_RECURSIVE_FORMATTING(k, entries)
+-- TODO: Standardize insert
+function RIGHTSIDE_InsertActions(actions, action)
+    -- table.insert(RIGHTSIDE_Hotkeys[hotkey].actions, {
+    --     action = 'ACTION',
+    --     key = 'KEY',
+    --     keyText = '',
+    --     hotkey = hotkey,
+    --     order = orderIndex,
+    --     text = entry['message'],
+    --     wikiURL = entry.wikiURL
+    -- })
+    -- orderIndex = orderIndex + 1
+end
+
+-- Takes entries from the game.prefs file, formats and inserts into Hotkeys
+function RIGHTSIDE_InsertFormattedPrefsEntries(hotkey, entries)
 
     -- create header if it doesn't exist
-    if not RIGHTSIDE_Hotkeys[k] then
-        RIGHTSIDE_Hotkeys[k] = {}
-        RIGHTSIDE_Hotkeys[k].actions = {}
-        RIGHTSIDE_Hotkeys[k].name = k
-        RIGHTSIDE_Hotkeys[k].collapsed = RIGHTSIDE_linesCollapsed
-        RIGHTSIDE_Hotkeys[k].order = table.getsize(RIGHTSIDE_Hotkeys) - 1
-        RIGHTSIDE_Hotkeys[k].text = k
+    if not RIGHTSIDE_Hotkeys[hotkey] then
+        RIGHTSIDE_Hotkeys[hotkey] = {}
+        RIGHTSIDE_Hotkeys[hotkey].actions = {}
+        RIGHTSIDE_Hotkeys[hotkey].hotkey = hotkey
+        RIGHTSIDE_Hotkeys[hotkey].name = hotkey
+        RIGHTSIDE_Hotkeys[hotkey].collapsed = RIGHTSIDE_linesCollapsed
+        RIGHTSIDE_Hotkeys[hotkey].order = table.getsize(RIGHTSIDE_Hotkeys) - 1
+        RIGHTSIDE_Hotkeys[hotkey].text = hotkey
     end
 
-    local orderIndex = 1
+    local orderIndex
 
+    -- Insert actions
     for entryKey, entry in entries do
+        orderIndex = 1
 
         if entry['message'] ~= nil then
-            table.insert(RIGHTSIDE_Hotkeys[k].actions, {
-                action = 'ACTION',
-                key = 'KEY',
-                keyText = '',
-                category = k,
-                order = RIGHTSIDE_Hotkeys[k].order + orderIndex,
+            table.insert(RIGHTSIDE_Hotkeys[hotkey].actions, {
+                hotkey = hotkey,
+                order = orderIndex,
+                hotkey = hotkey,
                 text = entry['message'],
-                wikiURL = entry.wikiURL
             })
             orderIndex = orderIndex + 1
         end
 
         if entry['execute'] ~= nil then
-            table.insert(RIGHTSIDE_Hotkeys[k].actions, {
+            table.insert(RIGHTSIDE_Hotkeys[hotkey].actions, {
+                hotkey = hotkey,
+                order = orderIndex,
                 action = 'ACTION',
                 key = 'KEY',
                 keyText = '',
-                category = k,
-                order = RIGHTSIDE_Hotkeys[k].order + orderIndex,
                 text = entry['execute'],
                 wikiURL = entries.wikiURL
             })
@@ -1382,45 +1390,43 @@ function RIGHTSIDE_FormatData()
     local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
 
     -- reset previously formated key actions in all groups because they might have been re-mapped
-    for category, group in RIGHTSIDE_Hotkeys do
-        group.actions = {}
+    for hotkey, entries in RIGHTSIDE_Hotkeys do
+        entries.actions = {}
     end
 
-    for k, v in advancedKeyMap do
-        RIGHTSIDE_RECURSIVE_FORMATTING(k, v)
+    for hotkey, entries in advancedKeyMap do
+        RIGHTSIDE_InsertFormattedPrefsEntries(hotkey, entries)
     end
 
-    -- flatten all key actions to a list separated by a header with info about key category
+    -- flatten ... (NEVER RUNS)
     local index = 1
-    for category, group in RIGHTSIDE_Hotkeys do
-        if not table.empty(group.actions) then
+    for hotkey, entries in RIGHTSIDE_Hotkeys do
+        if not table.empty(entries.actions) then
+            LOG(333)
             keyData[index] = {
+                hotkey = hotkey,
                 type = 'header',
                 id = index,
-                order = RIGHTSIDE_Hotkeys[category].order,
-                count = table.getsize(group.actions),
-                category = category,
-                text = RIGHTSIDE_Hotkeys[category].text,
-                collapsed = RIGHTSIDE_Hotkeys[category].collapsed
+                order = RIGHTSIDE_Hotkeys[hotkey].order,
+                count = table.getsize(entries.actions),
+                text = RIGHTSIDE_Hotkeys[hotkey].text,
+                collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed
             }
             index = index + 1
-            for _, data in group.actions do
+            for _, data in entries.actions do
                 keyData[index] = {
                     type = 'entry',
+                    hotkey = hotkey,
+                    order = RIGHTSIDE_Hotkeys[hotkey].order,
                     text = data.text,
                     action = data.action,
                     key = data.key,
-                    keyText = LOC(data.keyText),
-                    category = category,
-                    order = RIGHTSIDE_Hotkeys[category].order,
-                    collapsed = RIGHTSIDE_Hotkeys[category].collapsed,
+                    collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                     id = index,
-                    wikiURL = data.wikiURL,
                     filters = { -- create filter parameters for quick searching of keys
-                        key = string.gsub(string.lower(data.keyText), ' %+ ', ' '),
                         text = string.lower(data.text or ''),
                         action = string.lower(data.action or ''),
-                        category = string.lower(data.category or ''),
+                        hotkey = string.lower(data.hotkey or ''),
                     }
                 }
                 index = index + 1
@@ -1646,14 +1652,14 @@ local function RIGHTSIDE_CreateUI()
             for k, v in RIGHTSIDE_LineData do
                 if v.type == 'header' then
                     table.insert(RIGHTSIDE_linesVisible, k)
-                    RIGHTSIDE_Hotkeys[v.category].visible = v.count
-                    RIGHTSIDE_Hotkeys[v.category].bindings = 0
+                    RIGHTSIDE_Hotkeys[v.hotkey].visible = v.count
+                    RIGHTSIDE_Hotkeys[v.hotkey].bindings = 0
                 elseif v.type == 'entry' then
                     if not v.collapsed then
                         table.insert(RIGHTSIDE_linesVisible, k)
                     end
                     if v.key then
-                        RIGHTSIDE_Hotkeys[v.category].bindings = RIGHTSIDE_Hotkeys[v.category].bindings + 1
+                        RIGHTSIDE_Hotkeys[v.hotkey].bindings = RIGHTSIDE_Hotkeys[v.hotkey].bindings + 1
                     end
                 end
             end
@@ -1662,12 +1668,12 @@ local function RIGHTSIDE_CreateUI()
             for k, v in RIGHTSIDE_LineData do
                 local match = false
                 if v.type == 'header' then
-                    RIGHTSIDE_Hotkeys[v.category].visible = 0
-                    RIGHTSIDE_Hotkeys[v.category].bindings = 0
+                    RIGHTSIDE_Hotkeys[v.hotkey].visible = 0
+                    RIGHTSIDE_Hotkeys[v.hotkey].bindings = 0
                     if not headersVisible[k] then
                         headersVisible[k] = true
                         table.insert(RIGHTSIDE_linesVisible, k)
-                        RIGHTSIDE_Hotkeys[v.category].collapsed = true
+                        RIGHTSIDE_Hotkeys[v.hotkey].collapsed = true
                     end
                 elseif v.type == 'entry' and v.filters then
                     if string.find(v.filters.text, target) then
@@ -1679,9 +1685,9 @@ local function RIGHTSIDE_CreateUI()
                     elseif string.find(v.filters.action, target) then
                         match = true
                         v.filterMatch = 'action'
-                    elseif string.find(v.filters.category, target) then
+                    elseif string.find(v.filters.hotkey, target) then
                         match = true
-                        v.filterMatch = 'category'
+                        v.filterMatch = 'hotkey'
                     else
                         match = false
                         v.filterMatch = nil
@@ -1691,11 +1697,11 @@ local function RIGHTSIDE_CreateUI()
                             headersVisible[v.header] = true
                             table.insert(RIGHTSIDE_linesVisible, v.header)
                         end
-                        RIGHTSIDE_Hotkeys[v.category].collapsed = false
-                        RIGHTSIDE_Hotkeys[v.category].visible = RIGHTSIDE_Hotkeys[v.category].visible + 1
+                        RIGHTSIDE_Hotkeys[v.hotkey].collapsed = false
+                        RIGHTSIDE_Hotkeys[v.hotkey].visible = RIGHTSIDE_Hotkeys[v.hotkey].visible + 1
                         table.insert(RIGHTSIDE_linesVisible, k)
                         if v.key then
-                            RIGHTSIDE_Hotkeys[v.category].bindings = RIGHTSIDE_Hotkeys[v.category].bindings + 1
+                            RIGHTSIDE_Hotkeys[v.hotkey].bindings = RIGHTSIDE_Hotkeys[v.hotkey].bindings + 1
                         end
                     end
                 end
@@ -1705,6 +1711,8 @@ local function RIGHTSIDE_CreateUI()
     end
     RIGHTSIDE_FILTER.text:SetText('')
 end
+
+-- / RIGHTSIDE ---------------------------------------------------------------
 
 function CreateUI()
     LOG('Keybindings CreateUI')
