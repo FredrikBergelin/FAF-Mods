@@ -1201,6 +1201,20 @@ function RIGHTSIDE_CreateLine()
                 PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
                 return true
             end
+        elseif self.data.type == 'subheader' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
+            -- TODO
+            if string.len(RIGHTSIDE_search) == 0 then
+                RIGHTSIDE_ToggleLines(self.data.hotkey)
+                RIGHTSIDE_FILTER.input:AcquireFocus()
+
+                if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
+                    self.toggle.txt:SetText('+')
+                else
+                    self.toggle.txt:SetText('-')
+                end
+                PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
+                return true
+            end
         end
         return false
     end
@@ -1252,6 +1266,12 @@ function RIGHTSIDE_CreateLine()
     line.Update = function(self, lineData, lineID)
         line:SetSolidColor(RIGHTSIDE_GetLineColor(lineID, lineData))
         line.data = table.copy(lineData)
+
+        if lineData.indentation ~= nil then
+            LayoutHelpers.AtLeftIn(line, RIGHTSIDE_LIST, lineData.indentation * LINEHEIGHT)
+        else
+            LayoutHelpers.AtLeftIn(line, RIGHTSIDE_LIST)
+        end
 
         if lineData.type == 'header' then
             line.toggle:Show()
@@ -1359,9 +1379,6 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
             })
 
         elseif entry['subkeys'] ~= nil then
-
-
-            tLOG(entry['subkeys'], "entry['subkeys']")
             local subkeys = {}
 
             for subkey, entries in entry['subkeys'] do
@@ -1384,6 +1401,7 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
         lineData[ ref['index'] ] = {
             type = 'entry',
+            indentation = ref['indentation'],
             hotkey = hotkey,
             order = RIGHTSIDE_Hotkeys[hotkey].order,
             collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
@@ -1402,6 +1420,7 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
                 lineData[ ref['index'] ] = {
                     type = 'entry',
+                    indentation = ref['indentation'],
                     hotkey = hotkey,
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
                     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
@@ -1423,15 +1442,15 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
             end
 
         elseif action.subkeys ~= nil then
-            tLOG(action.subkeys, "action.subkeys")
+
+            ref['indentation'] = ref['indentation'] + 1
 
             for subkeyIndex, subkeys in action.subkeys do
 
-                tLOG(subkeyIndex, "subkeyIndex")
-
                 lineData[ ref['index'] ] = {
-                    type = 'entry',
-                    hotkey = hotkey,
+                    type = 'header',
+                    indentation = ref['indentation'],
+                    hotkey = subkeyIndex,
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
                     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                     filters = {
@@ -1442,9 +1461,10 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
                 ref['index'] = ref['index'] + 1
 
-                RECURSIVE(lineData, subkeys, hotkey, ref)
+                RECURSIVE(lineData, subkeys, subkeyIndex, ref)
             end
 
+            ref['indentation'] = ref['indentation'] - 1
         end
 
         ref['index'] = ref['index'] + 1
@@ -1464,7 +1484,8 @@ local function RIGHTSIDE_FormatLineData()
     end
 
     local ref = {
-        index = 1
+        index = 1,
+        indentation = 0
     }
 
     -- TODO Set indentation level
@@ -1473,6 +1494,7 @@ local function RIGHTSIDE_FormatLineData()
 
             lineData[ ref['index'] ] = {
                 type = 'header',
+                indentation = ref['indentation'],
                 hotkey = hotkey,
                 id = ref['index'],
                 order = RIGHTSIDE_Hotkeys[hotkey].order,
