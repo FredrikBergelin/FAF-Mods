@@ -12,7 +12,7 @@ function tLOG(this, key, indentLevel)
     local first = indent .. tostring(key) .. ': '
 
     if type(this) == 'nil' then
-        LOG(indent .. 'nil')
+        LOG(first .. 'nil')
         return
     elseif type(this) == 'string' then
         LOG(first .. '"' .. this .. '"')
@@ -1045,8 +1045,6 @@ end
 
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_LineData do
-        -- LOG("-- RIGHTSIDE_AssignCurrentSelection() for k, v in RIGHTSIDE_LineData do -- tLOG(v)")
-        -- -- tLOG(v, k)
         if v.selected and v.message then
             RIGHTSIDE_EditMessage(popup, k, v)
             break
@@ -1084,6 +1082,8 @@ end
 local function RIGHTSIDE_ToggleLines(hotkey)
     if RIGHTSIDE_search and string.len(RIGHTSIDE_search) > 0 then return end
 
+    tLOG(RIGHTSIDE_Hotkeys[hotkey], "RIGHTSIDE_Hotkeys[" .. tostring(hotkey) .. "]")
+
     for k, v in RIGHTSIDE_LineData do
         if v.hotkey == hotkey then
             if v.collapsed then
@@ -1096,7 +1096,7 @@ local function RIGHTSIDE_ToggleLines(hotkey)
     if RIGHTSIDE_Hotkeys[hotkey].collapsed then
         RIGHTSIDE_Hotkeys[hotkey].collapsed = false
     else
-        RIGHTSIDE_Hotkeys[hotkey].collapsed = true
+        RIGHTSIDE_Hotkeys[hotkey].collapsed = true -- TODO collapsed == nil
     end
     RIGHTSIDE_LIST:Filter(RIGHTSIDE_search)
 end
@@ -1133,6 +1133,12 @@ function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     button.txt:SetAlpha(0.8)
 
     button.OnMouseClick = function(self) -- override for mouse clicks
+        LOG("button.OnMouseClick return false")
+        return false
+    end
+
+    button.Clicked = function(line)
+        LOG("Clicked default")
         return false
     end
 
@@ -1143,8 +1149,16 @@ function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
         elseif event.Type == 'MouseExit' then
             button:SetAlpha(0.8)
             button.txt:SetAlpha(0.8)
+        elseif event.Type == 'ButtonPress' then
+            WARN("ButtonPress")
+            button.Clicked(parent)
+        elseif event.Type == 'ButtonDClick' then
+            WARN("ButtonDClick")
+            button.Clicked(parent)
+
+            -- Remove or replace above
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
-            return button:OnMouseClick()
+            return button.Clicked(parent)
         end
         return false
     end
@@ -1188,35 +1202,7 @@ function RIGHTSIDE_CreateLine()
                 RIGHTSIDE_AssignCurrentSelection()
                 return true
             end
-        elseif self.data.type == 'header' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
-            if string.len(RIGHTSIDE_search) == 0 then
-                RIGHTSIDE_ToggleLines(self.data.hotkey)
-                RIGHTSIDE_FILTER.input:AcquireFocus()
-
-                if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
-                    self.toggle.txt:SetText('+')
-                else
-                    self.toggle.txt:SetText('-')
-                end
-                PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
-                return true
-            end
-        elseif self.data.type == 'subheader' and (event.Type == 'ButtonPress' or event.Type == 'ButtonDClick') then
-            -- TODO
-            if string.len(RIGHTSIDE_search) == 0 then
-                RIGHTSIDE_ToggleLines(self.data.hotkey)
-                RIGHTSIDE_FILTER.input:AcquireFocus()
-
-                if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
-                    self.toggle.txt:SetText('+')
-                else
-                    self.toggle.txt:SetText('-')
-                end
-                PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
-                return true
-            end
         end
-        return false
     end
 
     line.UnbindKeyBinding = function(self)
@@ -1233,6 +1219,21 @@ function RIGHTSIDE_CreateLine()
         LINEHEIGHT,
         BUTTON_FONTSIZE,
         '+')
+
+    line.toggle.Clicked = function(line)
+        tLOG(line.data.hotkey, "line.data.hotkey")
+
+        RIGHTSIDE_ToggleLines(line.data.hotkey)
+        RIGHTSIDE_FILTER.input:AcquireFocus()
+
+        if RIGHTSIDE_Hotkeys[line.data.hotkey].collapsed then
+            line.toggle.txt:SetText('+')
+        else
+            line.toggle.txt:SetText('-')
+        end
+        PlaySound(Sound({ Cue = 'UI_Menu_MouseDown_Sml', Bank = 'Interface' }))
+        return true
+    end
 
     LayoutHelpers.AtLeftIn(line.toggle, line)
     LayoutHelpers.AtVerticalCenterIn(line.toggle, line)
@@ -1297,8 +1298,6 @@ function RIGHTSIDE_CreateLine()
 
             -- TODO remove
             line.description:SetText('ENTRY NOT DEFINED')
-
-            -- TODO set indentation
 
             if lineData.message ~= nil then
                 line.description:SetText(lineData.message)
@@ -1456,7 +1455,7 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
                     filters = {
                         hotkey = string.lower(Hotkey.hotkey or ''),
                     },
-                    subkey = subkeyIndex -- TODO
+                    subkey = subkeyIndex
                 }
 
                 ref['index'] = ref['index'] + 1
@@ -1488,7 +1487,7 @@ local function RIGHTSIDE_FormatLineData()
         indentation = 0
     }
 
-    -- TODO Set indentation level
+    -- TODO Make sure indentation level works in more complex scenarios
     for hotkey, Hotkey in RIGHTSIDE_Hotkeys do
         if not table.empty(Hotkey.actions) then
 
