@@ -1278,16 +1278,16 @@ function RIGHTSIDE_CreateLine()
 
             if lineData.message ~= nil then
                 line.description:SetText(lineData.message)
+
             elseif lineData.execute ~= nil then
                 line.description:SetText(lineData.execute)
+
             elseif lineData.conditional ~= nil then
                 line.description:SetText(lineData.conditional.func ..
                     ' ' .. lineData.conditional.args .. ' ' .. tostring(lineData.conditional.checkFor))
 
-                -- if lineData.conditional.
-
-            elseif lineData.subkeys ~= nil then
-                line.description:SetText('SUBKEYS')
+            elseif lineData.subkey ~= nil then
+                line.description:SetText(lineData.subkey)
             end
         end
     end
@@ -1413,21 +1413,32 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
             end
 
             if action.valid ~= nil then
-                tLOG(action.valid, "action.valid")
                 RECURSIVE(lineData, action.valid, hotkey, ref)
             end
 
             if action.invalid ~= nil then
-                tLOG(action.invalid, "action.invalid")
                 RECURSIVE(lineData, action.invalid, hotkey, ref)
             end
 
-            LOG('-------------')
+        elseif action.subkeys ~= nil then
 
-            tLOG(action, "ACTION")
+            for subkeyIndex, subkeys in action.subkeys do
 
-            -- elseif action.subkeys ~= nil then
-            --     keyData[i].subkeys = 'SUBKEYS'
+                lineData[ ref['index'] ] = {
+                    type = 'entry',
+                    hotkey = hotkey,
+                    order = RIGHTSIDE_Hotkeys[hotkey].order,
+                    collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                    filters = {
+                        hotkey = string.lower(Hotkey.hotkey or ''),
+                    },
+                    subkey = Hotkey.hotkey --- TODO
+                }
+
+                ref['index'] = ref['index'] + 1
+
+                RECURSIVE(lineData, subkeys, hotkey, ref)
+            end
 
         end
 
@@ -1435,7 +1446,6 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
     end
 end
 
--- TODO ULTIMATE
 local function RIGHTSIDE_FormatLineData()
     local lineData = {}
     local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
@@ -1471,9 +1481,6 @@ local function RIGHTSIDE_FormatLineData()
         end
     end
 
-    --- TODO
-    -- tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
-
     -- RIGHTSIDE_SortData(keyData)
 
     -- store index of a header line for each key line
@@ -1493,6 +1500,9 @@ end
 local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_search = ''
     RIGHTSIDE_LineData = RIGHTSIDE_FormatLineData()
+
+    --- TODO
+    tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
 
     -- TODO
     -- tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
