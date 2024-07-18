@@ -1280,8 +1280,9 @@ function RIGHTSIDE_CreateLine()
                 line.description:SetText(lineData.message)
             elseif lineData.execute ~= nil then
                 line.description:SetText(lineData.execute)
-            elseif lineData.conditionals ~= nil then
-                line.description:SetText('CONDITIONALS')
+            elseif lineData.conditional ~= nil then
+                line.description:SetText(lineData.conditional.func ..
+                    ' ' .. lineData.conditional.args .. ' ' .. tostring(lineData.conditional.checkFor))
             elseif lineData.subkeys ~= nil then
                 line.description:SetText('SUBKEYS')
             end
@@ -1362,6 +1363,59 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
     return Hotkey
 end
 
+local function RECURSIVE(keyData, Hotkey, hotkey, ref)
+
+    for _, action in Hotkey.actions do
+
+        keyData[ ref['index'] ] = {
+            type = 'entry',
+            hotkey = hotkey,
+            order = RIGHTSIDE_Hotkeys[hotkey].order,
+            collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+            filters = {
+                hotkey = string.lower(Hotkey.hotkey or ''),
+            }
+        }
+
+        if action.message ~= nil then
+            keyData[ ref['index'] ].message = action.message
+        elseif action.execute ~= nil then
+            keyData[ ref['index'] ].execute = action.execute
+        elseif action.conditionals ~= nil then
+
+            for k, conditional in action.conditionals do
+
+                keyData[ ref['index'] ] = {
+                    type = 'entry',
+                    hotkey = hotkey,
+                    order = RIGHTSIDE_Hotkeys[hotkey].order,
+                    collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                    filters = {
+                        hotkey = string.lower(Hotkey.hotkey or ''),
+                    },
+                    conditional = conditional
+                }
+
+                ref['index'] = ref['index'] + 1
+            end
+
+            if action.valid ~= nil then
+
+            end
+
+            if action.invalid ~= nil then
+
+            end
+
+            -- elseif action.subkeys ~= nil then
+            --     keyData[i].subkeys = 'SUBKEYS'
+
+        end
+
+        ref['index'] = ref['index'] + 1
+    end
+end
+
 -- TODO ULTIMATE
 local function RIGHTSIDE_FormatLineData()
     local keyData = {}
@@ -1375,48 +1429,24 @@ local function RIGHTSIDE_FormatLineData()
         RIGHTSIDE_Hotkeys[hotkey] = RIGHTSIDE_FormattedHotkey(hotkey, entries)
     end
 
-    -- TODO
-    tLOG(RIGHTSIDE_Hotkeys, "RIGHTSIDE_Hotkeys")
+    local ref = {
+        index = 1
+    }
 
-    local i = 1
     for hotkey, Hotkey in RIGHTSIDE_Hotkeys do
         if not table.empty(Hotkey.actions) then
 
-            keyData[i] = {
+            keyData[ ref['index'] ] = {
                 type = 'header',
                 hotkey = hotkey,
-                id = i,
+                id = ref['index'],
                 order = RIGHTSIDE_Hotkeys[hotkey].order,
                 collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                 count = table.getsize(Hotkey.actions),
             }
+            ref['index'] = ref['index'] + 1
 
-            i = i + 1
-
-            for _, entry in Hotkey.actions do
-
-                keyData[i] = {
-                    type = 'entry',
-                    hotkey = hotkey,
-                    order = RIGHTSIDE_Hotkeys[hotkey].order,
-                    collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
-                    filters = { -- create filter parameters for quick searching of keys
-                        hotkey = string.lower(Hotkey.hotkey or ''),
-                    }
-                }
-
-                if entry.message ~= nil then
-                    keyData[i].message = entry.message
-                elseif entry.execute ~= nil then
-                    keyData[i].execute = entry.execute
-                -- elseif entry.conditionals ~= nil then
-                --     keyData[i].conditionals = 'CONDITIONALS'
-                -- elseif entry.subkeys ~= nil then
-                --     keyData[i].subkeys = 'SUBKEYS'
-                end
-
-                i = i + 1
-            end
+            RECURSIVE(keyData, Hotkey, hotkey, ref)
         end
     end
 
