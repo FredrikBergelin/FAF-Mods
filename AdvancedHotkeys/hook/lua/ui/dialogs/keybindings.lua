@@ -1031,7 +1031,7 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
 
         local temp = advancedKeyMap[lineData.hotkey]
 
-        tLOG(temp, 'advancedKeyMap[' .. lineData.hotkey .. ']')
+        -- tLOG(temp, 'advancedKeyMap[' .. lineData.hotkey .. ']')
 
         -- RIGHTSIDE_Hotkeys[key].message =
         -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
@@ -1042,8 +1042,8 @@ end
 
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_LineData do
-        LOG("-- RIGHTSIDE_AssignCurrentSelection() for k, v in RIGHTSIDE_LineData do tLOG(v)")
-        tLOG(v, k)
+        -- LOG("-- RIGHTSIDE_AssignCurrentSelection() for k, v in RIGHTSIDE_LineData do -- tLOG(v)")
+        -- -- tLOG(v, k)
         if v.selected and v.message then
             RIGHTSIDE_EditMessage(popup, k, v)
             break
@@ -1283,6 +1283,9 @@ function RIGHTSIDE_CreateLine()
             elseif lineData.conditional ~= nil then
                 line.description:SetText(lineData.conditional.func ..
                     ' ' .. lineData.conditional.args .. ' ' .. tostring(lineData.conditional.checkFor))
+
+                -- if lineData.conditional.
+
             elseif lineData.subkeys ~= nil then
                 line.description:SetText('SUBKEYS')
             end
@@ -1325,26 +1328,31 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
 
         elseif entry['conditionals'] ~= nil then
             local conditionals = {}
+            local valid = {}
+            local invalid = {}
 
             for conditionalIndex, conditional in entry['conditionals'] do
                 table.insert(conditionals, {
-                    order = conditionalIndex,
                     func = conditional.func,
                     args = conditional.args,
                     checkFor = conditional.checkFor,
                 })
             end
 
+            if entry['valid'] ~= nil then
+                valid = RIGHTSIDE_FormattedHotkey(hotkey, entry['valid'])
+            end
+
+            if entry['invalid'] ~= nil then
+                invalid = RIGHTSIDE_FormattedHotkey(hotkey, entry['invalid'])
+            end
+
             table.insert(Hotkey.actions, {
                 order = entryIndex,
                 conditionals = conditionals,
+                valid = valid,
+                invalid = invalid,
             })
-            if entry['valid'] ~= nil then
-                RIGHTSIDE_FormattedHotkey(hotkey, entry['valid'])
-            end
-            if entry['invalid'] ~= nil then
-                RIGHTSIDE_FormattedHotkey(hotkey, entry['invalid'])
-            end
 
         elseif entry['subkeys'] ~= nil then
             local subkeys = {}
@@ -1363,11 +1371,16 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
     return Hotkey
 end
 
-local function RECURSIVE(keyData, Hotkey, hotkey, ref)
+local function RECURSIVE(lineData, Hotkey, hotkey, ref)
+
+    -- tLOG(keyData, "keyData")
+    -- tLOG(Hotkey, "Hotkey")
+    -- tLOG(hotkey, "hotkey")
+    -- tLOG(ref, "ref")
 
     for _, action in Hotkey.actions do
 
-        keyData[ ref['index'] ] = {
+        lineData[ ref['index'] ] = {
             type = 'entry',
             hotkey = hotkey,
             order = RIGHTSIDE_Hotkeys[hotkey].order,
@@ -1378,14 +1391,14 @@ local function RECURSIVE(keyData, Hotkey, hotkey, ref)
         }
 
         if action.message ~= nil then
-            keyData[ ref['index'] ].message = action.message
+            lineData[ ref['index'] ].message = action.message
         elseif action.execute ~= nil then
-            keyData[ ref['index'] ].execute = action.execute
+            lineData[ ref['index'] ].execute = action.execute
         elseif action.conditionals ~= nil then
 
             for k, conditional in action.conditionals do
 
-                keyData[ ref['index'] ] = {
+                lineData[ ref['index'] ] = {
                     type = 'entry',
                     hotkey = hotkey,
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
@@ -1400,12 +1413,18 @@ local function RECURSIVE(keyData, Hotkey, hotkey, ref)
             end
 
             if action.valid ~= nil then
-
+                tLOG(action.valid, "action.valid")
+                RECURSIVE(lineData, action.valid, hotkey, ref)
             end
 
             if action.invalid ~= nil then
-
+                tLOG(action.invalid, "action.invalid")
+                RECURSIVE(lineData, action.invalid, hotkey, ref)
             end
+
+            LOG('-------------')
+
+            tLOG(action, "ACTION")
 
             -- elseif action.subkeys ~= nil then
             --     keyData[i].subkeys = 'SUBKEYS'
@@ -1418,7 +1437,7 @@ end
 
 -- TODO ULTIMATE
 local function RIGHTSIDE_FormatLineData()
-    local keyData = {}
+    local lineData = {}
     local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
 
     for hotkey, entries in RIGHTSIDE_Hotkeys do
@@ -1436,7 +1455,9 @@ local function RIGHTSIDE_FormatLineData()
     for hotkey, Hotkey in RIGHTSIDE_Hotkeys do
         if not table.empty(Hotkey.actions) then
 
-            keyData[ ref['index'] ] = {
+            -- tLOG(Hotkey, "Hotkey")
+
+            lineData[ ref['index'] ] = {
                 type = 'header',
                 hotkey = hotkey,
                 id = ref['index'],
@@ -1446,15 +1467,18 @@ local function RIGHTSIDE_FormatLineData()
             }
             ref['index'] = ref['index'] + 1
 
-            RECURSIVE(keyData, Hotkey, hotkey, ref)
+            RECURSIVE(lineData, Hotkey, hotkey, ref)
         end
     end
+
+    --- TODO
+    -- tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
 
     -- RIGHTSIDE_SortData(keyData)
 
     -- store index of a header line for each key line
     local header = 1
-    for i, data in keyData do
+    for i, data in lineData do
         if data.type == 'header' then
             header = i
         elseif data.type == 'entry' then
@@ -1463,7 +1487,7 @@ local function RIGHTSIDE_FormatLineData()
         data.index = i
     end
 
-    return keyData
+    return lineData
 end
 
 local function RIGHTSIDE_CreateUI()
@@ -1471,7 +1495,7 @@ local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_LineData = RIGHTSIDE_FormatLineData()
 
     -- TODO
-    tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
+    -- tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
 
     RIGHTSIDE_SECTION = Group(dialogContent)
 
