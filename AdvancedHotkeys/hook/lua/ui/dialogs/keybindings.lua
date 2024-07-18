@@ -1079,13 +1079,13 @@ local function RIGHTSIDE_GetLineColor(lineID, data)
     end
 end
 
-local function RIGHTSIDE_ToggleLines(hotkey)
+local function RIGHTSIDE_ToggleLines(lineData)
     if RIGHTSIDE_search and string.len(RIGHTSIDE_search) > 0 then return end
 
-    tLOG(RIGHTSIDE_Hotkeys[hotkey], "RIGHTSIDE_Hotkeys[" .. tostring(hotkey) .. "]")
+    tLOG(RIGHTSIDE_Hotkeys[lineData.hotkey], "RIGHTSIDE_Hotkeys[" .. tostring(lineData.hotkey) .. "]")
 
     for k, v in RIGHTSIDE_LineData do
-        if v.hotkey == hotkey then
+        if v.hotkey == lineData.hotkey and v.indentation == lineData.indentation then -- TODO, check if parent is same obj
             if v.collapsed then
                 v.collapsed = false
             else
@@ -1093,10 +1093,10 @@ local function RIGHTSIDE_ToggleLines(hotkey)
             end
         end
     end
-    if RIGHTSIDE_Hotkeys[hotkey].collapsed then
-        RIGHTSIDE_Hotkeys[hotkey].collapsed = false
+    if RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed then
+        RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = false
     else
-        RIGHTSIDE_Hotkeys[hotkey].collapsed = true -- TODO collapsed == nil
+        RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = true -- TODO collapsed == nil
     end
     RIGHTSIDE_LIST:Filter(RIGHTSIDE_search)
 end
@@ -1223,7 +1223,7 @@ function RIGHTSIDE_CreateLine()
     line.toggle.Clicked = function(line)
         tLOG(line.data.hotkey, "line.data.hotkey")
 
-        RIGHTSIDE_ToggleLines(line.data.hotkey)
+        RIGHTSIDE_ToggleLines(line.data)
         RIGHTSIDE_FILTER.input:AcquireFocus()
 
         if RIGHTSIDE_Hotkeys[line.data.hotkey].collapsed then
