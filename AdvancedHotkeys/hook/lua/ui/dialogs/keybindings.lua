@@ -1034,8 +1034,6 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
 
         -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
 
-        tLOG(temp, 'advancedKeyMap[' .. lineData.hotkey .. ']')
-
         -- SetPreference('AdvancedHotkeysUserKeyMapBackupCreated', true)
         -- Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
 
@@ -1082,10 +1080,8 @@ end
 local function RIGHTSIDE_ToggleLines(lineData)
     if RIGHTSIDE_search and string.len(RIGHTSIDE_search) > 0 then return end
 
-    tLOG(RIGHTSIDE_Hotkeys[lineData.hotkey], "RIGHTSIDE_Hotkeys[" .. tostring(lineData.hotkey) .. "]")
-
     for k, v in RIGHTSIDE_LineData do
-        if v.hotkey == lineData.hotkey and v.indentation == lineData.indentation then -- TODO, check if parent is same obj
+        if v.keyPath == lineData.keyPath then
             if v.collapsed then
                 v.collapsed = false
             else
@@ -1093,10 +1089,11 @@ local function RIGHTSIDE_ToggleLines(lineData)
             end
         end
     end
+
     if RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed then
         RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = false
     else
-        RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = true -- TODO collapsed == nil
+        RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = true
     end
     RIGHTSIDE_LIST:Filter(RIGHTSIDE_search)
 end
@@ -1221,12 +1218,10 @@ function RIGHTSIDE_CreateLine()
         '+')
 
     line.toggle.Clicked = function(line)
-        tLOG(line.data.hotkey, "line.data.hotkey")
-
         RIGHTSIDE_ToggleLines(line.data)
         RIGHTSIDE_FILTER.input:AcquireFocus()
 
-        if RIGHTSIDE_Hotkeys[line.data.hotkey].collapsed then
+        if line.data.collapsed then
             line.toggle.txt:SetText('+')
         else
             line.toggle.txt:SetText('-')
@@ -1284,7 +1279,7 @@ function RIGHTSIDE_CreateLine()
 
             line.description:SetText(lineData.hotkey)
 
-            if RIGHTSIDE_Hotkeys[self.data.hotkey].collapsed then
+            if lineData.collapsed then
                 self.toggle.txt:SetText('+')
             else
                 self.toggle.txt:SetText('-')
@@ -1398,10 +1393,13 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
     for _, action in Hotkey.actions do
 
+        local keyP = ref['keyPath']
+
         lineData[ ref['index'] ] = {
             type = 'entry',
             indentation = ref['indentation'],
             hotkey = hotkey,
+            keyPath = ref['keyPath'],
             order = RIGHTSIDE_Hotkeys[hotkey].order,
             collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
             filters = {
@@ -1415,12 +1413,26 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
             lineData[ ref['index'] ].execute = action.execute
         elseif action.conditionals ~= nil then
 
+            -- lineData[ ref['index'] ] = {
+            --     type = 'header',
+            --     indentation = ref['indentation'],
+            --     hotkey = 'Condition',
+            --     keyPath = ref['keyPath'] .. '>Conditionals',
+            --     order = RIGHTSIDE_Hotkeys[hotkey].order,
+            --     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+            --     filters = {
+            --         hotkey = string.lower(Hotkey.hotkey or ''),
+            --     },
+            -- }
+
+            -- ref['indentation'] = ref['indentation'] + 1
             for k, conditional in action.conditionals do
 
                 lineData[ ref['index'] ] = {
                     type = 'entry',
                     indentation = ref['indentation'],
                     hotkey = hotkey,
+                    keyPath = ref['keyPath'],
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
                     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                     filters = {
@@ -1431,14 +1443,46 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
                 ref['index'] = ref['index'] + 1
             end
+            -- ref['indentation'] = ref['indentation'] - 1
 
             if action.valid ~= nil then
+                -- lineData[ ref['index'] ] = {
+                --     type = 'header',
+                --     indentation = ref['indentation'],
+                --     hotkey = 'Valid',
+                --     keyPath = ref['keyPath'] .. '>Valid',
+                --     order = RIGHTSIDE_Hotkeys[hotkey].order,
+                --     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                --     filters = {
+                --         hotkey = string.lower(Hotkey.hotkey or ''),
+                --     },
+                -- }
+                -- ref['index'] = ref['index'] + 1
+
+                -- ref['indentation'] = ref['indentation'] + 1
                 RECURSIVE(lineData, action.valid, hotkey, ref)
+                -- ref['indentation'] = ref['indentation'] - 1
             end
 
             if action.invalid ~= nil then
+                -- lineData[ ref['index'] ] = {
+                --     type = 'header',
+                --     indentation = ref['indentation'],
+                --     hotkey = 'Invalid',
+                --     keyPath = ref['keyPath'] .. '>Invalid',
+                --     order = RIGHTSIDE_Hotkeys[hotkey].order,
+                --     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                --     filters = {
+                --         hotkey = string.lower(Hotkey.hotkey or ''),
+                --     },
+                -- }
+                -- ref['index'] = ref['index'] + 1
+
+                -- ref['indentation'] = ref['indentation'] + 1
                 RECURSIVE(lineData, action.invalid, hotkey, ref)
+                -- ref['indentation'] = ref['indentation'] - 1
             end
+
 
         elseif action.subkeys ~= nil then
 
@@ -1446,10 +1490,13 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
             for subkeyIndex, subkeys in action.subkeys do
 
+                ref['keyPath'] = keyP .. ">" .. subkeyIndex
+
                 lineData[ ref['index'] ] = {
                     type = 'header',
                     indentation = ref['indentation'],
                     hotkey = subkeyIndex,
+                    keyPath = ref['keyPath'],
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
                     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                     filters = {
@@ -1484,22 +1531,26 @@ local function RIGHTSIDE_FormatLineData()
 
     local ref = {
         index = 1,
-        indentation = 0
+        indentation = 0,
+        keyPath = ''
     }
 
     -- TODO Make sure indentation level works in more complex scenarios
     for hotkey, Hotkey in RIGHTSIDE_Hotkeys do
         if not table.empty(Hotkey.actions) then
+            ref['keyPath'] = hotkey
 
             lineData[ ref['index'] ] = {
                 type = 'header',
                 indentation = ref['indentation'],
                 hotkey = hotkey,
+                keyPath = ref['keyPath'],
                 id = ref['index'],
                 order = RIGHTSIDE_Hotkeys[hotkey].order,
                 collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                 count = table.getsize(Hotkey.actions),
             }
+
             ref['index'] = ref['index'] + 1
 
             RECURSIVE(lineData, Hotkey, hotkey, ref)
@@ -1518,6 +1569,8 @@ local function RIGHTSIDE_FormatLineData()
         end
         data.index = i
     end
+
+    tLOG(lineData, "lineData")
 
     return lineData
 end
