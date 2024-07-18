@@ -1274,12 +1274,12 @@ function RIGHTSIDE_CreateLine()
             line.description:SetColor(UIUtil.fontColor)
 
             -- TODO TEST WORKING
-            line.description:SetText('Test')
+            line.description:SetText('ENTRY NOT DEFINED')
 
             if lineData.message ~= nil then
-                line.description:SetText('lineData.message')
+                line.description:SetText(lineData.message)
             elseif lineData.execute ~= nil then
-                line.description:SetText('lineData.execute')
+                line.description:SetText(lineData.execute)
             elseif lineData.conditionals ~= nil then
                 line.description:SetText('CONDITIONALS')
             elseif lineData.subkeys ~= nil then
@@ -1362,6 +1362,7 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
     return Hotkey
 end
 
+-- TODO ULTIMATE
 local function RIGHTSIDE_FormatLineData()
     local keyData = {}
     local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
@@ -1377,31 +1378,44 @@ local function RIGHTSIDE_FormatLineData()
     -- TODO
     tLOG(RIGHTSIDE_Hotkeys, "RIGHTSIDE_Hotkeys")
 
-    local index = 1
-    for hotkey, entries in RIGHTSIDE_Hotkeys do
-        if not table.empty(entries.actions) then
+    local i = 1
+    for hotkey, Hotkey in RIGHTSIDE_Hotkeys do
+        if not table.empty(Hotkey.actions) then
 
-            keyData[index] = {
+            keyData[i] = {
                 type = 'header',
                 hotkey = hotkey,
-                id = index,
+                id = i,
                 order = RIGHTSIDE_Hotkeys[hotkey].order,
                 collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
-                count = table.getsize(entries.actions),
+                count = table.getsize(Hotkey.actions),
             }
 
-            index = index + 1
-            for _, data in entries.actions do
-                keyData[index] = {
+            i = i + 1
+
+            for _, entry in Hotkey.actions do
+
+                keyData[i] = {
                     type = 'entry',
                     hotkey = hotkey,
                     order = RIGHTSIDE_Hotkeys[hotkey].order,
                     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
                     filters = { -- create filter parameters for quick searching of keys
-                        hotkey = string.lower(data.hotkey or ''),
+                        hotkey = string.lower(Hotkey.hotkey or ''),
                     }
                 }
-                index = index + 1
+
+                if entry.message ~= nil then
+                    keyData[i].message = entry.message
+                elseif entry.execute ~= nil then
+                    keyData[i].execute = entry.execute
+                -- elseif entry.conditionals ~= nil then
+                --     keyData[i].conditionals = 'CONDITIONALS'
+                -- elseif entry.subkeys ~= nil then
+                --     keyData[i].subkeys = 'SUBKEYS'
+                end
+
+                i = i + 1
             end
         end
     end
