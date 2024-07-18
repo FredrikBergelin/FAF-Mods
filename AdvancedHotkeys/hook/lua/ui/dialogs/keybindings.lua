@@ -511,7 +511,6 @@ function LEFTSIDE_CreateLine()
         return true
     end
 
-    -- TODO Check
     line.Update = function(self, data, lineID)
         line:SetSolidColor(LEFTSIDE_GetLineColor(lineID, data))
         line.data = table.copy(data)
@@ -1031,10 +1030,14 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
 
         local temp = advancedKeyMap[lineData.hotkey]
 
-        -- tLOG(temp, 'advancedKeyMap[' .. lineData.hotkey .. ']')
-
         -- RIGHTSIDE_Hotkeys[key].message =
+
         -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
+
+        tLOG(temp, 'advancedKeyMap[' .. lineData.hotkey .. ']')
+
+        -- SetPreference('AdvancedHotkeysUserKeyMapBackupCreated', true)
+        -- Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
 
         popup:Close()
     end
@@ -1116,11 +1119,11 @@ function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
     if not txtSize then txtSize = BUTTON_FONTSIZE end
     if not txt then txt = '?' end
 
-    local button = Bitmap(parent) -- TODO
+    local button = Bitmap(parent)
     button:SetSolidColor(bgColor)
     button.Height:Set(bgSize)
     button.Width:Set(bgSize)
-    button.txt = UIUtil.CreateText(button, txt, txtSize) -- TODO
+    button.txt = UIUtil.CreateText(button, txt, txtSize)
     button.txt:SetColor(txtColor)
     button.txt:SetFont(UIUtil.bodyFont, txtSize)
     LayoutHelpers.AtVerticalCenterIn(button.txt, button)
@@ -1246,7 +1249,6 @@ function RIGHTSIDE_CreateLine()
         return true
     end
 
-    -- TODO
     line.Update = function(self, lineData, lineID)
         line:SetSolidColor(RIGHTSIDE_GetLineColor(lineID, lineData))
         line.data = table.copy(lineData)
@@ -1273,8 +1275,10 @@ function RIGHTSIDE_CreateLine()
             line.description:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
 
-            -- TODO TEST WORKING
+            -- TODO remove
             line.description:SetText('ENTRY NOT DEFINED')
+
+            -- TODO set indentation
 
             if lineData.message ~= nil then
                 line.description:SetText(lineData.message)
@@ -1355,10 +1359,13 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
             })
 
         elseif entry['subkeys'] ~= nil then
+
+
+            tLOG(entry['subkeys'], "entry['subkeys']")
             local subkeys = {}
 
             for subkey, entries in entry['subkeys'] do
-                table.insert(subkeys, RIGHTSIDE_FormattedHotkey(subkey, entries))
+                subkeys[subkey] = RIGHTSIDE_FormattedHotkey(subkey, entries)
             end
 
             table.insert(Hotkey.actions, {
@@ -1372,11 +1379,6 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
 end
 
 local function RECURSIVE(lineData, Hotkey, hotkey, ref)
-
-    -- tLOG(keyData, "keyData")
-    -- tLOG(Hotkey, "Hotkey")
-    -- tLOG(hotkey, "hotkey")
-    -- tLOG(ref, "ref")
 
     for _, action in Hotkey.actions do
 
@@ -1421,8 +1423,11 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
             end
 
         elseif action.subkeys ~= nil then
+            tLOG(action.subkeys, "action.subkeys")
 
             for subkeyIndex, subkeys in action.subkeys do
+
+                tLOG(subkeyIndex, "subkeyIndex")
 
                 lineData[ ref['index'] ] = {
                     type = 'entry',
@@ -1432,7 +1437,7 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
                     filters = {
                         hotkey = string.lower(Hotkey.hotkey or ''),
                     },
-                    subkey = Hotkey.hotkey --- TODO
+                    subkey = subkeyIndex -- TODO
                 }
 
                 ref['index'] = ref['index'] + 1
@@ -1462,10 +1467,9 @@ local function RIGHTSIDE_FormatLineData()
         index = 1
     }
 
+    -- TODO Set indentation level
     for hotkey, Hotkey in RIGHTSIDE_Hotkeys do
         if not table.empty(Hotkey.actions) then
-
-            -- tLOG(Hotkey, "Hotkey")
 
             lineData[ ref['index'] ] = {
                 type = 'header',
@@ -1500,12 +1504,6 @@ end
 local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_search = ''
     RIGHTSIDE_LineData = RIGHTSIDE_FormatLineData()
-
-    --- TODO
-    tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
-
-    -- TODO
-    -- tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
 
     RIGHTSIDE_SECTION = Group(dialogContent)
 

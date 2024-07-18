@@ -122,9 +122,9 @@ function ConditionalConExecute(executable)
 end
 
 function InitAdvancedKeys()
-	local hotkeys = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
+	local hotkeysOrdered = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
-	for i, v in hotkeys do
+	for i, v in hotkeysOrdered do
 		local name = string.gsub(v, '-', '_')
 		userKeyActions['AHK ' .. name] = {
 			action = 'UI_Lua import("/mods/AdvancedHotkeys/modules/main.lua").RouteHotkey("' .. v .. '")',
