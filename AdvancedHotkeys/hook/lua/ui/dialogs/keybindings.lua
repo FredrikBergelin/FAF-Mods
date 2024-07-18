@@ -5,23 +5,24 @@
 -- Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 -----------------------------------------------------------------
 
-function tLOG(this, indentLevel)
+function tLOG(this, key, indentLevel)
     if not indentLevel then indentLevel = 0 end
 
-    local indent = string.rep('  ', indentLevel)
+    local indent = string.rep('-   ', indentLevel)
+    local first = indent .. tostring(key) .. ': '
 
     if type(this) == 'nil' then
         LOG(indent .. 'nil')
         return
     elseif type(this) == 'string' then
-        LOG(indent .. '"' .. this .. '"')
+        LOG(first .. '"' .. this .. '"')
         return
     elseif type(this) == 'boolean' then
-        LOG(indent .. tostring(this))
+        LOG(first .. tostring(this))
     elseif type(this) == 'table' then
-        LOG(indent .. "{")
-        for index, value in this do
-            tLOG(value, indentLevel + 1)
+        LOG(first .. "{")
+        for key, value in this do
+            tLOG(value, key, indentLevel + 1)
         end
         LOG(indent .. "}")
     end
@@ -510,6 +511,7 @@ function LEFTSIDE_CreateLine()
         return true
     end
 
+    -- TODO Check
     line.Update = function(self, data, lineID)
         line:SetSolidColor(LEFTSIDE_GetLineColor(lineID, data))
         line.data = table.copy(data)
@@ -936,7 +938,6 @@ end
 
 -- / LEFTSIDE ----------------------------------------------------------------
 
-
 -- RIGHTSIDE -----------------------------------------------------------------
 
 local RIGHTSIDE_FormatLineData -- Remove?
@@ -1030,7 +1031,7 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
 
         local temp = advancedKeyMap[lineData.hotkey]
 
-        tLOG(temp)
+        tLOG(temp, 'advancedKeyMap[' .. lineData.hotkey .. ']')
 
         -- RIGHTSIDE_Hotkeys[key].message =
         -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
@@ -1041,7 +1042,9 @@ end
 
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_LineData do
-        if v.selected then
+        LOG("-- RIGHTSIDE_AssignCurrentSelection() for k, v in RIGHTSIDE_LineData do tLOG(v)")
+        tLOG(v, k)
+        if v.selected and v.message then
             RIGHTSIDE_EditMessage(popup, k, v)
             break
         end
@@ -1199,11 +1202,6 @@ function RIGHTSIDE_CreateLine()
         return false
     end
 
-    line.AssignKeyBinding = function(self)
-        RIGHTSIDE_SelectLine(self.data.index)
-        RIGHTSIDE_AssignCurrentSelection()
-    end
-
     line.UnbindKeyBinding = function(self)
         if RIGHTSIDE_LineData[self.data.index].key then
             RIGHTSIDE_SelectLine(self.data.index)
@@ -1248,6 +1246,7 @@ function RIGHTSIDE_CreateLine()
         return true
     end
 
+    -- TODO
     line.Update = function(self, lineData, lineID)
         line:SetSolidColor(RIGHTSIDE_GetLineColor(lineID, lineData))
         line.data = table.copy(lineData)
@@ -1273,6 +1272,9 @@ function RIGHTSIDE_CreateLine()
 
             line.description:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
+
+            -- TODO TEST WORKING
+            line.description:SetText('Test')
 
             if lineData.message ~= nil then
                 line.description:SetText('lineData.message')
@@ -1372,6 +1374,9 @@ local function RIGHTSIDE_FormatLineData()
         RIGHTSIDE_Hotkeys[hotkey] = RIGHTSIDE_FormattedHotkey(hotkey, entries)
     end
 
+    -- TODO
+    tLOG(RIGHTSIDE_Hotkeys, "RIGHTSIDE_Hotkeys")
+
     local index = 1
     for hotkey, entries in RIGHTSIDE_Hotkeys do
         if not table.empty(entries.actions) then
@@ -1420,6 +1425,9 @@ end
 local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_search = ''
     RIGHTSIDE_LineData = RIGHTSIDE_FormatLineData()
+
+    -- TODO
+    tLOG(RIGHTSIDE_LineData, "RIGHTSIDE_LineData")
 
     RIGHTSIDE_SECTION = Group(dialogContent)
 
