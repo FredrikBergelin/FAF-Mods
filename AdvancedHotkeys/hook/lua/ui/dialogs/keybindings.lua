@@ -1178,7 +1178,7 @@ function RIGHTSIDE_CreateLine()
     line.Height:Set(LINEHEIGHT)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
-    LayoutHelpers.AtLeftIn(line.description, line, LINEHEIGHT + BUTTON_PADDING)
+    LayoutHelpers.AtLeftIn(line.description, line, BUTTON_PADDING)
     LayoutHelpers.AtVerticalCenterIn(line.description, line)
 
     line.HandleEvent = function(self, event)
@@ -1272,6 +1272,8 @@ function RIGHTSIDE_CreateLine()
         if lineData.type == 'header' then
             line.toggle:Show()
             line.unbindKeyButton:Hide()
+
+            LayoutHelpers.AtLeftIn(self.description, self, LINEHEIGHT + BUTTON_PADDING)
 
             line.description:SetFont('Arial', HEADER_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
@@ -1390,6 +1392,8 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
 end
 
 local function RECURSIVE(lineData, Hotkey, hotkey, ref)
+
+    ref['indentation'] = ref['indentation'] + 1
 
     for _, action in Hotkey.actions do
 
@@ -1515,6 +1519,8 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
         ref['index'] = ref['index'] + 1
     end
+
+    ref['indentation'] = ref['indentation'] - 1
 end
 
 local function RIGHTSIDE_FormatLineData()
