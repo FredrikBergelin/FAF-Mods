@@ -45,6 +45,14 @@ local actionCategories = import('/lua/keymap/keycategories.lua').keyCategories
 local actionCategoryOrder = import('/lua/keymap/keycategories.lua').keyCategoryOrder
 local allHotkeysOrdered = import('/mods/AdvancedHotkeys/modules/allKeys.lua').keyOrder
 
+-- local Prefs = import('/lua/user/prefs.lua')
+-- local userKeyActions = Prefs.GetFromCurrentProfile('UserKeyActions') -- Eg: ['Cycle next, defaults to closest'] = { action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection()', ... },
+-- local keymapKeyActions = import('/lua/keymap/keyactions.lua').keyActions
+-- local allKeyActions = table.combine(
+--     keymapKeyActions,
+--     userKeyActions
+-- )
+
 local popup = nil
 local dialogContent
 
@@ -516,20 +524,6 @@ function LEFTSIDE_CreateLine()
         line.data = table.copy(data)
 
         if data.type == 'header' then
-
-            -- if not line.tooltip then
-            --     line.tooltip = true
-
-            --     import('/lua/ui/game/tooltip.lua').AddControlTooltip(line,
-            --         {
-            --             text = 'header test',
-            --             body = 'Test' ..
-            --                 '\n - 1' ..
-            --                 '\n\n 2'
-            --         }, nil)
-            -- end
-
-
             if LEFTSIDE_Categories[self.data.category].collapsed then
                 self.toggle.txt:SetText('+')
             else
@@ -548,15 +542,6 @@ function LEFTSIDE_CreateLine()
             line.key:SetText('')
             line.statistics:SetText(stats)
         elseif data.type == 'entry' then
-
-            -- import('/lua/ui/game/tooltip.lua').AddControlTooltip(line,
-            --     {
-            --         text = 'entry test',
-            --         body = 'Test' ..
-            --             '\n - 1' ..
-            --             '\n\n 2'
-            --     }, nil)
-
             line.toggle:Hide()
             line.key:SetText(data.keyText)
             line.key:SetColor('ffffffff')
@@ -1894,9 +1879,9 @@ function CreateUI()
     LayoutHelpers.AtTopIn(LEFTSIDE_title, dialogContent, 12)
     LayoutHelpers.AtLeftIn(LEFTSIDE_title, dialogContent, TOP_PADDING / 2)
 
-    local RIGHTSIDE_title = UIUtil.CreateText(dialogContent, LOC('Advanced Hotkey Overrides'), 22)
+    local RIGHTSIDE_title = UIUtil.CreateText(dialogContent, 'Advanced Hotkey Overrides', 22)
     LayoutHelpers.AtTopIn(RIGHTSIDE_title, dialogContent, 12)
-    LayoutHelpers.AtLeftIn(RIGHTSIDE_title, dialogContent, LEFTSIDE_INNER_WIDTH + SIDE_PADDING * 2)
+    LayoutHelpers.AtLeftIn(RIGHTSIDE_title, dialogContent, LEFTSIDE_INNER_WIDTH + SIDE_PADDING * 2 + TOP_PADDING / 2)
 
     dialogContent.HandleEvent = function(self, event)
         if event.Type == 'KeyDown' then
