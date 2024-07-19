@@ -1192,6 +1192,7 @@ function RIGHTSIDE_CreateLine()
     line.Height:Set(LINEHEIGHT)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
+    LayoutHelpers.AtLeftIn(line.description, line, BUTTON_PADDING)
     LayoutHelpers.AtVerticalCenterIn(line.description, line)
 
     line.HandleEvent = function(self, event)
