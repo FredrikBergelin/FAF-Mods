@@ -51,7 +51,7 @@ local dialogContent
 local TOP_PADDING = 50
 local SIDE_PADDING = 10
 local KEYBINDING_WIDTH = 210
-local LEFTSIDE_WIDTH = 800
+local LEFTSIDE_INNER_WIDTH = 800
 local BUTTON_PADDING = 10
 local STANDARD_FONT_SIZE = 16
 local HEADER_FONT_SIZE = 20
@@ -675,7 +675,7 @@ local function LEFTSIDE_CreateUI()
 
     LEFTSIDE_SECTION = Group(dialogContent)
 
-    LayoutHelpers.SetWidth(LEFTSIDE_SECTION, LEFTSIDE_WIDTH)
+    LayoutHelpers.SetWidth(LEFTSIDE_SECTION, LEFTSIDE_INNER_WIDTH)
     LayoutHelpers.AtLeftIn(LEFTSIDE_SECTION, dialogContent, SIDE_PADDING)
     LayoutHelpers.AtTopIn(LEFTSIDE_SECTION, dialogContent, TOP_PADDING)
     LayoutHelpers.AtBottomIn(LEFTSIDE_SECTION, dialogContent)
@@ -683,9 +683,9 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_FILTER = Bitmap(LEFTSIDE_SECTION)
 
     LEFTSIDE_FILTER:SetSolidColor('FF282828')
-    LayoutHelpers.AtLeftIn(LEFTSIDE_FILTER, LEFTSIDE_SECTION)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_FILTER, LEFTSIDE_SECTION, KEYBINDING_WIDTH + LINEHEIGHT)
+    LayoutHelpers.AtRightIn(LEFTSIDE_FILTER, LEFTSIDE_SECTION)
     LayoutHelpers.AtTopIn(LEFTSIDE_FILTER, LEFTSIDE_SECTION)
-    LEFTSIDE_FILTER.Width:Set(LEFTSIDE_SECTION.Width())
     LEFTSIDE_FILTER.Height:Set(30)
 
     LEFTSIDE_FILTER:EnableHitTest()
@@ -705,7 +705,7 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_FILTER.info = UIUtil.CreateText(LEFTSIDE_FILTER, text, 17, UIUtil.titleFont)
     LEFTSIDE_FILTER.info:SetColor('FF727171')
     LEFTSIDE_FILTER.info:DisableHitTest()
-    LayoutHelpers.AtHorizontalCenterIn(LEFTSIDE_FILTER.info, LEFTSIDE_FILTER, -7)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_FILTER.info, LEFTSIDE_FILTER, BUTTON_PADDING)
     LayoutHelpers.AtVerticalCenterIn(LEFTSIDE_FILTER.info, LEFTSIDE_FILTER, 2)
 
     LEFTSIDE_FILTER.input = Edit(LEFTSIDE_FILTER)
@@ -1605,9 +1605,9 @@ local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_FILTER = Bitmap(RIGHTSIDE_SECTION)
 
     RIGHTSIDE_FILTER:SetSolidColor('FF282828')
-    LayoutHelpers.AtLeftIn(RIGHTSIDE_FILTER, RIGHTSIDE_SECTION)
+    LayoutHelpers.AtLeftIn(RIGHTSIDE_FILTER, RIGHTSIDE_SECTION, LINEHEIGHT)
+    LayoutHelpers.AtRightIn(RIGHTSIDE_FILTER, RIGHTSIDE_SECTION)
     LayoutHelpers.AtTopIn(RIGHTSIDE_FILTER, RIGHTSIDE_SECTION)
-    RIGHTSIDE_FILTER.Width:Set(RIGHTSIDE_SECTION.Width())
     RIGHTSIDE_FILTER.Height:Set(30)
 
     RIGHTSIDE_FILTER:EnableHitTest()
@@ -1616,18 +1616,24 @@ local function RIGHTSIDE_CreateUI()
             text = '<LOC key_binding_0018>Key Binding Filter',
             body = '<LOC key_binding_0019>' ..
                 'Filter all actions by typing either:' ..
-                '\n - full key binding "CTRL+K"' ..
-                '\n - partial key binding "CTRL"' ..
-                '\n - full action name "Self-Destruct"' ..
-                '\n - partial action name "Self"' ..
-                '\n\n Note that collapsing of key categories is disabled while this filter contains some text'
+                '\n - Single Hotkey: "A" - The A hotkey' ..
+                '\n - Modifiers: "Ctrl" - All with Ctrl modifier' ..
+                '\n - Subkeys: ">B" - All times B is used as a subkey' ..
+                '\n - Categories: ">Conditions" - All hotkeys with condition.' ..
+                '\n - Specific modifier key: Ctrl-A - Search for Ctrl + B' ..
+                '\n - Specific subkey: A>B - Search for A then B' ..
+                '\n - Specific category: A>Conditions - Condition of A' ..
+                '\n - Specific subkey: A>B - Search for A then B' ..
+                '\n - Specific subkey: A>B - Search for A then B' ..
+                '\n - Specific subkey: A>B - Search for A then B' ..
+                '\n - '
         }, nil)
 
-    local text = LOC('<LOC key_binding_filterInfo>Type key binding or name of action')
+    local text = LOC('<LOC key_binding_filterInfo>Type modifiers-hotkey>subkey>categories')
     RIGHTSIDE_FILTER.info = UIUtil.CreateText(RIGHTSIDE_FILTER, text, 17, UIUtil.titleFont)
     RIGHTSIDE_FILTER.info:SetColor('FF727171')
     RIGHTSIDE_FILTER.info:DisableHitTest()
-    LayoutHelpers.AtHorizontalCenterIn(RIGHTSIDE_FILTER.info, RIGHTSIDE_FILTER, -7)
+    LayoutHelpers.AtLeftIn(RIGHTSIDE_FILTER.info, RIGHTSIDE_FILTER, BUTTON_PADDING)
     LayoutHelpers.AtVerticalCenterIn(RIGHTSIDE_FILTER.info, RIGHTSIDE_FILTER, 2)
 
     RIGHTSIDE_FILTER.input = Edit(RIGHTSIDE_FILTER)
@@ -1862,9 +1868,13 @@ function CreateUI()
         RIGHTSIDE_ConfirmNewKeyMap()
     end
 
-    local title = UIUtil.CreateText(dialogContent, LOC('<LOC key_binding_0000>Key Bindings'), 22)
-    LayoutHelpers.AtTopIn(title, dialogContent, 12)
-    LayoutHelpers.AtHorizontalCenterIn(title, dialogContent)
+    local LEFTSIDE_title = UIUtil.CreateText(dialogContent, LOC('<LOC key_binding_0000>Key Bindings'), 22)
+    LayoutHelpers.AtTopIn(LEFTSIDE_title, dialogContent, 12)
+    LayoutHelpers.AtLeftIn(LEFTSIDE_title, dialogContent, TOP_PADDING / 2)
+
+    local RIGHTSIDE_title = UIUtil.CreateText(dialogContent, LOC('<LOC key_binding_0000>Advanced Hotkey Overrides'), 22)
+    LayoutHelpers.AtTopIn(RIGHTSIDE_title, dialogContent, 12)
+    LayoutHelpers.AtLeftIn(RIGHTSIDE_title, dialogContent, LEFTSIDE_INNER_WIDTH + SIDE_PADDING * 2)
 
     dialogContent.HandleEvent = function(self, event)
         if event.Type == 'KeyDown' then
