@@ -516,6 +516,20 @@ function LEFTSIDE_CreateLine()
         line.data = table.copy(data)
 
         if data.type == 'header' then
+
+            -- if not line.tooltip then
+            --     line.tooltip = true
+
+            --     import('/lua/ui/game/tooltip.lua').AddControlTooltip(line,
+            --         {
+            --             text = 'header test',
+            --             body = 'Test' ..
+            --                 '\n - 1' ..
+            --                 '\n\n 2'
+            --         }, nil)
+            -- end
+
+
             if LEFTSIDE_Categories[self.data.category].collapsed then
                 self.toggle.txt:SetText('+')
             else
@@ -534,6 +548,15 @@ function LEFTSIDE_CreateLine()
             line.key:SetText('')
             line.statistics:SetText(stats)
         elseif data.type == 'entry' then
+
+            -- import('/lua/ui/game/tooltip.lua').AddControlTooltip(line,
+            --     {
+            --         text = 'entry test',
+            --         body = 'Test' ..
+            --             '\n - 1' ..
+            --             '\n\n 2'
+            --     }, nil)
+
             line.toggle:Hide()
             line.key:SetText(data.keyText)
             line.key:SetColor('ffffffff')
@@ -691,9 +714,8 @@ local function LEFTSIDE_CreateUI()
     LEFTSIDE_FILTER:EnableHitTest()
     import('/lua/ui/game/tooltip.lua').AddControlTooltip(LEFTSIDE_FILTER,
         {
-            text = '<LOC key_binding_0018>Key Binding Filter',
-            body = '<LOC key_binding_0019>' ..
-                'Filter all actions by typing either:' ..
+            text = 'Key Binding Filter',
+            body = 'Filter all actions by typing either:' ..
                 '\n - full key binding "CTRL+K"' ..
                 '\n - partial key binding "CTRL"' ..
                 '\n - full action name "Self-Destruct"' ..
@@ -701,7 +723,7 @@ local function LEFTSIDE_CreateUI()
                 '\n\n Note that collapsing of key categories is disabled while this filter contains some text'
         }, nil)
 
-    local text = LOC('<LOC key_binding_filterInfo>Type key binding or name of action')
+    local text = LOC('Type key binding or name of action')
     LEFTSIDE_FILTER.info = UIUtil.CreateText(LEFTSIDE_FILTER, text, 17, UIUtil.titleFont)
     LEFTSIDE_FILTER.info:SetColor('FF727171')
     LEFTSIDE_FILTER.info:DisableHitTest()
@@ -1613,9 +1635,8 @@ local function RIGHTSIDE_CreateUI()
     RIGHTSIDE_FILTER:EnableHitTest()
     import('/lua/ui/game/tooltip.lua').AddControlTooltip(RIGHTSIDE_FILTER,
         {
-            text = '<LOC key_binding_0018>Key Binding Filter',
-            body = '<LOC key_binding_0019>' ..
-                'Filter all actions by typing either:' ..
+            text = 'Key Binding Filter',
+            body = 'Filter all actions by typing either:' ..
                 '\n - Single Hotkey: "A" - The A hotkey' ..
                 '\n - Modifiers: "Ctrl" - All with Ctrl modifier' ..
                 '\n - Subkeys: ">B" - All times B is used as a subkey' ..
@@ -1629,7 +1650,7 @@ local function RIGHTSIDE_CreateUI()
                 '\n - '
         }, nil)
 
-    local text = LOC('<LOC key_binding_filterInfo>Type modifiers-hotkey>subkey>categories')
+    local text = LOC('Type modifiers-hotkey>subkey>categories')
     RIGHTSIDE_FILTER.info = UIUtil.CreateText(RIGHTSIDE_FILTER, text, 17, UIUtil.titleFont)
     RIGHTSIDE_FILTER.info:SetColor('FF727171')
     RIGHTSIDE_FILTER.info:DisableHitTest()
@@ -1872,7 +1893,7 @@ function CreateUI()
     LayoutHelpers.AtTopIn(LEFTSIDE_title, dialogContent, 12)
     LayoutHelpers.AtLeftIn(LEFTSIDE_title, dialogContent, TOP_PADDING / 2)
 
-    local RIGHTSIDE_title = UIUtil.CreateText(dialogContent, LOC('<LOC key_binding_0000>Advanced Hotkey Overrides'), 22)
+    local RIGHTSIDE_title = UIUtil.CreateText(dialogContent, LOC('Advanced Hotkey Overrides'), 22)
     LayoutHelpers.AtTopIn(RIGHTSIDE_title, dialogContent, 12)
     LayoutHelpers.AtLeftIn(RIGHTSIDE_title, dialogContent, LEFTSIDE_INNER_WIDTH + SIDE_PADDING * 2)
 
