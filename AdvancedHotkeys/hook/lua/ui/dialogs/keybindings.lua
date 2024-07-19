@@ -1090,11 +1090,11 @@ local function RIGHTSIDE_ToggleLines(lineData)
         end
     end
 
-    if RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed then
-        RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = false
-    else
-        RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = true
-    end
+    -- if RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed then
+    --     RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = false
+    -- else
+    --     RIGHTSIDE_Hotkeys[lineData.hotkey].collapsed = true
+    -- end
     RIGHTSIDE_LIST:Filter(RIGHTSIDE_search)
 end
 
@@ -1146,14 +1146,6 @@ function RIGHTSIDE_CreateToggle(parent, bgColor, txtColor, bgSize, txtSize, txt)
         elseif event.Type == 'MouseExit' then
             button:SetAlpha(0.8)
             button.txt:SetAlpha(0.8)
-        elseif event.Type == 'ButtonPress' then
-            WARN("ButtonPress")
-            button.Clicked(parent)
-        elseif event.Type == 'ButtonDClick' then
-            WARN("ButtonDClick")
-            button.Clicked(parent)
-
-            -- Remove or replace above
         elseif event.Type == 'ButtonPress' or event.Type == 'ButtonDClick' then
             return button.Clicked(parent)
         end
@@ -1178,7 +1170,6 @@ function RIGHTSIDE_CreateLine()
     line.Height:Set(LINEHEIGHT)
     line.Width:Set(function() return line.Right() - line.Left() end)
 
-    LayoutHelpers.AtLeftIn(line.description, line, BUTTON_PADDING)
     LayoutHelpers.AtVerticalCenterIn(line.description, line)
 
     line.HandleEvent = function(self, event)
@@ -1273,7 +1264,7 @@ function RIGHTSIDE_CreateLine()
             line.toggle:Show()
             line.unbindKeyButton:Hide()
 
-            LayoutHelpers.AtLeftIn(self.description, self, LINEHEIGHT + BUTTON_PADDING)
+            LayoutHelpers.AtLeftIn(line.description, line, LINEHEIGHT + BUTTON_PADDING)
 
             line.description:SetFont('Arial', HEADER_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
@@ -1289,6 +1280,8 @@ function RIGHTSIDE_CreateLine()
         elseif lineData.type == 'entry' then
             line.toggle:Hide()
             line.unbindKeyButton:Show()
+
+            LayoutHelpers.AtLeftIn(line.description, line, BUTTON_PADDING)
 
             line.description:SetFont('Arial', STANDARD_FONT_SIZE)
             line.description:SetColor(UIUtil.fontColor)
@@ -1328,7 +1321,7 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
     local Hotkey = {}
     Hotkey.hotkey = hotkey
     Hotkey.order = table.getsize(RIGHTSIDE_Hotkeys) - 1
-    Hotkey.collapsed = RIGHTSIDE_linesCollapsed
+    -- Hotkey.collapsed = RIGHTSIDE_linesCollapsed
     Hotkey.actions = {}
 
     -- Insert actions
@@ -1413,23 +1406,27 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
 
         if action.message ~= nil then
             lineData[ ref['index'] ].message = action.message
+
         elseif action.execute ~= nil then
             lineData[ ref['index'] ].execute = action.execute
+
         elseif action.conditionals ~= nil then
+            ref['keyPath'] = keyP .. ">" .. 'Condition'
 
-            -- lineData[ ref['index'] ] = {
-            --     type = 'header',
-            --     indentation = ref['indentation'],
-            --     hotkey = 'Condition',
-            --     keyPath = ref['keyPath'] .. '>Conditionals',
-            --     order = RIGHTSIDE_Hotkeys[hotkey].order,
-            --     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
-            --     filters = {
-            --         hotkey = string.lower(Hotkey.hotkey or ''),
-            --     },
-            -- }
+            lineData[ ref['index'] ] = {
+                type = 'header',
+                indentation = ref['indentation'],
+                hotkey = 'Condition',
+                keyPath = ref['keyPath'],
+                order = RIGHTSIDE_Hotkeys[hotkey].order,
+                collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                filters = {
+                    hotkey = string.lower(Hotkey.hotkey or ''),
+                },
+            }
+            ref['index'] = ref['index'] + 1
 
-            -- ref['indentation'] = ref['indentation'] + 1
+            ref['indentation'] = ref['indentation'] + 1
             for k, conditional in action.conditionals do
 
                 lineData[ ref['index'] ] = {
@@ -1444,51 +1441,66 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
                     },
                     conditional = conditional
                 }
-
                 ref['index'] = ref['index'] + 1
             end
-            -- ref['indentation'] = ref['indentation'] - 1
+            ref['indentation'] = ref['indentation'] - 1
+
+            ref['keyPath'] = keyP .. ">" .. 'Valid'
 
             if action.valid ~= nil then
-                -- lineData[ ref['index'] ] = {
-                --     type = 'header',
-                --     indentation = ref['indentation'],
-                --     hotkey = 'Valid',
-                --     keyPath = ref['keyPath'] .. '>Valid',
-                --     order = RIGHTSIDE_Hotkeys[hotkey].order,
-                --     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
-                --     filters = {
-                --         hotkey = string.lower(Hotkey.hotkey or ''),
-                --     },
-                -- }
-                -- ref['index'] = ref['index'] + 1
+                lineData[ ref['index'] ] = {
+                    type = 'header',
+                    indentation = ref['indentation'],
+                    hotkey = 'Valid',
+                    keyPath = ref['keyPath'],
+                    order = RIGHTSIDE_Hotkeys[hotkey].order,
+                    collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                    filters = {
+                        hotkey = string.lower(Hotkey.hotkey or ''),
+                    },
+                }
+                ref['index'] = ref['index'] + 1
 
-                -- ref['indentation'] = ref['indentation'] + 1
                 RECURSIVE(lineData, action.valid, hotkey, ref)
-                -- ref['indentation'] = ref['indentation'] - 1
             end
+
+            ref['keyPath'] = keyP .. ">" .. 'Invalid'
 
             if action.invalid ~= nil then
-                -- lineData[ ref['index'] ] = {
-                --     type = 'header',
-                --     indentation = ref['indentation'],
-                --     hotkey = 'Invalid',
-                --     keyPath = ref['keyPath'] .. '>Invalid',
-                --     order = RIGHTSIDE_Hotkeys[hotkey].order,
-                --     collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
-                --     filters = {
-                --         hotkey = string.lower(Hotkey.hotkey or ''),
-                --     },
-                -- }
-                -- ref['index'] = ref['index'] + 1
+                lineData[ ref['index'] ] = {
+                    type = 'header',
+                    indentation = ref['indentation'],
+                    hotkey = 'Invalid',
+                    keyPath = ref['keyPath'],
+                    order = RIGHTSIDE_Hotkeys[hotkey].order,
+                    collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                    filters = {
+                        hotkey = string.lower(Hotkey.hotkey or ''),
+                    },
+                }
+                ref['index'] = ref['index'] + 1
 
-                -- ref['indentation'] = ref['indentation'] + 1
                 RECURSIVE(lineData, action.invalid, hotkey, ref)
-                -- ref['indentation'] = ref['indentation'] - 1
             end
 
+            ref['keyPath'] = keyP
 
         elseif action.subkeys ~= nil then
+
+            ref['keyPath'] = keyP .. ">" .. 'Subkeys'
+
+            lineData[ ref['index'] ] = {
+                type = 'header',
+                indentation = ref['indentation'],
+                hotkey = 'Subkeys',
+                keyPath = ref['keyPath'],
+                order = RIGHTSIDE_Hotkeys[hotkey].order,
+                collapsed = RIGHTSIDE_Hotkeys[hotkey].collapsed,
+                filters = {
+                    hotkey = string.lower(Hotkey.hotkey or ''),
+                },
+            }
+            ref['index'] = ref['index'] + 1
 
             ref['indentation'] = ref['indentation'] + 1
 
@@ -1508,13 +1520,13 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
                     },
                     subkey = subkeyIndex
                 }
-
                 ref['index'] = ref['index'] + 1
 
                 RECURSIVE(lineData, subkeys, subkeyIndex, ref)
             end
 
             ref['indentation'] = ref['indentation'] - 1
+            ref['keyPath'] = keyP
         end
 
         ref['index'] = ref['index'] + 1
@@ -1575,8 +1587,6 @@ local function RIGHTSIDE_FormatLineData()
         end
         data.index = i
     end
-
-    tLOG(lineData, "lineData")
 
     return lineData
 end
@@ -1779,8 +1789,8 @@ local function RIGHTSIDE_CreateUI()
             for k, v in RIGHTSIDE_LineData do
                 if v.type == 'header' then
                     table.insert(RIGHTSIDE_linesVisible, k)
-                    RIGHTSIDE_Hotkeys[v.hotkey].visible = v.count
-                    RIGHTSIDE_Hotkeys[v.hotkey].bindings = 0
+                    -- RIGHTSIDE_Hotkeys[v.hotkey].visible = v.count
+                    -- RIGHTSIDE_Hotkeys[v.hotkey].bindings = 0
                 elseif v.type == 'entry' then
                     if not v.collapsed then
                         table.insert(RIGHTSIDE_linesVisible, k)
@@ -1795,8 +1805,8 @@ local function RIGHTSIDE_CreateUI()
             for k, v in RIGHTSIDE_LineData do
                 local match = false
                 if v.type == 'header' then
-                    RIGHTSIDE_Hotkeys[v.hotkey].visible = 0
-                    RIGHTSIDE_Hotkeys[v.hotkey].bindings = 0
+                    -- RIGHTSIDE_Hotkeys[v.hotkey].visible = 0
+                    -- RIGHTSIDE_Hotkeys[v.hotkey].bindings = 0
                     if not headersVisible[k] then
                         headersVisible[k] = true
                         table.insert(RIGHTSIDE_linesVisible, k)
