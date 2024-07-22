@@ -1,10 +1,10 @@
 function GlobalConditional(returnVal)
     if returnVal == nil then
-        return _G.GlobalConditionalBool
+        return pcall(function() return _G.GlobalConditionalBool end) or nil
     end
 
     _G.GlobalConditionalBool = returnVal
-    return returnVal
+    return _G.GlobalConditionalBool
 end
 
 function AnyUnitSelected()

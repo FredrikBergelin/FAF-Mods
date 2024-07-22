@@ -24,11 +24,8 @@ end
 local Conditionals = import("/mods/AdvancedHotkeys/modules/conditionals.lua")
 
 function GlobalReturn(returnVal)
-
-    tLOG(returnVal, 'returnVal')
-
     if returnVal == nil then
-        return _G.GlobalReturnValue or nil -- access to nonexistent global variable "GlobalReturnValue"
+        return pcall(function() return _G.GlobalReturnValue end) or nil
     end
 
     _G.GlobalReturnValue = returnVal
@@ -45,7 +42,7 @@ function TableContains(table, element)
 end
 
 function Select()
-    Select(GlobalReturn() or {})
+    SelectUnits(GlobalReturn() or {})
 end
 
 function SelectedUnits()
@@ -53,7 +50,7 @@ function SelectedUnits()
 end
 
 function FilterCommandQueueContainsOnly(commandList)
-    local units = _G.GlobalReturnValue
+    local units = GlobalReturn()
     local validUnits = {}
     for _, unit in units do
         local comQ = unit:GetCommandQueue()
@@ -77,18 +74,18 @@ function CategoryFilterSelect(hotkey, message, categoriesString, entityCategorie
                               filterEntityCategories)
     if Conditionals.AnySelectedHasCategory(filterEntityCategories or entityCategories) then
         print("Filter " .. (filterPrintString or message))
-        Select(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
+        SelectUnits(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
     else
         print("Onscreen " .. message)
         ConExecute("UI_SelectByCategory +inview " .. categoriesString)
-        Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+        SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
     end
 
     SubHotkeys({
         [hotkey] = function() SubHotkey(hotkey, function(hotkey)
                 print("All " .. message)
                 ConExecute("UI_SelectByCategory " .. categoriesString)
-                Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+                SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
             end)
         end,
     })
@@ -99,7 +96,7 @@ function CategoryFilterAdd(hotkey, message, categoriesString, entityCategories)
 
     AddToSelection(function()
         ConExecute("UI_SelectByCategory +inview " .. categoriesString)
-        Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+        SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
     end)
 
     SubHotkeys({
@@ -107,7 +104,7 @@ function CategoryFilterAdd(hotkey, message, categoriesString, entityCategories)
                 print("Add all " .. message)
                 AddToSelection(function()
                     ConExecute("UI_SelectByCategory " .. categoriesString)
-                    Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+                    SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
                 end)
             end)
         end,
@@ -123,7 +120,7 @@ function AddToSelection(selectFunction)
         table.insert(selected, unit)
     end
 
-    Select(selected)
+    SelectUnits(selected)
 end
 
 function SelectedUnitsWithOnlyTheseCommands(commands)
