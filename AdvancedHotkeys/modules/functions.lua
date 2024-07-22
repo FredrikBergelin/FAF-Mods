@@ -1,3 +1,40 @@
+function tLOG(this, key, indentLevel)
+    if not indentLevel then indentLevel = 0 end
+
+    local indent = string.rep('-   ', indentLevel)
+    local first = indent .. tostring(key) .. ': '
+
+    if type(this) == 'nil' then
+        LOG(first .. 'nil')
+        return
+    elseif type(this) == 'string' then
+        LOG(first .. '"' .. this .. '"')
+        return
+    elseif type(this) == 'boolean' then
+        LOG(first .. tostring(this))
+    elseif type(this) == 'table' then
+        LOG(first .. "{")
+        for key, value in this do
+            tLOG(value, key, indentLevel + 1)
+        end
+        LOG(indent .. "}")
+    end
+end
+
+local Conditionals = import("/mods/AdvancedHotkeys/modules/conditionals.lua")
+
+function GlobalReturn(returnVal)
+
+    tLOG(returnVal, 'returnVal')
+
+    if returnVal == nil then
+        return _G.GlobalReturnValue or nil -- access to nonexistent global variable "GlobalReturnValue"
+    end
+
+    _G.GlobalReturnValue = returnVal
+    return _G.GlobalReturnValue
+end
+
 function TableContains(table, element)
     for _, value in pairs(table) do
         if value == element then
@@ -7,22 +44,51 @@ function TableContains(table, element)
     return false
 end
 
+function Select()
+    Select(GlobalReturn() or {})
+end
+
+function SelectedUnits()
+    return GlobalReturn(GetSelectedUnits())
+end
+
+function FilterCommandQueueContainsOnly(commandList)
+    local units = _G.GlobalReturnValue
+    local validUnits = {}
+    for _, unit in units do
+        local comQ = unit:GetCommandQueue()
+        local addUnit = true
+        for _, command in comQ do
+            if (
+                TableContains(commandList,
+                    command.type)) then
+                addUnit = false
+                break
+            end
+        end
+        if addUnit then
+            table.insert(validUnits, unit)
+        end
+    end
+    return GlobalReturn(validUnits)
+end
+
 function CategoryFilterSelect(hotkey, message, categoriesString, entityCategories, filterPrintString,
                               filterEntityCategories)
-    if Functions.AnySelectedHasCategory(filterEntityCategories or entityCategories) then
+    if Conditionals.AnySelectedHasCategory(filterEntityCategories or entityCategories) then
         print("Filter " .. (filterPrintString or message))
-        SelectUnits(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
+        Select(EntityCategoryFilterDown(filterEntityCategories or entityCategories, GetSelectedUnits() or {}))
     else
         print("Onscreen " .. message)
         ConExecute("UI_SelectByCategory +inview " .. categoriesString)
-        SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+        Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
     end
 
     SubHotkeys({
         [hotkey] = function() SubHotkey(hotkey, function(hotkey)
                 print("All " .. message)
                 ConExecute("UI_SelectByCategory " .. categoriesString)
-                SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+                Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
             end)
         end,
     })
@@ -31,17 +97,17 @@ end
 function CategoryFilterAdd(hotkey, message, categoriesString, entityCategories)
     print("Add onscreen " .. message)
 
-    Functions.AddToSelection(function()
+    AddToSelection(function()
         ConExecute("UI_SelectByCategory +inview " .. categoriesString)
-        SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+        Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
     end)
 
     SubHotkeys({
-        [message] = function() SubHotkey(message, function(hotkey)
+        [hotkey] = function() SubHotkey(hotkey, function(hotkey)
                 print("Add all " .. message)
-                Functions.AddToSelection(function()
+                AddToSelection(function()
                     ConExecute("UI_SelectByCategory " .. categoriesString)
-                    SelectUnits(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
+                    Select(EntityCategoryFilterDown(entityCategories, GetSelectedUnits() or {}))
                 end)
             end)
         end,
@@ -57,7 +123,7 @@ function AddToSelection(selectFunction)
         table.insert(selected, unit)
     end
 
-    SelectUnits(selected)
+    Select(selected)
 end
 
 function SelectedUnitsWithOnlyTheseCommands(commands)

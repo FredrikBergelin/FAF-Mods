@@ -1,40 +1,46 @@
-function GlobalReturn(returnVal)
-    _G.ConExecuteGlobalReturnValue = returnVal
+function GlobalConditional(returnVal)
+    if returnVal == nil then
+        return _G.GlobalConditionalBool
+    end
+
+    _G.GlobalConditionalBool = returnVal
     return returnVal
 end
 
-AnyUnitSelected = import('/mods/common/modules/misc.lua').AnyUnitSelected
+function AnyUnitSelected()
+    return GlobalConditional(import('/mods/common/modules/misc.lua').AnyUnitSelected())
+end
 
 function AnySelectedHasCategory(category)
     local units = GetSelectedUnits()
 
     if units == nil then
-        return GlobalReturn(false)
+        return GlobalConditional(false)
     end
 
     for id, unit in units do
         if EntityCategoryContains(category, unit) then
-            return GlobalReturn(true)
+            return GlobalConditional(true)
         end
     end
 
-    return GlobalReturn(false)
+    return GlobalConditional(false)
 end
 
 function AllSelectedHaveCategory(category)
     local units = GetSelectedUnits()
 
     if units == nil then
-        return GlobalReturn(false)
+        return GlobalConditional(false)
     end
 
     for id, unit in units do
         if not EntityCategoryContains(category, unit) then
-            return GlobalReturn(false)
+            return GlobalConditional(false)
         end
     end
 
-    return GlobalReturn(true)
+    return GlobalConditional(true)
 end
 
 local isReplay = import("/lua/ui/game/gamemain.lua").GetReplayState()
@@ -50,19 +56,19 @@ function AnyUnitCanUpgrade()
     local units = GetSelectedUnits()
 
     if isReplay then
-        return GlobalReturn(false)
+        return GlobalConditional(false)
     end
 
     if units == nil then
-        return GlobalReturn(false)
+        return GlobalConditional(false)
     end
 
     for id, unit in units do
         local buildableStructures = GetUpgradesOfUnit(unit)
         if buildableStructures and not TablEmpty(buildableStructures) then
-            return GlobalReturn(true)
+            return GlobalConditional(true)
         end
     end
 
-    return GlobalReturn(false)
+    return GlobalConditional(false)
 end

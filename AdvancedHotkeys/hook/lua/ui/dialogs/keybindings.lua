@@ -1018,7 +1018,7 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
     LayoutHelpers.AtHorizontalCenterIn(textBox, dialogContent)
     LayoutHelpers.AtVerticalCenterIn(textBox, dialogContent)
     LayoutHelpers.SetDimensions(textBox, 334, 24)
-    textBox:SetText(lineData.message)
+    textBox:SetText(lineData.print)
 
     textBox:AcquireFocus() -- Not working
 
@@ -1031,13 +1031,13 @@ local function RIGHTSIDE_EditMessage(parent, lineDataKey, lineData)
     okButton.OnClick = function(self, modifiers)
         local newText = textBox:GetText()
 
-        lineData.message = newText
+        lineData.print = newText
 
         local advancedKeyMap = import('/mods/AdvancedHotkeys/modules/main.lua').advancedKeyMap
 
         local temp = advancedKeyMap[lineData.hotkey]
 
-        -- RIGHTSIDE_Hotkeys[key].message =
+        -- RIGHTSIDE_Hotkeys[key].print =
 
         -- advancedKeyMap[key] = RIGHTSIDE_keyGroups[key]
 
@@ -1050,7 +1050,7 @@ end
 
 local function RIGHTSIDE_AssignCurrentSelection()
     for k, v in RIGHTSIDE_LineData do
-        if v.selected and v.message then
+        if v.selected and v.print then
             RIGHTSIDE_EditMessage(popup, k, v)
             break
         end
@@ -1297,8 +1297,8 @@ function RIGHTSIDE_CreateLine()
             -- TODO remove
             line.description:SetText('ENTRY NOT DEFINED')
 
-            if lineData.message ~= nil then
-                line.description:SetText(lineData.message)
+            if lineData.print ~= nil then
+                line.description:SetText(lineData.print)
 
             elseif lineData.execute ~= nil then
                 line.description:SetText(lineData.execute)
@@ -1335,10 +1335,10 @@ local function RIGHTSIDE_FormattedHotkey(hotkey, entries)
     -- Insert actions
     for entryIndex, entry in entries do
 
-        if entry['message'] ~= nil then
+        if entry['print'] ~= nil then
             table.insert(Hotkey.actions, {
                 order = entryIndex,
-                message = entry['message'],
+                print = entry['print'],
             })
 
         elseif entry['execute'] ~= nil then
@@ -1412,8 +1412,8 @@ local function RECURSIVE(lineData, Hotkey, hotkey, ref)
             }
         }
 
-        if action.message ~= nil then
-            lineData[ ref['index'] ].message = action.message
+        if action.print ~= nil then
+            lineData[ ref['index'] ].print = action.print
 
         elseif action.execute ~= nil then
             lineData[ ref['index'] ].execute = action.execute

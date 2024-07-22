@@ -11,7 +11,7 @@ local lastClickTime = -9999
 advancedKeyMap = {
 	['0'] = {
 		{
-			message = '0 was pressed',
+			print = '0 was pressed',
 		},
 		{
 			execute = 'StartCommandMode order RULEUCC_Patrol',
@@ -31,12 +31,12 @@ advancedKeyMap = {
 			},
 			valid = {
 				{
-					message = 'Conditionals are Valid',
+					print = 'Conditionals are Valid',
 				},
 			},
 			invalid = {
 				{
-					message = 'Conditionals are Invalid',
+					print = 'Conditionals are Invalid',
 				},
 			},
 		},
@@ -44,7 +44,7 @@ advancedKeyMap = {
 			subkeys = {
 				['0'] = {
 					{
-						message = 's 0',
+						print = 's 0',
 					},
 				},
 			}
@@ -92,7 +92,7 @@ end
 
 function ExecuteRecursively(entries)
 	for entryKey, entry in entries do
-		if entry['message'] ~= nil then print(entry['message']) end
+		if entry['print'] ~= nil then print(entry['print']) end
 
 		if entry['execute'] ~= nil then ConExecute(entry['execute']) end
 
@@ -118,7 +118,7 @@ end
 function ConditionalConExecute(executable)
 	ConExecute(executable)
 
-	return ConExecuteGlobalReturnValue
+	return GlobalConditionalBool
 end
 
 function InitAdvancedKeys()
