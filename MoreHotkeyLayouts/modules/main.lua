@@ -791,7 +791,6 @@ local customKeyMap = {
 	end) end,
 
 	I = function() Hotkey('I', function(hotkey)
-		ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 	end) end,
 	O = function() Hotkey('O', function(hotkey)
 	end) end,
