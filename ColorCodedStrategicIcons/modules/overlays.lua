@@ -85,8 +85,8 @@ local StationaryFactoryOverlay = Class(Overlay)
     end,
 
     OnFrame = function(self, delta)
-        if not self.unit:IsDead() and self.isIdle then
-        self:Update()
+        if not self.unit:IsDead() then
+            self:Update()
         else
             self:Hide()
         end
