@@ -791,6 +791,7 @@ local customKeyMap = {
 	end) end,
 
 	I = function() Hotkey('I', function(hotkey)
+		ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 	end) end,
 	O = function() Hotkey('O', function(hotkey)
 	end) end,
@@ -1495,7 +1496,8 @@ function RunCustom(key)
 end
 
 function Init()
-	from(customKeyMap).foreach(function(k, v)
+
+	for k, v in pairs(customKeyMap) do
 		local name = string.gsub(k, "-", "_")
 
 		userKeyActions['SHK '..name] = {
@@ -1504,7 +1506,7 @@ function Init()
 		}
 
 		userKeyMap[k] = 'SHK '..name
-	end)
+	end
 
 	Prefs.SetToCurrentProfile('UserKeyActions', userKeyActions)
 	Prefs.SetToCurrentProfile('UserKeyMap', userKeyMap)
