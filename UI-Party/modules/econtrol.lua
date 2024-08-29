@@ -43,7 +43,7 @@ local spendTypes = {
 }
 
 local resourceTypes = from({
-	{ name = "Mass",   econDataKey = "massConsumed" },
+	{ name = "Mass", econDataKey = "massConsumed" },
 	{ name = "Energy", econDataKey = "energyConsumed" },
 })
 
@@ -88,7 +88,6 @@ function GetUnitType(unit)
 	return unitType
 end
 
-
 function GetOnValueForScriptBit(i)
 	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
 	return true
@@ -99,11 +98,13 @@ function DisableUnitsAbility(units)
 		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
 	end
 end
+
 function EnableUnitsAbility(units)
 	for i = 0, 8 do
 		ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
 	end
 end
+
 function GetIsUnitAbilityEnabled(units)
 	for i = 0, 8 do
 		if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
@@ -112,7 +113,6 @@ function GetIsUnitAbilityEnabled(units)
 	end
 	return false
 end
-
 
 local energyPercent = 0
 function UpdateEconTotals()
@@ -145,9 +145,9 @@ function PauseProduction(unitType, spendType)
 			v.econtrol.pausedEnergyConsumed = econData["energyConsumed"]
 			v.econtrol.pausedMassConsumed = econData["massConsumed"]
 			table.insert(unitType.pausedProductionUnits, v)
+			SetPaused({ v }, true) -- TODO CRASH, trying v:IsDead
 		end
 	end
-	SetPaused(unitType.pausedProductionUnits, true) -- TODO CRASH, trying v:IsDead
 	-- warning: Error running lua script: ...r forged alliance\mods\ui-party\modules\econtrol.lua(150): Game object has been destroyed
 	--          stack traceback:
 	--          	[C]: in function `SetPaused'
@@ -292,7 +292,7 @@ function EndAutoPause(unitType, spendType)
 end
 
 function EndAutoPauseSelection(units)
-	from(units).foreach(function (k, unit)
+	from(units).foreach(function(k, unit)
 		if unit.originalName then
 			unit:SetCustomName(unit.originalName)
 			unit.originalName = nil
@@ -309,6 +309,7 @@ end
 function StatusIconEvents(self, event, unitType, spendType)
 	return true
 end
+
 function IconEvents(self, event, unitType)
 	if event.Type == 'ButtonPress' then
 		if event.Modifiers.Ctrl and event.Modifiers.Alt then
@@ -606,7 +607,7 @@ function UsageContainer(root, unitType, spendType, resourceType)
 	local container = Bitmap(root)
 	container.Width:Set(usageContainerWidth)
 	container.Height:Set(usageContainerHeight)
-	container:InternalSetSolidColor("15"..color)
+	container:InternalSetSolidColor("15" .. color)
 
 	container.bar = Bitmap(container)
 	container.bar.Width:Set(10)
@@ -624,7 +625,8 @@ function StatusIcon(root, spendType, iconPath)
 	container:SetTexture(iconPath)
 	container.Height:Set(iconSize)
 	container.Width:Set(iconSize)
-	LayoutHelpers.AtLeftIn(container, root, spendType == spendTypes.PRODUCTION and productionStatusIconLeftIn or upkeepStatusIconLeftIn)
+	LayoutHelpers.AtLeftIn(container, root,
+		spendType == spendTypes.PRODUCTION and productionStatusIconLeftIn or upkeepStatusIconLeftIn)
 	LayoutHelpers.AtVerticalCenterIn(container, root, 0)
 
 	return container
@@ -836,28 +838,46 @@ function buildUi()
 			typeUi.stratIcon.HandleEvent = function(self, event) return IconEvents(self, event, unitType) end
 
 			-- Production paused status icon
-			typeUi.productionPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
-			typeUi.productionPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
+			typeUi.productionPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION,
+				'/mods/UI-Party/textures/category_icons/icon_paused.dds')
+			typeUi.productionPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType,
+					spendTypes.PRODUCTION)
+			end
 
 			-- Production autopaused status icon
-			typeUi.productionAutoPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_autopaused.dds')
-			typeUi.productionAutoPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
+			typeUi.productionAutoPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION,
+				'/mods/UI-Party/textures/category_icons/icon_autopaused.dds')
+			typeUi.productionAutoPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event,
+					unitType, spendTypes.PRODUCTION)
+			end
 
 			-- Production prioritized status icon
-			typeUi.productionPrioritizedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION, '/mods/UI-Party/textures/category_icons/icon_prioritized.dds')
-			typeUi.productionPrioritizedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.PRODUCTION) end
+			typeUi.productionPrioritizedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.PRODUCTION,
+				'/mods/UI-Party/textures/category_icons/icon_prioritized.dds')
+			typeUi.productionPrioritizedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event,
+					unitType, spendTypes.PRODUCTION)
+			end
 
 			-- Upkeep paused status icon
-			typeUi.upkeepPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_paused.dds')
-			typeUi.upkeepPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
+			typeUi.upkeepPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP,
+				'/mods/UI-Party/textures/category_icons/icon_paused.dds')
+			typeUi.upkeepPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType,
+					spendTypes.UPKEEP)
+			end
 
 			-- Upkeep autopaused status icon
-			typeUi.upkeepAutoPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_autopaused.dds')
-			typeUi.upkeepAutoPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
+			typeUi.upkeepAutoPausedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP,
+				'/mods/UI-Party/textures/category_icons/icon_autopaused.dds')
+			typeUi.upkeepAutoPausedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType,
+					spendTypes.UPKEEP)
+			end
 
 			-- Upkeep prioritized status icon
-			typeUi.upkeepPrioritizedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP, '/mods/UI-Party/textures/category_icons/icon_prioritized.dds')
-			typeUi.upkeepPrioritizedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType, spendTypes.UPKEEP) end
+			typeUi.upkeepPrioritizedStatusIcon = StatusIcon(typeUi.uiRoot, spendTypes.UPKEEP,
+				'/mods/UI-Party/textures/category_icons/icon_prioritized.dds')
+			typeUi.upkeepPrioritizedStatusIcon.HandleEvent = function(self, event) return StatusIconEvents(self, event, unitType,
+					spendTypes.UPKEEP)
+			end
 
 			typeUi.Clear = function()
 				typeUi.productionPausedStatusIcon:Hide()
@@ -872,37 +892,50 @@ function buildUi()
 			typeUi.productionContainer = SpendTypeContainer(typeUi.uiRoot, spendTypes.PRODUCTION)
 			LayoutHelpers.AtLeftIn(typeUi.productionContainer, typeUi.uiRoot, rightBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.productionContainer, typeUi.uiRoot, topBarTopIn)
-			typeUi.productionContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi, unitType, spendTypes.PRODUCTION) end
+			typeUi.productionContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi,
+					unitType, spendTypes.PRODUCTION)
+			end
 
 			-- Production energy bar
-			typeUi.productionEnergyContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION, "Energy")
+			typeUi.productionEnergyContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION,
+				"Energy")
 			LayoutHelpers.AtLeftIn(typeUi.productionEnergyContainer, typeUi.productionContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.productionEnergyContainer, typeUi.productionContainer, 0)
-			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.PRODUCTION, "Energy") end
+			typeUi.productionEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi,
+					unitType, spendTypes.PRODUCTION, "Energy")
+			end
 
 			-- Production mass bar
 			typeUi.productionMassContainer = UsageContainer(typeUi.productionContainer, unitType, spendTypes.PRODUCTION, "Mass")
 			LayoutHelpers.AtLeftIn(typeUi.productionMassContainer, typeUi.productionContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.productionMassContainer, typeUi.productionContainer, bottomBarTopIn)
-			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.PRODUCTION, "Mass") end
+			typeUi.productionMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi,
+					unitType, spendTypes.PRODUCTION, "Mass")
+			end
 
 			-- Upkeep Container
 			typeUi.upkeepContainer = SpendTypeContainer(typeUi.uiRoot, spendTypes.UPKEEP)
 			LayoutHelpers.AtLeftIn(typeUi.upkeepContainer, typeUi.uiRoot, leftBarsLeftIn)
 			LayoutHelpers.AtTopIn(typeUi.upkeepContainer, typeUi.uiRoot, topBarTopIn)
-			typeUi.upkeepContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP) end
+			typeUi.upkeepContainer.HandleEvent = function(self, event) return SpendTypeContainerEvents(self, event, typeUi,
+					unitType, spendTypes.UPKEEP)
+			end
 
 			-- Upkeep energy bar
 			typeUi.upkeepEnergyContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, "Energy")
 			LayoutHelpers.AtLeftIn(typeUi.upkeepEnergyContainer, typeUi.upkeepContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.upkeepEnergyContainer, typeUi.upkeepContainer, 0)
-			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP, "Energy") end
+			typeUi.upkeepEnergyContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi,
+					unitType, spendTypes.UPKEEP, "Energy")
+			end
 
 			-- Upkeep mass bar
 			typeUi.upkeepMassContainer = UsageContainer(typeUi.upkeepContainer, unitType, spendTypes.UPKEEP, "Mass")
 			LayoutHelpers.AtLeftIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, 0)
 			LayoutHelpers.AtTopIn(typeUi.upkeepMassContainer, typeUi.upkeepContainer, bottomBarTopIn)
-			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi, unitType, spendTypes.UPKEEP, "Mass") end
+			typeUi.upkeepMassContainer.HandleEvent = function(self, event) return UsageContainerEvents(self, event, typeUi,
+					unitType, spendTypes.UPKEEP, "Mass")
+			end
 
 
 			unitType.usage["Mass"] = {

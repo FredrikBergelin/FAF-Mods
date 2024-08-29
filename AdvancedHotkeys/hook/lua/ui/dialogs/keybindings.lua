@@ -1545,7 +1545,7 @@ end
 
 local function RIGHTSIDE_FormatLineData()
     local lineData = {}
-    local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap')
+    local advancedKeyMap = GetPreference('AdvancedHotkeysKeyMap') or {}
 
     for hotkey, entries in RIGHTSIDE_Hotkeys do
         entries.actions = {}
