@@ -61,7 +61,22 @@ ScoreBoard = UMT.Class(Group)
     ResetWidthComponents = function(self)
         ArmyViews.nameWidth:Set(self.Layouter:ScaleVar(75))
         ArmyViews.armyViewWidth:Set(self.Layouter:Sum(ArmyViews.nameWidth, 80))
-        ArmyViews.allyViewWidth:Set(self.Layouter:Sum(ArmyViews.nameWidth, 160))
+
+        if ArmyViews.showFullResourceData then
+            ArmyViews.allyViewWidth:Set(self.Layouter:Sum(ArmyViews.nameWidth, 260))
+        else
+            ArmyViews.allyViewWidth:Set(self.Layouter:Sum(ArmyViews.nameWidth, 160))
+        end
+    end,
+
+    SetFullDataView = function(self, val)
+        ArmyViews.showFullResourceData = val
+
+        if ArmyViews.showFullResourceData then
+            ArmyViews.allyViewWidth:Set(self.Layouter:Sum(ArmyViews.nameWidth, 260))
+        else
+            ArmyViews.allyViewWidth:Set(self.Layouter:Sum(ArmyViews.nameWidth, 160))
+        end
     end,
 
     ---@param self ScoreBoard
@@ -283,7 +298,7 @@ ReplayScoreBoard = UMT.Class(ScoreBoard)
         self._dataPanel = DataPanel(self)
     end,
 
-    _InitArmyViews = function (self)
+    _InitArmyViews = function(self)
         self._armiesContainer = ArmyViewsContainer(self)
         self._teamsContainer = TeamViewsContainer(self)
     end,
