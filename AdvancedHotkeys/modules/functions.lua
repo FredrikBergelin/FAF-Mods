@@ -211,3 +211,21 @@ function ToggleRepeatBuildOrSetTo(setTo)
         end
     end
 end
+
+-- Unused
+function RemoveFromGroups()
+    local units = GetSelectedUnits()
+    if units then
+        for _, unit in units do
+            for _, group in unit:GetSelectionSets() do
+                local groupTable = Selection.selectionSets[group]
+                for index = table_getsize(groupTable), 1, -1 do
+                    if unit:GetEntityId() == groupTable[index]:GetEntityId() then
+                        table_remove(groupTable, index)
+                    end
+                end
+                unit:RemoveSelectionSet(group)
+            end
+        end
+    end
+end
