@@ -123,7 +123,7 @@ function createPositionMarker(nickname, faction, color, posX, posY, posZ)
     posMarker.OnFrame = function(self, delta)
         local worldView = import('/lua/ui/game/worldview.lua').viewLeft
         local pos = worldView:Project(Vector(posMarker.pos.x, posMarker.pos.y, posMarker.pos.z))
-
+ 
         LayoutHelpers.AtLeftTopIn(posMarker, worldView, (pos.x - posMarker.Width() / 2) / PixelScaleFactor, (pos.y - posMarker.Height() / 2) / PixelScaleFactor + 1)
         LayoutHelpers.AtLeftTopIn(posMarkerButton, worldView, (pos.x - posMarker.Width() / 2) / PixelScaleFactor, (pos.y - posMarker.Height() / 2) / PixelScaleFactor + 1)
     end
