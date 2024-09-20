@@ -5,29 +5,6 @@
 -- Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 -----------------------------------------------------------------
 
-function tLOG(this, key, indentLevel)
-    if not indentLevel then indentLevel = 0 end
-
-    local indent = string.rep('-   ', indentLevel)
-    local first = indent .. tostring(key) .. ': '
-
-    if type(this) == 'nil' then
-        LOG(first .. 'nil')
-        return
-    elseif type(this) == 'string' then
-        LOG(first .. '"' .. this .. '"')
-        return
-    elseif type(this) == 'boolean' then
-        LOG(first .. tostring(this))
-    elseif type(this) == 'table' then
-        LOG(first .. "{")
-        for key, value in this do
-            tLOG(value, key, indentLevel + 1)
-        end
-        LOG(indent .. "}")
-    end
-end
-
 -- This file is the F1 menu used for navigating and interacting with keybindings
 local UIUtil        = import('/lua/ui/uiutil.lua')
 local LayoutHelpers = import('/lua/maui/layouthelpers.lua')

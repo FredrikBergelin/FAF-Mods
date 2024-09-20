@@ -1,28 +1,26 @@
 -- tLOG = import('/mods/common/modules/tools.lua').tLOG
--- TODO: WARNING: Error running lua command: ...mander forged alliance\mods\common\modules\tools.lua(13): attempt to concatenate local `k' (a table value)
-function tLOG(tbl, indent)
-	if not indent then indent = 0 end
-	formatting = string.rep("  ", indent)
-	if type(tbl) == "nil" then
-		LOG(formatting .. "nil")
-		return
-	end
-	if type(tbl) == "string" then
-		LOG(formatting .. tbl)
-		return
-	end
-	for k, v in pairs(tbl) do
-		formatting = string.rep("  ", indent) .. k .. ": "
-		if type(v) == "nil" then
-			LOG(formatting .. "NIL")
-		elseif type(v) == "table" then
-			LOG(formatting)
-			tLOG(v, indent + 1)
-		elseif type(v) == 'boolean' then
-			LOG(formatting .. tostring(v))
-		else
-			LOG(formatting)
-			LOG(v)
-		end
-	end
+
+function tLOG(this, key, indentLevel)
+    if not indentLevel then indentLevel = 0 end
+
+    local indent = string.rep('-   ', indentLevel)
+    local first = indent .. tostring(key) .. ': '
+
+    if type(this) == 'nil' then
+        LOG(first .. 'nil')
+        return
+    elseif type(this) == 'string' then
+        LOG(first .. '"' .. this .. '"')
+        return
+    elseif type(this) == 'boolean' then
+        LOG(first .. tostring(this))
+    elseif type(this) == 'function' then
+        LOG(first .. 'function')
+    elseif type(this) == 'table' then
+        LOG(first .. "{")
+        for key, value in this do
+            tLOG(value, key, indentLevel + 1)
+        end
+        LOG(indent .. "}")
+    end
 end
