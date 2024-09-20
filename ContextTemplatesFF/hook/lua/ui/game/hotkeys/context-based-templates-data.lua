@@ -62,7 +62,6 @@ AppendPowerGeneratorsToTML = nil
 AppendWallsToPointDefense = nil
 AppendAirGrid = nil
 
-
 ---@type ContextBasedTemplate
 T2ExtractorWithStorages = {
     Name = 'T2 + Storage',
@@ -455,7 +454,6 @@ T1HydroWithAirFac = {
         }
     },
 }
-
 
 ---@type ContextBasedTemplate
 CapExtractorWithStorages = {
@@ -1114,11 +1112,75 @@ SurroundT3PowerWithPower = {
 }
 
 ---@type ContextBasedTemplate
+PointDefense = {
+    Name = "Point defense",
+    TriggersOnLand = true,
+    TemplateSortingOrder = 11,
+    TemplateData = {
+        3,
+        3,
+        {
+            'uab2101',
+            4646,
+            0,
+            0
+        },
+        {
+            'uab5101',
+            4749,
+            -1,
+            -1
+        },
+        {
+            'uab5101',
+            4753,
+            0,
+            -1
+        },
+        {
+            'uab5101',
+            4757,
+            1,
+            -1
+        },
+        {
+            'uab5101',
+            4761,
+            1,
+            0
+        },
+        {
+            'uab5101',
+            4765,
+            1,
+            1
+        },
+        {
+            'uab5101',
+            4769,
+            0,
+            1
+        },
+        {
+            'uab5101',
+            4773,
+            -1,
+            1
+        },
+        {
+            'uab5101',
+            4777,
+            -1,
+            0
+        }
+    },
+}
+---@type ContextBasedTemplate
 -- Old name to override existing templates
 T2ArtilleryWithPgen = {
     Name = "Artillery",
     TriggersOnLand = true,
-    TemplateSortingOrder = 11,
+    TemplateSortingOrder = 12,
     TemplateData = {
         6,
         6,
@@ -1154,12 +1216,11 @@ T2ArtilleryWithPgen = {
         }
     },
 }
-
 ---@type ContextBasedTemplate
 FireStation = {
     Name = "Fire Station",
     TriggersOnLand = true,
-    TemplateSortingOrder = 12,
+    TemplateSortingOrder = 13,
     TemplateData = {
         29,
         13.5,
@@ -1493,7 +1554,7 @@ FireStation = {
 FireStation2 = {
     Name = "Fire Station 2",
     TriggersOnLand = true,
-    TemplateSortingOrder = 13,
+    TemplateSortingOrder = 14,
     TemplateData = {
         27,
         23.5,
@@ -1824,72 +1885,6 @@ FireStation2 = {
     },
 }
 
-
----@type ContextBasedTemplate
-PointDefense = {
-    Name = "Point defense",
-    TriggersOnLand = true,
-    TemplateSortingOrder = 15,
-    TemplateData = {
-        3,
-        3,
-        {
-            'uab2101',
-            4646,
-            0,
-            0
-        },
-        {
-            'uab5101',
-            4749,
-            -1,
-            -1
-        },
-        {
-            'uab5101',
-            4753,
-            0,
-            -1
-        },
-        {
-            'uab5101',
-            4757,
-            1,
-            -1
-        },
-        {
-            'uab5101',
-            4761,
-            1,
-            0
-        },
-        {
-            'uab5101',
-            4765,
-            1,
-            1
-        },
-        {
-            'uab5101',
-            4769,
-            0,
-            1
-        },
-        {
-            'uab5101',
-            4773,
-            -1,
-            1
-        },
-        {
-            'uab5101',
-            4777,
-            -1,
-            0
-        }
-    },
-}
-
 -- ---@type ContextBasedTemplate
 -- TorpedoDefense = {
 --     Name = "Torpedo defense",
@@ -1921,4 +1916,165 @@ PointDefense = {
 --             0
 --         },
 --     },
+-- }
+
+
+
+
+
+
+
+
+
+-- {
+--     templateData = {
+--         18,
+--         18,
+--         {
+--             'zrb9601',
+--             7974,
+--             0,
+--             0
+--         },
+--         {
+--             'zrb9601',
+--             8388,
+--             -2,
+--             -8
+--         },
+--         {
+--             'zrb9601',
+--             8746,
+--             6,
+--             -10
+--         },
+--         {
+--             'zrb9601',
+--             9171,
+--             8,
+--             -2
+--         }
+--     },
+--     name = 'Land Factory',
+--     icon = 'zrb9601'
+-- },
+-- {
+--     templateData = {
+--         18,
+--         18,
+--         {
+--             'zrb9501',
+--             9662,
+--             0,
+--             0
+--         },
+--         {
+--             'zrb9501',
+--             9851,
+--             -2,
+--             -8
+--         },
+--         {
+--             'zrb9501',
+--             9987,
+--             6,
+--             -10
+--         },
+--         {
+--             'zrb9501',
+--             10161,
+--             8,
+--             -2
+--         }
+--     },
+--     name = 'Land Factory',
+--     icon = 'zrb9501'
+-- },
+-- {
+--     templateData = {
+--         18,
+--         18,
+--         {
+--             'urb0101',
+--             10380,
+--             0,
+--             0
+--         },
+--         {
+--             'urb0101',
+--             10450,
+--             -2,
+--             -8
+--         },
+--         {
+--             'urb0101',
+--             10573,
+--             6,
+--             -10
+--         },
+--         {
+--             'urb0101',
+--             10651,
+--             8,
+--             -2
+--         }
+--     },
+--     name = 'Land Factory',
+--     icon = 'urb0101'
+-- },
+-- {
+--     templateData = {
+--         12,
+--         16,
+--         {
+--             'urb1102',
+--             42408,
+--             0,
+--             0
+--         },
+--         {
+--             'urb1101',
+--             42718,
+--             -4,
+--             -6
+--         },
+--         {
+--             'urb1101',
+--             42861,
+--             -4,
+--             -10
+--         },
+--         {
+--             'urb1101',
+--             43066,
+--             0,
+--             -12
+--         },
+--         {
+--             'urb1101',
+--             44669,
+--             4,
+--             -12
+--         },
+--         {
+--             'urb1101',
+--             44956,
+--             6,
+--             -8
+--         },
+--         {
+--             'urb1101',
+--             46437,
+--             6,
+--             -4
+--         },
+--         {
+--             'urb0102',
+--             46825,
+--             1,
+--             -7
+--         }
+--     },
+--     name = 'Hydrocarbon Power Plant',
+--     icon = 'urb1102'
 -- }

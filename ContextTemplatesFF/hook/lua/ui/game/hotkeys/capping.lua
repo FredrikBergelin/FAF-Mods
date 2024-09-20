@@ -52,12 +52,9 @@ function AssistToCap(structure, units)
 
     -- various conditions written out for maintainability
     local isShiftDown = IsKeyDown('Shift')
-
     local isDoubleTapped = structure ~= nil and (pStructure1 == structure)
     local isTripleTapped = structure ~= nil and (pStructure1 == structure) and (pStructure2 == structure)
-
     local isUpgrading = structure:GetFocus() ~= nil
-
     local isTech1 = structure:IsInCategory('TECH1')
     local isTech2 = structure:IsInCategory('TECH2')
     local isTech3 = structure:IsInCategory('TECH3')
