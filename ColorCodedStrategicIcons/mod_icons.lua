@@ -1,4 +1,3 @@
--- we do not have any manual assignments
 UnitIconAssignments = {
 	{ BlueprintId = "UEL0001", IconSet = "icon_commander_uef" },
 	{ BlueprintId = "URL0001", IconSet = "icon_commander_cybran" },
@@ -13,7 +12,6 @@ UnitIconAssignments = {
 	{ BlueprintId = "URL0301_Combat", IconSet = "icon_subcommander_combat" },
 	{ BlueprintId = "UAL0301_Combat", IconSet = "icon_subcommander_combat" },
 	{ BlueprintId = "XSL0301_Combat", IconSet = "icon_subcommander_combat" },
-
 	{ BlueprintId = "UAL0301_NanoCombat", IconSet = "icon_subcommander_combat" },
 	{ BlueprintId = "XSL0301_AdvancedCombat", IconSet = "icon_subcommander_combat" },
 
@@ -30,13 +28,11 @@ UnitIconAssignments = {
 	{ BlueprintId = "URL0301_Stealth", IconSet = "icon_subcommander_stealth" },
 	{ BlueprintId = "URL0301_Cloak", IconSet = "icon_subcommander_cloak" },
 	{ BlueprintId = "URL0301_AntiAir", IconSet = "icon_subcommander_antiair" },
-
 	{ BlueprintId = "UEL0301_BubbleShield", IconSet = "icon_subcommander_shield" },
 	{ BlueprintId = "UEL0301_IntelJammer", IconSet = "icon_subcommander_jammer" },
 
 	{ BlueprintId = "UAL0301_NanoCombat", IconSet = "icon_subcommander_nanocombat" },
 	{ BlueprintId = "UAL0301_ShieldCombat", IconSet = "icon_subcommander_shieldcombat" },
-
 	{ BlueprintId = "XSL0301_NanoCombat", IconSet = "icon_subcommander_nanocombat" },
 	{ BlueprintId = "XSL0301_AdvancedCombat", IconSet = "icon_subcommander_advancedcombat" },
 	{ BlueprintId = "XSL0301_Missile", IconSet = "icon_subcommander_missile" },
@@ -84,7 +80,7 @@ UnitIconAssignments = {
 	{ BlueprintId = "XNB1303", IconSet = "icon_structure3_fab" },
 
 	{ BlueprintId = "UES0401", IconSet = "icon_experimental_atlantis" },
-	{ BlueprintId = "XSA0402", IconSet = "icon_experimental_awasher" },
+	{ BlueprintId = "XSA0402", IconSet = "icon_experimental_ahwassa" },
 	{ BlueprintId = "UAA0310", IconSet = "icon_experimental_czar" },
 	{ BlueprintId = "UEL0401", IconSet = "icon_experimental_fatty" },
 	{ BlueprintId = "UEB2401", IconSet = "icon_experimental_mavor" },
@@ -108,7 +104,7 @@ UnitIconAssignments = {
 	{ BlueprintId = "XSL0103", IconSet = "icon_land1_artillery_hover" },
 
 	{ BlueprintId = "UEL0202", IconSet = "icon_land2_directfire_pillar" },
-	{ BlueprintId = "UEL0204", IconSet = "icon_bot2_directfire_mongoose" },
+	{ BlueprintId = "DEL0204", IconSet = "icon_bot2_directfire_mongoose" },
 	{ BlueprintId = "URL0203", IconSet = "icon_land2_directfire_wagner" },
 	{ BlueprintId = "DRL0204", IconSet = "icon_bot2_directfire_hoplite" },
 	{ BlueprintId = "UAL0202", IconSet = "icon_land2_directfire_obsidian" },
@@ -150,7 +146,6 @@ UnitIconAssignments = {
 	{ BlueprintId = "UES0302", IconSet = "icon_ship3_directfire_uef" },
 	{ BlueprintId = "UAS0302", IconSet = "icon_ship3_directfire_aeon" },
 	{ BlueprintId = "XSS0302", IconSet = "icon_ship3_directfire_sera" },
-
 }
 
 --- Entry point for scripted assignments. This function has a limited scope and any changes to the

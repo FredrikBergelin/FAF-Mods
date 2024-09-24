@@ -1,5 +1,3 @@
-tLOG = import('/mods/common/modules/tools.lua').tLOG
-
 local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
 local AddBeatFunction = import("/lua/ui/game/gamemain.lua").AddBeatFunction
 
@@ -35,15 +33,15 @@ local EngineerOverlay = Class(Overlay)
             self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/engineer_t1_idle.dds", 0)
         elseif unit:IsInCategory("TECH2") and unit:IsInCategory("FIELDENGINEER") then
             self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/sparky_idle.dds", 0)
-        elseif unit:IsInCategory("TECH2") then
+        elseif unit:IsInCategory("TECH2") and unit:IsInCategory("MOBILE") then
             self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/engineer_t2_idle.dds", 0)
-        elseif unit:IsInCategory("TECH3") and not unit:IsInCategory("SUBCOMMANDER") then
+        elseif unit:IsInCategory("TECH3") and unit:IsInCategory("MOBILE") and not unit:IsInCategory("SUBCOMMANDER") then
             self:SetTexture("/mods/ColorCodedStrategicIcons/overlays/engineer_t3_idle.dds", 0)
         end
     end,
 
     OnFrame = function(self, delta)
-        -- TODO: if not is destroyed
+        -- TODO: if not is destroyed?
         if self.isIdle then
             self:Update()
         else
@@ -129,23 +127,28 @@ local FactoryOverlay = Class(Overlay)
 
     UpdateState = function(self)
 
-        -- tLOG(self.unit:GetBuildRate(), "GetBuildRate")
-
         if not factoriesOverlayActive or self.unit:IsDead() then -- if self.unit:IsBeingBuilt() -- attempt to call method `IsBeingBuilt' (a nil value) ???
             self:Destroy()
             return
         end
 
         if GetIsPaused { self.unit } or self.unit:IsIdle() then
+            LOG("1 - " ..
+                tostring(self.unit:IsRepeatQueue()) ..
+                " - " .. tostring(GetIsPaused { self.unit }) .. " - " .. tostring(self.unit:IsIdle()))
             self:SetFrame(0)
         elseif self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("FACTORY") then
+            LOG("2 - ")
             self:SetFrame(1)
         elseif self.unit:IsRepeatQueue() and self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("ENGINEER") then
+            LOG("3 - ")
             self:SetFrame(2)
         elseif self.unit:IsRepeatQueue() then
+            LOG("4 - ")
             self:SetFrame(3)
         else
-            self:Hide()
+            LOG("HIDE - ")
+            self:Destroy() -- Use Destroy, not Hide - it does nothing?
         end
     end
 }
@@ -164,8 +167,10 @@ local StationarySiloOverlay = Class(Overlay)
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_2.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_3.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_4.dds",
-            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_5.dds", --TODO
-            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_6.dds", --TODO
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_5.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_6.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_7.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_8.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds",
         })
     end,
@@ -196,8 +201,12 @@ local StationarySiloOverlay = Class(Overlay)
             self:SetFrame(5)
         elseif self.siloStorageCount == 6 then
             self:SetFrame(6)
-        elseif self.siloStorageCount > 6 then
+        elseif self.siloStorageCount == 7 then
             self:SetFrame(7)
+        elseif self.siloStorageCount == 8 then
+            self:SetFrame(8)
+        elseif self.siloStorageCount > 8 then
+            self:SetFrame(9)
         end
     end
 }
@@ -218,6 +227,8 @@ local MobileSiloOverlay = Class(Overlay)
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_4.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_5.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_6.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_7.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_8.dds",
             "/mods/ColorCodedStrategicIcons/overlays/missile_loaded_plus.dds",
         })
     end,
@@ -248,8 +259,12 @@ local MobileSiloOverlay = Class(Overlay)
             self:SetFrame(5)
         elseif self.siloStorageCount == 6 then
             self:SetFrame(6)
-        elseif self.siloStorageCount > 6 then
+        elseif self.siloStorageCount == 7 then
             self:SetFrame(7)
+        elseif self.siloStorageCount == 8 then
+            self:SetFrame(8)
+        elseif self.siloStorageCount > 8 then
+            self:SetFrame(9)
         end
     end
 }
@@ -295,8 +310,12 @@ local AntiNukeSiloOverlay = Class(Overlay)
             self:SetFrame(3)
         elseif self.siloStorageCount == 4 then
             self:SetFrame(4)
-        elseif self.siloStorageCount > 4 then
+        elseif self.siloStorageCount == 5 then
             self:SetFrame(5)
+        elseif self.siloStorageCount == 6 then
+            self:SetFrame(6)
+        elseif self.siloStorageCount > 7 then
+            self:SetFrame(7)
         end
     end
 }
