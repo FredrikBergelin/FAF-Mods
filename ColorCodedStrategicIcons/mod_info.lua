@@ -1,6 +1,6 @@
 name = "Color Coded Strategic Icons"
-uid = "Color-Coded-Strategic-Icons-FF-v2"
-version = 2
+uid = "Color-Coded-Strategic-Icons-FF-v3"
+version = 3
 description = [[Color-coded strategic icons with integrated unit overlays. Lets you determine an army composition even at a glance.
 - Player color is shown as a surrounding glow, the middle is colored based on unit class with the same colors as range circles.
 - Icon size indicates unit HP/threat level. Submersible land units have a pointy bottom, hover units have a pointy top.
@@ -14,6 +14,11 @@ url = "https://forum.faforever.com/topic/6779/color-coded-strategic-icons"
 ui_only = true
 icon = "/mods/ColorCodedStrategicIcons/icon.png"
 __umt = true
+
+
+-- V1 BETA, had missing icons
+-- V2 All icons included, optional overlays
+-- V3 Hotfix, removed LOG calls left by mistake
 
 
 -- Want to make your own adjustments? Feel free to reach out on FAF Forums or Discord, I know a few tricks that can help you get started.

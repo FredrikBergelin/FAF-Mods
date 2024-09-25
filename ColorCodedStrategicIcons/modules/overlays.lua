@@ -133,21 +133,14 @@ local FactoryOverlay = Class(Overlay)
         end
 
         if GetIsPaused { self.unit } or self.unit:IsIdle() then
-            LOG("1 - " ..
-                tostring(self.unit:IsRepeatQueue()) ..
-                " - " .. tostring(GetIsPaused { self.unit }) .. " - " .. tostring(self.unit:IsIdle()))
             self:SetFrame(0)
         elseif self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("FACTORY") then
-            LOG("2 - ")
             self:SetFrame(1)
         elseif self.unit:IsRepeatQueue() and self.unit:GetFocus() and self.unit:GetFocus():IsInCategory("ENGINEER") then
-            LOG("3 - ")
             self:SetFrame(2)
         elseif self.unit:IsRepeatQueue() then
-            LOG("4 - ")
             self:SetFrame(3)
         else
-            LOG("HIDE - ")
             self:Destroy() -- Use Destroy, not Hide - it does nothing?
         end
     end
