@@ -277,6 +277,7 @@ local AntiNukeSiloOverlay = Class(Overlay)
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_4.dds",
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_5.dds",
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_6.dds",
+            "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_7.dds",
             "/mods/ColorCodedStrategicIcons/overlays/antimissile_loaded_plus.dds",
         })
     end,
@@ -307,8 +308,10 @@ local AntiNukeSiloOverlay = Class(Overlay)
             self:SetFrame(5)
         elseif self.siloStorageCount == 6 then
             self:SetFrame(6)
-        elseif self.siloStorageCount > 7 then
+        elseif self.siloStorageCount == 7 then
             self:SetFrame(7)
+        elseif self.siloStorageCount > 7 then
+            self:SetFrame(8)
         end
     end
 }
@@ -343,10 +346,9 @@ local MexOverlay = Class(Overlay)
 
 local function UpdateOverlays()
     for _, overlay in overlays do
-        if IsDestroyed(overlay) then
-            continue
+        if not IsDestroyed(overlay) then
+            overlay:UpdateState()
         end
-        overlay:UpdateState()
     end
 end
 

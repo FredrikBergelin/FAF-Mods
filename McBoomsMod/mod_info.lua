@@ -15,8 +15,7 @@ exclusive = false
 ui_only = true
 conflicts = {
     "fef06074-475f-42d1-a511-ceab6463bb5d",
-	"8c28a269-8655-4639-8e54-3d311fc376f8",
-	
+    "8c28a269-8655-4639-8e54-3d311fc376f8",
     "68c017a4-bce5-11e5-9912-ba0be0483c18",
     "d0f93970-a8de-4140-a3f9-6023a8d3e97e",
     "d0f93970-a8de-4140-a3f9-SupEcoEM-v2",

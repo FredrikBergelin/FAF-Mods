@@ -22,40 +22,20 @@ KeyMapper.SetUserKeyAction('Cycle next, defaults to closest', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, true)',
     category = 'Command Cycler'
 })
-KeyMapper.SetUserKeyAction('(Shift) Cycle next, defaults to closest', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(nil, false)',
-    category = 'Command Cycler'
-})
 KeyMapper.SetUserKeyAction('Cycle from closest', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest", true)',
-    category = 'Command Cycler'
-})
-KeyMapper.SetUserKeyAction('(Shift) Cycle from closest', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("closest", false)',
     category = 'Command Cycler'
 })
 KeyMapper.SetUserKeyAction('Cycle from furthest', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest", true)',
     category = 'Command Cycler'
 })
-KeyMapper.SetUserKeyAction('(Shift) Cycle from furthest', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("furthest", false)',
-    category = 'Command Cycler'
-})
 KeyMapper.SetUserKeyAction('Cycle from most damaged', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage", true)',
     category = 'Command Cycler'
 })
-KeyMapper.SetUserKeyAction('(Shift) Cycle from most damaged', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("damage", false)',
-    category = 'Command Cycler'
-})
 KeyMapper.SetUserKeyAction('Cycle from most health', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health", true)',
-    category = 'Command Cycler'
-})
-KeyMapper.SetUserKeyAction('(Shift) Cycle from most health', {
-    action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection("health", false)',
     category = 'Command Cycler'
 })
 KeyMapper.SetUserKeyAction('Select all and reset selection', {
@@ -66,7 +46,6 @@ KeyMapper.SetUserKeyAction('Select remaining, without command', {
     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").SelectRest()',
     category = 'Command Cycler'
 })
-
 -- KeyMapper.SetUserKeyAction('Add one more unit to each selection', {
 --     action = 'UI_Lua import("/mods/CommandCycler/modules/Main.lua").CreateOrContinueSelection(true)',
 --     category = 'Command Cycler'
@@ -119,29 +98,11 @@ function SelectNext()
     end
 
     local mousePos = GetMouseWorldPos()
-    local nextOrderValue = 99999999
+    local nextOrderValue = false
     local nextUnit = nil
     local nextUnitIndex = nil
     local missilesCount = false
     local unitsToRemove = {}
-
-    if specialMode == "silo" then
-        if sortMode == "closest" then
-            nextOrderValue = 99999999
-            sortMode = "closest"
-        elseif sortMode == "furthest" then
-            nextOrderValue = 0
-            sortMode = "furthest"
-        end
-    elseif sortMode == "closest" then
-        nextOrderValue = 99999999
-    elseif sortMode == "furthest" then
-        nextOrderValue = 0
-    elseif sortMode == "damage" then
-        nextOrderValue = 99999999
-    elseif sortMode == "health" then
-        nextOrderValue = 0
-    end
 
     for key, unit in pairs(selectionWithoutOrder) do
         if specialMode == "silo" then
@@ -161,14 +122,14 @@ function SelectNext()
                 local bp
                 if sortMode == "closest" then
                     distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
-                    if distanceToCursor < nextOrderValue then
+                    if not nextOrderValue or distanceToCursor < nextOrderValue then
                         nextOrderValue = distanceToCursor
                         nextUnit = unit
                         nextUnitIndex = key
                     end
                 elseif sortMode == "furthest" then
                     distanceToCursor = Util.GetDistanceBetweenTwoVectors(mousePos, unit:GetPosition())
-                    if distanceToCursor > nextOrderValue then
+                    if not nextOrderValue or distanceToCursor > nextOrderValue then
                         nextOrderValue = distanceToCursor
                         nextUnit = unit
                         nextUnitIndex = key
@@ -186,8 +147,27 @@ function SelectNext()
                     bp = unit:GetBlueprint()
                     unitHealthPercent = unit:GetHealth() / bp.Defense.MaxHealth
 
-                    if unitHealthPercent > nextOrderValue then
+                    if not nextOrderValue or unitHealthPercent > nextOrderValue then
                         nextOrderValue = unitHealthPercent
+                        nextUnit = unit
+                        nextUnitIndex = key
+                    end
+                elseif sortMode == "shield" then
+                    bp = unit:GetBlueprint()
+                    local shieldMaxHealth = bp.Defense.Shield and bp.Defense.Shield.ShieldMaxHealth or false
+                    local unitShieldValue = 0
+
+                    if shieldMaxHealth then
+
+                        LOG("2 " .. tostring(shieldMaxHealth))
+                        LOG("3 " .. tostring(unit:GetShieldRatio()))
+
+                        unitShieldValue = shieldMaxHealth * unit:GetShieldRatio()
+                        LOG("VALUE " .. tostring(unitShieldValue))
+                    end
+
+                    if not nextOrderValue or unitShieldValue > nextOrderValue then
+                        nextOrderValue = unitShieldValue
                         nextUnit = unit
                         nextUnitIndex = key
                     end

@@ -774,7 +774,7 @@ local customKeyMap = {
 		end
 	end) end,
 	['Shift-Y'] = function() Hotkey('Shift-Y', function(hotkey)
-		if AllHaveCategory(categories.FACTORY) then
+		if AllHaveCategory(categories.FACTORY) then	
 			ConExecute 'UI_Lua import("/lua/keymap/hotbuild.lua").buildAction("HBO_T1_5")'
 		end
 	end) end,
@@ -793,6 +793,7 @@ local customKeyMap = {
 	I = function() Hotkey('I', function(hotkey)
 	end) end,
 	O = function() Hotkey('O', function(hotkey)
+		CreateOrContinueSelection("shield", "auto")
 	end) end,
 	P = function() Hotkey('P', function(hotkey)
 		ConExecute 'UI_Lua import("/mods/CommandWheel/modules/App.lua").OpenWheel("AlertExtended")'
