@@ -536,7 +536,6 @@ function UpdateResourcesUi()
 				productionValue = productionValue / resourceType.currentMaxUsageByAnyCategory * usageContainerWidth
 				upkeepValue = upkeepValue / resourceType.currentMaxUsageByAnyCategory * usageContainerWidth
 
-
 				-- productionValue = usageContainerWidth * 100 / resourceType.currentMaxUsageByAnyCategory * productionValue / resourceTypeUsageTotal
 				-- upkeepValue = usageContainerWidth * 100 / resourceType.currentMaxUsageByAnyCategory * upkeepValue / resourceTypeUsageTotal
 
@@ -551,7 +550,8 @@ function UpdateResourcesUi()
 				if (productionValue > 0 and productionValue < 1) then productionValue = 1 end
 				if (upkeepValue > 0 and upkeepValue < 1) then upkeepValue = 1 end
 
-				local shouldShow = productionValue + upkeepValue > 0
+				-- Always show all for now -- TODO: make this a setting
+				local shouldShow = true -- = productionValue + upkeepValue > 0
 				if (shouldShow and unitType.typeUi.uiRoot:IsHidden()) then
 					unitType.typeUi.uiRoot:Show()
 					unitType.typeUi.Clear()
@@ -724,7 +724,6 @@ function buildUi()
 				spacer = 0
 			},
 
-
 			{
 				name = "Silos",
 				category = categories.SILO,
@@ -740,7 +739,7 @@ function buildUi()
 				spacer = 0
 			},
 			{
-				name = "Military",
+				name = "Defense",
 				category = categories.STRUCTURE * categories.DEFENSE +
 					categories.STRUCTURE * categories.STRATEGIC,
 				icon =
@@ -829,8 +828,8 @@ function buildUi()
 
 			-- Icon
 			typeUi.stratIcon = Bitmap(typeUi.uiRoot)
-			local iconName = '/mods/UI-Party/textures/category_icons/' .. unitType.icon .. '.dds'
-			typeUi.stratIcon:SetTexture(iconName)
+			local iconPath = '/mods/UI-Party/textures/category_icons/' .. unitType.icon .. '.dds'
+			typeUi.stratIcon:SetTexture(iconPath)
 			typeUi.stratIcon.Height:Set(iconSize) -- typeUi.stratIcon.BitmapHeight
 			typeUi.stratIcon.Width:Set(iconSize)
 			LayoutHelpers.AtLeftIn(typeUi.stratIcon, typeUi.uiRoot, iconLeftIn)
