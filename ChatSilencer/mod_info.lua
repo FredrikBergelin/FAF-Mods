@@ -1,0 +1,17 @@
+name = "Chat Silencer"
+uid = "860e8355-900e-48a0-8af9-5b00dfbfd3c1"
+version = 2
+copyright = "Copyright is waived by the author, arma473"
+description = "Removes all chat from other players.  Can be configured by editing the lua files of course."
+author = "arma473"
+url = "http://"
+icon = "/mods/ChatSilencer/ChatSilencer.png"
+selectable = true
+enabled = true
+exclusive = false
+ui_only = true
+requires = { }
+requiresNames = { }
+conflicts = { }
+before = { }
+after = { }

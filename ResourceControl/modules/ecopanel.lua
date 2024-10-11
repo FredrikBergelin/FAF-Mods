@@ -110,26 +110,26 @@ function GetUnitType(unit)
 	return unitType
 end
 
-function GetOnValueForScriptBit(i)
+function OnValueForAbility(i)
 	if i == 0 then return false end -- shield is weird and reversed... you need to set it to false to get it to turn off - unlike everything else
 	return true
 end
 
 function DisableUnitsAbility(units)
 	for i = 0, 8 do
-		ToggleScriptBit(units, i, not GetOnValueForScriptBit(i))
+		ToggleScriptBit(units, i, not OnValueForAbility(i))
 	end
 end
 
 function EnableUnitsAbility(units)
 	for i = 0, 8 do
-		ToggleScriptBit(units, i, GetOnValueForScriptBit(i))
+		ToggleScriptBit(units, i, OnValueForAbility(i))
 	end
 end
 
 function GetIsUnitAbilityEnabled(units)
 	for i = 0, 8 do
-		if GetScriptBit(units, i) == GetOnValueForScriptBit(i) then
+		if GetScriptBit(units, i) == OnValueForAbility(i) then
 			return true
 		end
 	end
