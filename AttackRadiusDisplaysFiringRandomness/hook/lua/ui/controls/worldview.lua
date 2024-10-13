@@ -69,7 +69,7 @@ RadiusDecalFunction = function(predicate)
 
     if maxRadius > 0 then
         local damageRadius = maxSpreadWeaponCached.DamageRadius
-        local decalData = { }
+        local decalData = {}
         if damageRadius > 0 then
             table.insert(decalData,
                 { --Damage radius display
@@ -121,7 +121,7 @@ WorldView = Class(oldWorldView) {
                             decal.scaleUpdate = scaleUpdate
                         else
                             local scale = instance.scale
-                            decal:SetScale({scale, 1, scale})
+                            decal:SetScale({ scale, 1, scale })
                         end
 
                         self.CursorDecalTrash:Add(decal);
@@ -134,7 +134,7 @@ WorldView = Class(oldWorldView) {
             for k, decal in self.CursorDecalTrash do
                 if decal.scaleUpdate then
                     local scale = decal.scaleUpdate()
-                    decal:SetScale({scale, 1, scale})
+                    decal:SetScale({ scale, 1, scale })
                 end
                 decal:SetPosition(GetMouseWorldPos())
             end
