@@ -1,3 +1,5 @@
+tLOG = import('/mods/common/modules/tools.lua').tLOG
+
 local function AveragePositionOfUnits(units)
     local unitCount = table.getn(units)
 
@@ -45,8 +47,16 @@ local maxSpreadWeaponCached
 ---@return number
 local function GetMaxDamageSpread(weapons)
     local maxRadius = 0
+
+    LOG(table.getn(weapons))
+
+    tLOG(weapons, "weapons, GetMaxDamageSpread(weapons)")
+
     for _, w in weapons do
         newRad = GetWeaponDamageSpread(w)
+
+        tLOG(newRad, "newRad")
+
         if newRad > maxRadius then
             maxRadius = newRad
             maxSpreadWeaponCached = w
@@ -62,30 +72,32 @@ end
 --- A generic decal texture / size computation function that uses the damage and spread radius
 ---@param predicate function<WeaponBlueprint[]>
 ---@return WorldViewDecalData[]
-local function RadiusDecalFunction(predicate)
-    local unitsToWeapons = GetSelectedWeaponsWithReticules(predicate)
+RadiusDecalFunction = function(predicate)
+    local weapons = GetSelectedWeaponsWithReticules(predicate)
 
-    -- The maximum damage radius of a selected missile weapon.
-    local maxRadius = 0
-    for _, weapons in unitsToWeapons do
-        if weapons then
-            for _, w in weapons do
-                if w.FixedSpreadRadius and w.FixedSpreadRadius + w.DamageRadius > maxRadius then
-                    maxRadius = w.FixedSpreadRadius + w.DamageRadius
-                elseif w.DamageRadius > maxRadius then
-                    maxRadius = w.DamageRadius
-                end
-            end
-        end
-    end
+    local maxRadius = GetMaxDamageSpread(weapons)
 
     if maxRadius > 0 then
-        return {
-            {
-                texture = "/textures/ui/common/game/AreaTargetDecal/weapon_icon_small.dds",
-                scale = maxRadius * 2
-            }
-        }
+        local damageRadius = maxSpreadWeaponCached.DamageRadius
+        local decalData = {}
+        if damageRadius > 0 then
+            table.insert(decalData,
+                { --Damage radius display
+                    texture = "/textures/ui/common/game/AreaTargetDecal/weapon_icon_small.dds",
+                    scale = damageRadius * 2
+                }
+            )
+        end
+        if damageRadius ~= maxRadius then
+            table.insert(decalData,
+                { --Inaccuracy display
+                    texture = "/textures/ui/common/game/AreaTargetDecal/nuke_icon_inner.dds",
+                    scaleUpdateFunction = RadiusDecalScaleUpdate
+                }
+            )
+        end
+
+        return decalData
     end
 
     return false
@@ -113,15 +125,27 @@ WorldView = Class(oldWorldView) {
                     for k, instance in data do
                         local decal = UserDecal()
                         decal:SetTexture(instance.texture)
-                        decal:SetScale({ instance.scale, 1, instance.scale })
+
+                        local scaleUpdate = instance.scaleUpdateFunction
+                        if scaleUpdate then
+                            decal.scaleUpdate = scaleUpdate
+                        else
+                            local scale = instance.scale
+                            decal:SetScale({ scale, 1, scale })
+                        end
+
                         self.CursorDecalTrash:Add(decal);
                         self.Trash:Add(decal)
                     end
                 end
             end
 
-            -- update their locations
+            -- update their scale and then locations
             for k, decal in self.CursorDecalTrash do
+                if decal.scaleUpdate then
+                    local scale = decal.scaleUpdate()
+                    decal:SetScale({ scale, 1, scale })
+                end
                 decal:SetPosition(GetMouseWorldPos())
             end
         else
