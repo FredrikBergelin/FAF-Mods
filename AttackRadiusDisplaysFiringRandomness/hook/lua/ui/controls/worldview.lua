@@ -1,13 +1,3 @@
-tLOG = import('/mods/common/modules/tools.lua').tLOG
-
-local function TableLength(tbl)
-    local count = 0
-    for _ in pairs(tbl) do
-        count = count + 1
-    end
-    return count
-end
-
 local maxSpreadWeaponCached
 
 local function AveragePositionOfUnits(units)
@@ -39,49 +29,26 @@ end
 ---@param weapon WeaponBlueprint
 ---@return number
 local function GetWeaponDamageSpread(weapon)
-
-    if not weapon then
-        LOG("GetWeaponDamageSpread: No weapon data passed.")
-        return 0
-    end
-
     local dist = VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())
-    
-    local weaponMaxRadius = weapon.MaxRadius
 
+    local weaponMaxRadius = weapon.MaxRadius
     local weaponMinRadius = weapon.MinRadius
-    
+
     if weaponMinRadius and dist < weaponMinRadius then
         dist = weaponMinRadius
     elseif weaponMaxRadius and dist > weaponMaxRadius then
         dist = weaponMaxRadius
     end
 
-    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or ((weapon.FiringRandomness or 0) / 12 * dist))
+    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or 0) + ((weapon.FiringRandomness or 0) * dist / 10)
 end
+
 local function GetMaxDamageSpread(weapons)
     local maxRadius = 0
 
-    -- Log the number of weapon sets
-    LOG("Number of weapon sets: " .. TableLength(weapons))
-
     for key, weaponData in pairs(weapons) do
-        if weaponData then
-            LOG("Processing weaponData: " .. repr(weaponData))
-        else
-            LOG("Warning: weaponData is nil at key: " .. tostring(key))
-        end
-
         for _, w in pairs(weaponData or {}) do
-            if w then
-                LOG("Processing weapon: " .. repr(w))
-            else
-                LOG("Warning: Weapon is nil in weaponData")
-            end
-
             local newRad = GetWeaponDamageSpread(w)
-
-            LOG("newRad (spread): " .. tostring(newRad))
 
             if newRad > maxRadius then
                 maxRadius = newRad
@@ -93,18 +60,7 @@ local function GetMaxDamageSpread(weapons)
     return maxRadius
 end
 
-local function TableLength(tbl)
-    local count = 0
-    for _ in pairs(tbl) do
-        count = count + 1
-    end
-    return count
-end
-
-
-
 local function RadiusDecalScaleUpdate()
-    WARN("RadiusDecalScaleUpdate calling GetWeaponDamageSpread")
     return GetWeaponDamageSpread(maxSpreadWeaponCached) * 2
 end
 
