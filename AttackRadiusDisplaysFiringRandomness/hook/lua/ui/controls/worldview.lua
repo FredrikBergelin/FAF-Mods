@@ -1,23 +1,13 @@
--- Utility function to count the number of elements in a table.
-local function TableLength(tbl)
-    local count = 0
-    for _ in pairs(tbl) do
-        count = count + 1
-    end
-    return count
-end
-
 local maxSpreadWeaponCached
 
 -- Helper function to calculate the average position of a group of units.
 local function AveragePositionOfUnits(units)
-    WARN(table.getn(units))
+    local unitCount = table.getn(units)
 
-    local unitCount = TableLength(units)
     local px, py, pz = 0, 0, 0
 
-    for _, unit in ipairs(units) do
-        local ux, uy, uz = unpack(unit:GetPosition())
+    for k = 1, unitCount do
+        local ux, uy, uz = unpack(units[k]:GetPosition())
         px = px + ux
         py = py + uy
         pz = pz + uz
@@ -36,6 +26,7 @@ end
 ---@return number
 local function GetWeaponDamageSpread(weapon)
     local dist = VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())
+
     local weaponMaxRadius = weapon.MaxRadius
     local weaponMinRadius = weapon.MinRadius
 
@@ -54,12 +45,13 @@ end
 local function GetMaxDamageSpread(weapons)
     local maxRadius = 0
 
-    for _, weaponData in pairs(weapons) do
-        for _, weapon in weaponData or {} do
-            local newRadius = GetWeaponDamageSpread(weapon)
-            if newRadius > maxRadius then
-                maxRadius = newRadius
-                maxSpreadWeaponCached = weapon
+    for key, weaponData in pairs(weapons) do
+        for _, w in pairs(weaponData or {}) do
+            local newRad = GetWeaponDamageSpread(w)
+
+            if newRad > maxRadius then
+                maxRadius = newRad
+                maxSpreadWeaponCached = w
             end
         end
     end
@@ -75,28 +67,31 @@ end
 --- Override to compute the decal texture and size based on the weapon's damage and spread radius.
 ---@param predicate function<WeaponBlueprint[]>
 ---@return WorldViewDecalData[]
-local function RadiusDecalFunction(predicate)
+RadiusDecalFunction = function(predicate)
     local weapons = GetSelectedWeaponsWithReticules(predicate)
+
     local maxRadius = GetMaxDamageSpread(weapons)
 
     if maxRadius > 0 then
         local damageRadius = maxSpreadWeaponCached.DamageRadius
         local decalData = {}
-
         -- Create decal for damage radius
         if damageRadius > 0 then
-            table.insert(decalData, {
-                texture = "/textures/ui/common/game/AreaTargetDecal/weapon_icon_small.dds",
-                scale = damageRadius * 2
-            })
+            table.insert(decalData,
+                { --Damage radius display
+                    texture = "/textures/ui/common/game/AreaTargetDecal/weapon_icon_small.dds",
+                    scale = damageRadius * 2
+                }
+            )
         end
-
         -- Create decal for inaccuracy if the spread radius differs from damage radius
         if damageRadius ~= maxRadius then
-            table.insert(decalData, {
-                texture = "/textures/ui/common/game/AreaTargetDecal/nuke_icon_inner.dds",
-                scaleUpdateFunction = RadiusDecalScaleUpdate
-            })
+            table.insert(decalData,
+                { --Inaccuracy display
+                    texture = "/textures/ui/common/game/AreaTargetDecal/nuke_icon_inner.dds",
+                    scaleUpdateFunction = RadiusDecalScaleUpdate
+                }
+            )
         end
 
         return decalData
@@ -107,7 +102,7 @@ end
 
 local oldWorldView = WorldView
 
---- Extension of the WorldView class to handle cursor decals for command actions.
+-- Extension of the WorldView class to handle cursor decals for command actions.
 WorldView = Class(oldWorldView) {
 
     --- Manages the decals of a cursor event based on selection and weapon stats.
@@ -119,31 +114,34 @@ WorldView = Class(oldWorldView) {
     OnCursorDecals = function(self, identifier, enabled, changed, getDecalsBasedOnSelection)
         if enabled then
             if changed then
+
                 -- Prepare decals based on the current selection
                 local data = getDecalsBasedOnSelection()
                 if data then
                     -- Clear out old decals if they exist
-                    self.CursorDecalTrash:Destroy()
+                    self.CursorDecalTrash:Destroy();
 
                     -- Add new decals
-                    for _, instance in data do
+                    for k, instance in data do
                         local decal = UserDecal()
                         decal:SetTexture(instance.texture)
 
-                        if instance.scaleUpdateFunction then
-                            decal.scaleUpdate = instance.scaleUpdateFunction
+                        local scaleUpdate = instance.scaleUpdateFunction
+                        if scaleUpdate then
+                            decal.scaleUpdate = scaleUpdate
                         else
-                            decal:SetScale({ instance.scale, 1, instance.scale })
+                            local scale = instance.scale
+                            decal:SetScale({ scale, 1, scale })
                         end
 
-                        self.CursorDecalTrash:Add(decal)
+                        self.CursorDecalTrash:Add(decal);
                         self.Trash:Add(decal)
                     end
                 end
             end
 
             -- Update their scale and positions
-            for _, decal in self.CursorDecalTrash do
+            for k, decal in self.CursorDecalTrash do
                 if decal.scaleUpdate then
                     local scale = decal.scaleUpdate()
                     decal:SetScale({ scale, 1, scale })
@@ -152,7 +150,7 @@ WorldView = Class(oldWorldView) {
             end
         else
             -- Destroy current decals when command ends
-            self.CursorDecalTrash:Destroy()
+            self.CursorDecalTrash:Destroy();
         end
     end,
 }
