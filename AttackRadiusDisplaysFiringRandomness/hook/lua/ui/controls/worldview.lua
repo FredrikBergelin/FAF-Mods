@@ -38,25 +38,27 @@ end
 --- Get the weapon "damage spread", which is how much the weapon's damage spreads out depending on the distance to target
 ---@param weapon WeaponBlueprint
 ---@return number
--- Add logging inside GetWeaponDamageSpread to identify potential issues
 local function GetWeaponDamageSpread(weapon)
+
     if not weapon then
         LOG("GetWeaponDamageSpread: No weapon data passed.")
         return 0
     end
 
-    -- Log the weapon blueprint data for debugging
-    LOG("GetWeaponDamageSpread: Weapon blueprint data: " .. repr(weapon))
+    local dist = VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())
+    
+    local weaponMaxRadius = weapon.MaxRadius
 
-    -- Check for any field in the weapon related to spread or radius (adjust as needed)
-    local spread = weapon.DamageRadius or weapon.AreaOfEffectRadius or 0
+    local weaponMinRadius = weapon.MinRadius
+    
+    if weaponMinRadius and dist < weaponMinRadius then
+        dist = weaponMinRadius
+    elseif weaponMaxRadius and dist > weaponMaxRadius then
+        dist = weaponMaxRadius
+    end
 
-    -- Log the calculated spread for debugging
-    LOG("GetWeaponDamageSpread: Calculated spread: " .. tostring(spread))
-
-    return spread
+    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or ((weapon.FiringRandomness or 0) / 12 * dist))
 end
-
 local function GetMaxDamageSpread(weapons)
     local maxRadius = 0
 
