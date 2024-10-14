@@ -8,6 +8,8 @@ local function TableLength(tbl)
     return count
 end
 
+local maxSpreadWeaponCached
+
 local function AveragePositionOfUnits(units)
     local unitCount = table.getn(units)
 
@@ -58,20 +60,26 @@ end
 local function GetMaxDamageSpread(weapons)
     local maxRadius = 0
 
-    -- Log the number of weapons to process
+    -- Log the number of weapon sets
     LOG("Number of weapon sets: " .. TableLength(weapons))
 
     for key, weaponData in pairs(weapons) do
-        tLOG(weaponData, "weaponData")
+        if weaponData then
+            LOG("Processing weaponData: " .. repr(weaponData))
+        else
+            LOG("Warning: weaponData is nil at key: " .. tostring(key))
+        end
 
-        for _, w in pairs(weaponData) do
-            tLOG(w, "w")
+        for _, w in pairs(weaponData or {}) do
+            if w then
+                LOG("Processing weapon: " .. repr(w))
+            else
+                LOG("Warning: Weapon is nil in weaponData")
+            end
 
-            -- Call GetWeaponDamageSpread with logging
             local newRad = GetWeaponDamageSpread(w)
 
-            -- Log the newRad value for debugging
-            tLOG(newRad, "newRad")
+            LOG("newRad (spread): " .. tostring(newRad))
 
             if newRad > maxRadius then
                 maxRadius = newRad
@@ -91,44 +99,10 @@ local function TableLength(tbl)
     return count
 end
 
-local maxSpreadWeaponCached
 
--- --- Get the maximum damage spread from multiple weapons, and cache the max spread weapon
--- ---@param weapons WeaponBlueprint[]
--- ---@return number
--- local function GetMaxDamageSpread(weapons)
---     local maxRadius = 0
-
---     -- Logging the table length for debugging
---     LOG(TableLength(weapons))
-
---     -- First, loop over the weapon keys like 'url0304'
---     for key, weaponData in pairs(weapons) do
-
---         tLOG(weaponData, "weaponData")
-
---         -- weaponData appears to be another table where the actual weapon blueprint is stored
---         -- Now loop over the actual weapon blueprint data
---         for _, w in pairs(weaponData) do
-
---             tLOG(w, "w")
-
---             local newRad = GetWeaponDamageSpread(w)
-
---             -- Log the newRad for debugging
---             tLOG(newRad, "newRad")
-
---             if newRad > maxRadius then
---                 maxRadius = newRad
---                 maxSpreadWeaponCached = w
---             end
---         end
---     end
-
---     return maxRadius
--- end
 
 local function RadiusDecalScaleUpdate()
+    WARN("RadiusDecalScaleUpdate calling GetWeaponDamageSpread")
     return GetWeaponDamageSpread(maxSpreadWeaponCached) * 2
 end
 
