@@ -1,4 +1,4 @@
-local next =  next
+local next = next
 local tableGetN = table.getn
 local tableInsert = table.insert
 local unpack = unpack
@@ -42,7 +42,7 @@ local function GetWeaponDamageSpread(weapon, dist)
     elseif weaponMaxRadius and dist > weaponMaxRadius then
         dist = weaponMaxRadius
     end
-    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or (weapon.FiringRandomness or 0) / 12 * dist)
+    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or (weapon.FiringRandomness or 0) / 10 * dist)
 end
 
 local maxSpreadWeaponCached
@@ -101,7 +101,8 @@ GetMaxDamageSpread = function(unitsToWeapons)
 end
 
 local function RadiusDecalScaleUpdate()
-    return GetWeaponDamageSpread(maxSpreadWeaponCached, VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())) * 2
+    return GetWeaponDamageSpread(maxSpreadWeaponCached,
+        VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())) * 2
 end
 
 --- A generic decal texture / size computation function that uses the damage and spread radius
@@ -113,7 +114,7 @@ RadiusDecalFunction = function(predicate)
     local maxRadius = GetMaxDamageSpread(unitsToWeapons)
     if maxRadius > 0 then
         local damageRadius = maxSpreadWeaponCached.DamageRadius
-        local decalData = { }
+        local decalData = {}
         if damageRadius > 0 then
             decalData = {
                 { --Damage radius display
@@ -165,7 +166,7 @@ WorldView = Class(oldWorldView) {
                             decal.scaleUpdate = scaleUpdate
                         else
                             local scale = instance.scale
-                            decal:SetScale({scale, 1, scale})
+                            decal:SetScale({ scale, 1, scale })
                         end
 
                         self.CursorDecalTrash:Add(decal);
@@ -178,7 +179,7 @@ WorldView = Class(oldWorldView) {
             for k, decal in self.CursorDecalTrash do
                 if decal.scaleUpdate then
                     local scale = decal.scaleUpdate()
-                    decal:SetScale({scale, 1, scale})
+                    decal:SetScale({ scale, 1, scale })
                 end
                 decal:SetPosition(GetMouseWorldPos())
             end
