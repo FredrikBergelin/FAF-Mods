@@ -1,11 +1,16 @@
-local maxSpreadWeaponCached
+local next =  next
+local tableGetN = table.getn
+local tableInsert = table.insert
+local unpack = unpack
+local GetMouseWorldPos = GetMouseWorldPos
+local VDist3 = VDist3
 
--- Helper function to calculate the average position of a group of units.
 local function AveragePositionOfUnits(units)
-    local unitCount = table.getn(units)
+    local unitCount = tableGetN(units)
 
-    local px, py, pz = 0, 0, 0
-
+    local px = 0
+    local py = 0
+    local pz = 0
     for k = 1, unitCount do
         local ux, uy, uz = unpack(units[k]:GetPosition())
         px = px + ux
@@ -17,76 +22,108 @@ local function AveragePositionOfUnits(units)
     py = py / unitCount
     pz = pz / unitCount
 
-    return { px, py, pz }
+    return {
+        px,
+        py,
+        pz
+    }
+
 end
 
---- Get the weapon's damage spread, which accounts for both the explosion radius and firing randomness.
---- The spread increases with distance from the target.
+--- Get the weapon "damage spread", which is how much the weapon's damage spreads out depending on the distance to target
 ---@param weapon WeaponBlueprint
+---@param dist number distance between unit and target
 ---@return number
-local function GetWeaponDamageSpread(weapon)
-    local dist = VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())
-
+local function GetWeaponDamageSpread(weapon, dist)
     local weaponMaxRadius = weapon.MaxRadius
     local weaponMinRadius = weapon.MinRadius
-
-    -- Clamp distance to within the weapon's firing radius
     if weaponMinRadius and dist < weaponMinRadius then
         dist = weaponMinRadius
     elseif weaponMaxRadius and dist > weaponMaxRadius then
         dist = weaponMaxRadius
     end
-
-    -- Calculate spread as a combination of damage radius and firing randomness
-    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or 0) + ((weapon.FiringRandomness or 0) * dist / 10)
+    return (weapon.DamageRadius or 0) + (weapon.FixedSpreadRadius or (weapon.FiringRandomness or 0) / 12 * dist)
 end
 
--- Helper function to get the maximum damage spread from a set of weapons.
-local function GetMaxDamageSpread(weapons)
-    local maxRadius = 0
+local maxSpreadWeaponCached
 
-    for key, weaponData in pairs(weapons) do
-        for _, w in pairs(weaponData or {}) do
-            local newRad = GetWeaponDamageSpread(w)
+local GetMaxDamageSpread
+--- Init version of the function. Checks data format and then replaces itself with the appropriate version and returns its output.
+---@param unitsToWeapons table<UnitId, WeaponBlueprint[] | false> | table<UnitId, WeaponBlueprint | false>
+---@return number
+GetMaxDamageSpread = function(unitsToWeapons)
+    -- data structure after https://github.com/FAForever/fa/pull/6028
+    if not next(unitsToWeapons).MaxRadius then
+        --- Get the maximum damage spread from multiple weapons, and cache the max spread weapon
+        ---@param unitsToWeapons table<UnitId, WeaponBlueprint[] | false>
+        ---@return number
+        GetMaxDamageSpread = function(unitsToWeapons)
+            -- cache for performance
+            local distance = VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())
 
-            if newRad > maxRadius then
-                maxRadius = newRad
-                maxSpreadWeaponCached = w
+            local maxRadius
+            local newRad
+            for _, weapons in unitsToWeapons do
+                if weapons then
+                    for _, w in weapons do
+                        newRad = GetWeaponDamageSpread(w, distance)
+                        if newRad > maxRadius then
+                            maxRadius = newRad
+                            maxSpreadWeaponCached = w
+                        end
+                    end
+                end
             end
+            return maxRadius
+        end
+    else -- data structure before PR #6028
+        ---@param unitsToWeapons table<UnitId, WeaponBlueprint | false>
+        ---@return number
+        GetMaxDamageSpread = function(unitsToWeapons)
+            -- cache for performance
+            local distance = VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())
+
+            local maxRadius
+            local newRad
+            for _, w in unitsToWeapons do
+                if w then
+                    newRad = GetWeaponDamageSpread(w, distance)
+                    if newRad > maxRadius then
+                        maxRadius = newRad
+                        maxSpreadWeaponCached = w
+                    end
+                end
+            end
+            return maxRadius
         end
     end
-
-    return maxRadius
+    return GetMaxDamageSpread(unitsToWeapons)
 end
 
--- Helper function to update the scale of the radius decal based on the current weapon's damage spread.
 local function RadiusDecalScaleUpdate()
-    return GetWeaponDamageSpread(maxSpreadWeaponCached) * 2
+    return GetWeaponDamageSpread(maxSpreadWeaponCached, VDist3(AveragePositionOfUnits(GetSelectedUnits()), GetMouseWorldPos())) * 2
 end
 
---- Override to compute the decal texture and size based on the weapon's damage and spread radius.
+--- A generic decal texture / size computation function that uses the damage and spread radius
 ---@param predicate function<WeaponBlueprint[]>
 ---@return WorldViewDecalData[]
 RadiusDecalFunction = function(predicate)
-    local weapons = GetSelectedWeaponsWithReticules(predicate)
+    local unitsToWeapons = GetSelectedWeaponsWithReticules(predicate)
 
-    local maxRadius = GetMaxDamageSpread(weapons)
-
+    local maxRadius = GetMaxDamageSpread(unitsToWeapons)
     if maxRadius > 0 then
         local damageRadius = maxSpreadWeaponCached.DamageRadius
-        local decalData = {}
-        -- Create decal for damage radius
+        local decalData = { }
         if damageRadius > 0 then
-            table.insert(decalData,
+            decalData = {
                 { --Damage radius display
                     texture = "/textures/ui/common/game/AreaTargetDecal/weapon_icon_small.dds",
                     scale = damageRadius * 2
                 }
-            )
+            }
         end
-        -- Create decal for inaccuracy if the spread radius differs from damage radius
         if damageRadius ~= maxRadius then
-            table.insert(decalData,
+            tableInsert(decalData,
                 { --Inaccuracy display
                     texture = "/textures/ui/common/game/AreaTargetDecal/nuke_icon_inner.dds",
                     scaleUpdateFunction = RadiusDecalScaleUpdate
@@ -102,10 +139,9 @@ end
 
 local oldWorldView = WorldView
 
--- Extension of the WorldView class to handle cursor decals for command actions.
 WorldView = Class(oldWorldView) {
 
-    --- Manages the decals of a cursor event based on selection and weapon stats.
+    --- Manages the decals of a cursor event
     ---@param self WorldView
     ---@param identifier CommandCap
     ---@param enabled boolean
@@ -115,13 +151,11 @@ WorldView = Class(oldWorldView) {
         if enabled then
             if changed then
 
-                -- Prepare decals based on the current selection
+                -- prepare decals based on the selection
                 local data = getDecalsBasedOnSelection()
                 if data then
-                    -- Clear out old decals if they exist
+                    -- clear out old decals, if they exist
                     self.CursorDecalTrash:Destroy();
-
-                    -- Add new decals
                     for k, instance in data do
                         local decal = UserDecal()
                         decal:SetTexture(instance.texture)
@@ -131,7 +165,7 @@ WorldView = Class(oldWorldView) {
                             decal.scaleUpdate = scaleUpdate
                         else
                             local scale = instance.scale
-                            decal:SetScale({ scale, 1, scale })
+                            decal:SetScale({scale, 1, scale})
                         end
 
                         self.CursorDecalTrash:Add(decal);
@@ -140,17 +174,18 @@ WorldView = Class(oldWorldView) {
                 end
             end
 
-            -- Update their scale and positions
+            -- update their scale and then locations
             for k, decal in self.CursorDecalTrash do
                 if decal.scaleUpdate then
                     local scale = decal.scaleUpdate()
-                    decal:SetScale({ scale, 1, scale })
+                    decal:SetScale({scale, 1, scale})
                 end
                 decal:SetPosition(GetMouseWorldPos())
             end
         else
-            -- Destroy current decals when command ends
+            -- command ended, destroy the current decals to make room for new decals
             self.CursorDecalTrash:Destroy();
         end
     end,
+
 }
