@@ -1832,6 +1832,8 @@ end
 
 -- / RIGHTSIDE ---------------------------------------------------------------
 
+-- MAIN ----------------------------------------------------------------------
+
 function CreateUI()
     LOG('Keybindings CreateUI')
 
@@ -1840,8 +1842,8 @@ function CreateUI()
     if popup then CloseUI() return end
 
     dialogContent = Group(GetFrame(0))
-    LayoutHelpers.SetDimensions(dialogContent, GetFrame(0).Width() - 100, GetFrame(0).Height() - 150)
-    LayoutHelpers.AtLeftTopIn(dialogContent, GetFrame(0), 50, 100)
+    LayoutHelpers.SetDimensions(dialogContent, GetFrame(0).Width() - 30, GetFrame(0).Height() - 30)
+    LayoutHelpers.AtLeftTopIn(dialogContent, GetFrame(0), 150)
 
     popup = Popup(GetFrame(0), dialogContent)
     popup.OnShadowClicked = CloseUI
