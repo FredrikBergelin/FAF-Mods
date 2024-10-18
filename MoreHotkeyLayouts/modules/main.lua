@@ -1076,11 +1076,12 @@ local customKeyMap = {
 			import("/lua/keymap/hotbuild.lua").buildActionTemplate("")
 		else
 			-- TODO: Select all idle engineers and assist highest and go into templates tab?
+
+			print("Add range ring")
+			ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 		end
 	end) end,
 	['Ctrl-Chevron'] = function() Hotkey('Ctrl-Chevron', function(hotkey)
-		print("Add range ring")
-		ConExecute 'UI_Lua import("/mods/StrategicRings/modules/App.lua").HoverRing()'
 	end) end,
 	['Ctrl-Shift-Chevron'] = function() Hotkey('Ctrl-Shift-Chevron', function(hotkey)
 		print("Delete closest range ring")
