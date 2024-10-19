@@ -829,7 +829,7 @@ local customKeyMap = {
 		elseif not isReplay and AnyUnitCanUpgrade() then
 			ConExecute 'UI_LUA import("/lua/keymap/hotbuild.lua").buildActionUpgrade()'
 		else
-			CategoryFilterSelect("A", "fighters", "AIR HIGHALTAIR ANTIAIR", ((categories.AIR * categories.HIGHALTAIR * categories.ANTIAIR) - categories.BOMBER))
+			CategoryFilterSelect("A", "fighters", "AIR HIGHALTAIR ANTIAIR", ((categories.AIR * categories.HIGHALTAIR * categories.ANTIAIR) - categories.BOMBER - categories.EXPERIMENTAL))
 		end
 	end) end,
 	['Shift-A'] = function() Hotkey('Shift-A', function(hotkey)
